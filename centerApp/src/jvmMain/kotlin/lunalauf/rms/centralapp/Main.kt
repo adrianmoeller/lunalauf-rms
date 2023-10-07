@@ -1,13 +1,15 @@
+package lunalauf.rms.centralapp
+
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
-import ui.screens.FileOpenScreen
-import ui.screens.MainWindow
-import ui.screens.NoFileOpenScreen
-import ui.screens.PublicViewScreen
+import lunalauf.rms.centralapp.ui.screens.FileOpenScreen
+import lunalauf.rms.centralapp.ui.screens.MainWindow
+import lunalauf.rms.centralapp.ui.screens.NoFileOpenScreen
+import lunalauf.rms.centralapp.ui.screens.PublicViewScreen
 
 @Composable
 @Preview

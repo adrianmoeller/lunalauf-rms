@@ -1,4 +1,4 @@
-package ui.common
+package lunalauf.rms.centralapp.ui.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

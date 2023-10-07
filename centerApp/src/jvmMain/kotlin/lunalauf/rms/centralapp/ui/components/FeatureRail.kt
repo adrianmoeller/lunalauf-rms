@@ -1,4 +1,4 @@
-package ui.components
+package lunalauf.rms.centralapp.ui.components
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi

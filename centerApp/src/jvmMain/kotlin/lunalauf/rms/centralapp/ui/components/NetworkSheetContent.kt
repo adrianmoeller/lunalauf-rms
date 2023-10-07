@@ -1,4 +1,4 @@
-package ui.components
+package lunalauf.rms.centralapp.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -27,9 +27,9 @@ import compose.icons.evaicons.outline.WifiOff
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Search
 import compose.icons.fontawesomeicons.solid.Stop
-import ui.common.ListItemDivider
-import ui.common.cond
-import ui.common.listItemHoverColor
+import lunalauf.rms.centralapp.ui.common.ListItemDivider
+import lunalauf.rms.centralapp.ui.common.cond
+import lunalauf.rms.centralapp.ui.common.listItemHoverColor
 
 @Composable
 fun NetworkSheetContent(

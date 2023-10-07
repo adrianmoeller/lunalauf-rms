@@ -1,4 +1,4 @@
-package ui.screens
+package lunalauf.rms.centralapp.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,8 +21,8 @@ import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberWindowState
-import ui.common.PublicViewTable
-import ui.publicViewTypography
+import lunalauf.rms.centralapp.ui.common.PublicViewTable
+import lunalauf.rms.centralapp.ui.publicViewTypography
 
 @Composable
 fun ApplicationScope.PublicViewScreen(

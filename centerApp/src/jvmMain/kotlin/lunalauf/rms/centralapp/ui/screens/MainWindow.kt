@@ -1,4 +1,4 @@
-package ui.screens
+package lunalauf.rms.centralapp.ui.screens
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import kotlinx.coroutines.launch
-import ui.components.*
+import lunalauf.rms.centralapp.ui.components.*
 import java.awt.Color
 
 @Composable

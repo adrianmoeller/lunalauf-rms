@@ -1,4 +1,4 @@
-package ui.common
+package lunalauf.rms.centralapp.ui.common
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.VerticalScrollbar

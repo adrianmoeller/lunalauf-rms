@@ -1,9 +1,7 @@
-package ui.common
+package lunalauf.rms.centralapp.ui.common
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import kotlinx.coroutines.flow.*
 
 @Composable
 fun rememberTableState(

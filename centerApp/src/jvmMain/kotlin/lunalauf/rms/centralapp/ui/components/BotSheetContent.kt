@@ -1,4 +1,4 @@
-package ui.components
+package lunalauf.rms.centralapp.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -12,8 +12,8 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.ExclamationTriangle
 import compose.icons.fontawesomeicons.solid.Play
 import compose.icons.fontawesomeicons.solid.Stop
-import ui.common.OptionTile
-import ui.common.cond
+import lunalauf.rms.centralapp.ui.common.OptionTile
+import lunalauf.rms.centralapp.ui.common.cond
 
 @Composable
 fun BotSheetContent(

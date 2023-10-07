@@ -1,4 +1,4 @@
-package ui.screens
+package lunalauf.rms.centralapp.ui.screens
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
@@ -10,7 +10,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import ui.preferences.PreferencesSheet
+import lunalauf.rms.centralapp.ui.preferences.PreferencesSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
