@@ -25,7 +25,7 @@ tasks.withType(KotlinCompile::class).configureEach {
 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
 kotlin {
     jvm {
-        jvmToolchain(11)
+        jvmToolchain(jdkVersion = 11)
         withJava()
     }
     sourceSets {
@@ -48,7 +48,7 @@ compose.desktop {
         mainClass = "MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "lunalauf-rms"
+            packageName = "lunalauf-rms-center"
             packageVersion = "1.0.0"
         }
     }
