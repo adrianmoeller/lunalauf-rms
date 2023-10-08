@@ -20,18 +20,15 @@ import java.time.LocalDateTime
 import java.util.*
 import java.util.function.Consumer
 
-class LunaLaufAPI {
+object LunaLaufAPI {
+    const val fileExtension = "ll"
+    const val DEFAULT_ROUND_POINTS = 1
+
     var processLogger: ProcessLogger = ProcessLogger.initLogger()
     private var resSet: ResourceSet? = null
     var resource: Resource? = null
         private set
 
-    // Derived Values
-    private val overallValuesListeners: MutableSet<Runnable> = HashSet()
-    var overallRounds = 0
-        private set
-    var overallContribution = 0.0
-        private set
     private var runEnabled = false
     private var runDryPhase = false
     private var runDryPhaseFinishedTeams: MutableSet<Team>? = null
@@ -59,7 +56,7 @@ class LunaLaufAPI {
     }
 
     @Synchronized
-    fun newFile(uri: URI?, year: Int): Result<LunaLauf> {
+    fun newFile(uri: URI, year: Int): Result<LunaLauf> {
         val re = Result<LunaLauf>("Create New File")
         if (resource != null) {
             if (!re.makeSub(save()).hasResult()) {
@@ -79,8 +76,7 @@ class LunaLaufAPI {
         if (!llRe.hasResult()) {
             return re.failed("Failed creating LunaLauf model", null)
         }
-        val lunalauf = llRe.result
-        attachDerivedValuesAdapter(lunalauf)
+        val lunalauf = llRe.result!!
         try {
             resource!!.contents.add(lunalauf)
         } catch (e: Exception) {
@@ -89,16 +85,8 @@ class LunaLaufAPI {
         return re.passed(lunalauf, 1, "Done", Lvl.INFO)
     }
 
-    fun addOverallValuesListener(action: Runnable) {
-        overallValuesListeners.add(action)
-    }
-
-    fun clearOverallValuesListeners() {
-        overallValuesListeners.clear()
-    }
-
     @Synchronized
-    fun load(uri: URI?): Result<LunaLauf> {
+    fun load(uri: URI): Result<LunaLauf> {
         val re = Result<LunaLauf>("Load File")
         if (resource != null) {
             if (!re.makeSub(save()).hasResult()) {
@@ -123,9 +111,7 @@ class LunaLaufAPI {
         if (!llRe.hasResult()) {
             return re.failed("File is corrupted", null)
         }
-        val lunalauf = llRe.result
-        attachDerivedValuesAdapter(lunalauf)
-        return re.passed(lunalauf, 1, "Done", Lvl.INFO)
+        return re.passed(llRe.result, 1, "Done", Lvl.INFO)
     }
 
     @Synchronized
@@ -176,46 +162,6 @@ class LunaLaufAPI {
         val lunalauf: LunaLauf = LunaLaufLanguageFactoryImpl.eINSTANCE.createLunaLauf()
         lunalauf.year = year
         return re.passed(lunalauf, 1, "Done: $lunalauf", Lvl.INFO)
-    }
-
-    private fun attachDerivedValuesAdapter(lunalauf: LunaLauf?) {
-        calcDerivedValues(lunalauf)
-        lunalauf!!.eAdapters().add(object : EContentAdapter() {
-            override fun notifyChanged(n: Notification) {
-                when (n.eventType) {
-                    Notification.ADD, Notification.ADD_MANY, Notification.REMOVE, Notification.REMOVE_MANY, Notification.SET, Notification.UNSET ->                    // TODO reduce number of invocations!
-                        calcDerivedValues(lunalauf)
-
-                    else -> {}
-                }
-                super.notifyChanged(n)
-            }
-        })
-    }
-
-    private fun calcDerivedValues(lunalauf: LunaLauf?) {
-        val changed0 = calcOverallRounds(lunalauf)
-        val changed1 = calcOverallContribution(lunalauf)
-        if (changed0 || changed1) overallValuesListeners.forEach(Consumer { obj: Runnable -> obj.run() })
-    }
-
-    private fun calcOverallRounds(lunalauf: LunaLauf?): Boolean {
-        var rounds = 0
-        for (runner in lunalauf!!.runners) rounds += runner.numOfRounds()
-        for (team in lunalauf.teams) rounds += team.numOfFunfactorPoints()
-        if (overallRounds == rounds) return false
-        overallRounds = rounds
-        return true
-    }
-
-    private fun calcOverallContribution(lunalauf: LunaLauf?): Boolean {
-        var contribution = 0.0
-        for (team in lunalauf!!.teams) contribution += team.totalAmount()
-        for (runner in lunalauf.runners) if (runner.team == null) contribution += runner.totalAmount()
-        contribution += lunalauf.additionalContribution
-        if (overallContribution == contribution) return false
-        overallContribution = contribution
-        return true
     }
 
     @Synchronized
@@ -446,7 +392,7 @@ class LunaLaufAPI {
         }
 
     @Synchronized
-    fun logRound(runner: Runner?, points: Int, manualLogged: Boolean): Result<Round> {
+    fun logRound(runner: Runner?, points: Int, manualLogged: Boolean, roundThreshold: Int): Result<Round> {
         val re = Result<Round>("Log Round")
         if (runner == null) {
             return re.failed("Parameter runner is 'null'", null)
@@ -484,7 +430,7 @@ class LunaLaufAPI {
                     runDryPhaseFinishedTeams!!.add(team)
                 }
             }
-            if (!RoundCountValidator.validate(runner, currentTime)) {
+            if (!RoundCountValidator.validate(runner, currentTime, roundThreshold)) {
                 return re.passed(null, 0, "Count interval is too short", Lvl.WARN)
             }
         }
@@ -577,10 +523,5 @@ class LunaLaufAPI {
         }
         EcoreUtil.delete(element, true)
         return re.passed(element, 1, "Done", Lvl.INFO)
-    }
-
-    companion object {
-        const val fileExtension = "ll"
-        const val DEFAULT_ROUND_POINTS = 1
     }
 }

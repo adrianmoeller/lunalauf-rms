@@ -25,18 +25,29 @@ tasks.withType(KotlinCompile::class).configureEach {
 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
 kotlin {
     jvm {
-        jvmToolchain(jdkVersion = 11)
+        jvmToolchain(jdkVersion = 17)
         withJava()
     }
     sourceSets {
         val jvmMain by getting {
+            apply(plugin = "lunalauf.rms.kotlin-application-conventions")
+
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(compose.material3)
-                implementation("androidx.navigation:navigation-compose:2.6.0")
-                implementation("br.com.devsrsouza.compose.icons:font-awesome:1.1.0")
-                implementation("br.com.devsrsouza.compose.icons:eva-icons:1.1.0")
 
+                val composeIconsVersion = "1.1.0"
+                implementation("br.com.devsrsouza.compose.icons:font-awesome:$composeIconsVersion")
+                implementation("br.com.devsrsouza.compose.icons:eva-icons:$composeIconsVersion")
+
+                val voyagerVersion = "1.0.0-rc07"
+                implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
+                implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
+
+                implementation("LunaLaufLanguage:LunaLaufLanguage:1.0.2")
+                implementation(project(":modelAPI"))
             }
         }
         val jvmTest by getting

@@ -6,6 +6,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
+import lunalauf.rms.centralapp.data.model.DataModel
+import lunalauf.rms.centralapp.ui.screenmodels.MainScreenModel
 import lunalauf.rms.centralapp.ui.screens.FileOpenScreen
 import lunalauf.rms.centralapp.ui.screens.MainWindow
 import lunalauf.rms.centralapp.ui.screens.NoFileOpenScreen
@@ -17,26 +19,27 @@ fun ApplicationScope.App() {
 //    val colorScheme = darkColorScheme()
     val colorScheme = lightColorScheme()
 
-    var fileOpen by remember { mutableStateOf(true) } // TMP
-
+    val mainScreenModel = remember { MainScreenModel() }
     var publicViewOpen by remember { mutableStateOf(false) }
+    val modelState = mainScreenModel.dataModelState
 
     MainWindow(
         colorScheme = colorScheme,
         onPublicViewOpenChange = { publicViewOpen = it },
         publicViewOpen = publicViewOpen,
         onPublicViewSettingsClick = { /* TODO */ },
-        publicViewAvailable = fileOpen
+        publicViewAvailable = modelState is DataModel.Loaded
     ) {
-        if (fileOpen) {
+        if (modelState is DataModel.Loaded) {
             FileOpenScreen(
-                fileName = "file.ll",
-                onMenuClick = {}
+                dataModelState = modelState,
+                preferencesState = mainScreenModel.preferencesState,
+                onMenuClick = { /* TODO */ }
             )
         } else {
             NoFileOpenScreen(
-                onNewClick = {},
-                onOpenClick = {}
+                onNewClick = mainScreenModel::newFile,
+                onOpenClick = mainScreenModel::openFile
             )
         }
     }

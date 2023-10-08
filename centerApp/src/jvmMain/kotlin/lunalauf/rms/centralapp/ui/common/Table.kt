@@ -43,8 +43,16 @@ fun Table(
     var sortIndex by remember { mutableStateOf(0) }
 
     val sortedData = when (sortMode) {
-        1 -> data.sortedBy { it[sortIndex] }
-        -1 -> data.sortedByDescending { it[sortIndex] }
+        1 -> {
+            val comp = DynamicListComparator(sortIndex)
+            data.sortedWith(comp)
+        }
+
+        -1 -> {
+            val comp = DynamicListComparator(sortIndex, true)
+            data.sortedWith(comp)
+        }
+
         else -> data
     }
 
@@ -225,6 +233,26 @@ private fun RowScope.DataTableCell(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+    }
+}
+
+private class DynamicListComparator(
+    private val index: Int,
+    private val descending: Boolean = false
+) : Comparator<List<String>> {
+    override fun compare(l1: List<String>, l2: List<String>): Int {
+        val result = compareString(l1[index], l2[index])
+        return if (descending) -result else result
+    }
+
+    private fun compareString(o1: String, o2: String): Int {
+        val n1 = o1.toDoubleOrNull()
+        val n2 = o2.toDoubleOrNull()
+
+        return if (n1 != null && n2 != null)
+            n1.compareTo(n2)
+        else
+            o1.compareTo(o2)
     }
 }
 
