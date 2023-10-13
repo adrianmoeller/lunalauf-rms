@@ -3,56 +3,81 @@ package lunalauf.rms.centralapp.ui.screenmodels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import lunalauf.rms.centralapp.data.model.DataModel
-import lunalauf.rms.centralapp.data.preferences.PreferencesState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import lunalauf.rms.centralapp.ui.filechooser.showNewFileChooser
 import lunalauf.rms.centralapp.ui.filechooser.showOpenFileChooser
-import lunalauf.rms.modelapi.LunaLaufAPI
-import lunalauf.rms.modelapi.util.Result
+import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.modelapi.resource.ModelResourceManager
+import lunalauf.rms.modelapi.resource.ModelResult
+import lunalauf.rms.modelapi.resource.SaveResult
 import org.eclipse.emf.common.util.URI
 import java.time.LocalDate
 
-class MainScreenModel {
-    var dataModelState: DataModel by mutableStateOf(DataModel.Unloaded)
-        private set
-    var preferencesState: PreferencesState by mutableStateOf(PreferencesState())
+class MainScreenModel : AbstractScreenModel() {
+
+    val modelResourceManager = ModelResourceManager.initialize()
+
+    var modelState: ModelState by mutableStateOf(ModelState.Unloaded)
         private set
 
     fun newFile() {
-        val path = showNewFileChooser()
-        if (path != null) {
-            dataModelState = DataModel.Loading
-            val result = LunaLaufAPI.newFile(URI.createFileURI(path), LocalDate.now().year).log()
-            dataModelState = if (result.hasResult())
-                DataModel.Loaded(path, result.result!!)
-            else
-                DataModel.Unloaded
+        if (modelResourceManager is ModelResourceManager.Accessible) {
+            val path = showNewFileChooser()
+            if (path != null) {
+                modelState = ModelState.Loading
+                launchInDefaultScope {
+                    val result = modelResourceManager.newFile(URI.createFileURI(path), LocalDate.now().year)
+                    modelState = if (result is ModelResult.Available)
+                        result.modelState
+                    else
+                        ModelState.Unloaded
+                }
+            }
         }
     }
 
     fun openFile() {
-        val path = showOpenFileChooser()
-        if (path != null) {
-            dataModelState = DataModel.Loading
-            val result = LunaLaufAPI.load(URI.createFileURI(path)).log()
-            dataModelState = if (result.hasResult())
-                DataModel.Loaded(path, result.result!!)
-            else
-                DataModel.Unloaded
+        if (modelResourceManager is ModelResourceManager.Accessible) {
+            val path = showOpenFileChooser()
+            if (path != null) {
+                modelState = ModelState.Loading
+                launchInDefaultScope {
+                    val result = modelResourceManager.load(URI.createFileURI(path))
+                    modelState = if (result is ModelResult.Available)
+                        result.modelState
+                    else
+                        ModelState.Unloaded
+                }
+            }
         }
     }
 
     fun closeFile() {
-        val result = Result<Void>("Close File")
-
-        val uri = result.makeSub(LunaLaufAPI.save())
-        if (!uri.hasResult())
-            result.failed("Failed saving file before closing", null).log()
-        else
-            dataModelState = DataModel.Unloaded
+        if (modelResourceManager is ModelResourceManager.Accessible) {
+            val loadedModelState = modelState
+            modelState = ModelState.Loading
+            launchInDefaultScope {
+                val result = modelResourceManager.save()
+                modelState = when (result) {
+                    is SaveResult.Success, SaveResult.NoFileOpen -> ModelState.Unloaded
+                    is SaveResult.Error -> loadedModelState
+                }
+            }
+        }
     }
 
-     fun updateAutoSaveActive(value: Boolean) {
-
-     }
+    fun saveFile() {
+        if (modelResourceManager is ModelResourceManager.Accessible) {
+            launchInDefaultScope {
+                val result = modelResourceManager.save()
+                when (result) {
+                    is SaveResult.Error -> TODO()
+                    SaveResult.NoFileOpen -> modelState = ModelState.Unloaded
+                    is SaveResult.Success -> TODO()
+                }
+            }
+        }
+    }
 }

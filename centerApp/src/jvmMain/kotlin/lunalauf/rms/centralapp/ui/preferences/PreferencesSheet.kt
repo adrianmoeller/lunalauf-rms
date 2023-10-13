@@ -68,7 +68,7 @@ fun PreferencesSheet(
                                 onValueChange = onAutoSaveIntervalChange,
                                 onValueChangeFinished = onAutoSaveIntervalChangeFinished,
                                 valueRange = 10f..30f,
-                                steps = 1,
+                                steps = 3,
                             )
                         }
                 }
@@ -94,8 +94,8 @@ fun PreferencesSheet(
                             value = roundThreshold,
                             onValueChange = onRoundThresholdChange,
                             onValueChangeFinished = onRoundThresholdChangeFinished,
-                            valueRange = 30f..70f,
-                            steps = 7,
+                            valueRange = 20f..80f,
+                            steps = 11,
                         )
                     }
                 }

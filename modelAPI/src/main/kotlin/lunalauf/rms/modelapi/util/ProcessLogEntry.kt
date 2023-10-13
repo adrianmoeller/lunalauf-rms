@@ -1,4 +1,4 @@
-package lunalauf.rms.modelapi
+package lunalauf.rms.modelapi.util
 
 import java.io.Serializable
 import java.sql.Timestamp

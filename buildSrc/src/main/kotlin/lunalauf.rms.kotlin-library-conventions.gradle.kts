@@ -12,8 +12,16 @@ repositories {
     mavenLocal()
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 dependencies {
     implementation("org.slf4j:slf4j-api:2.0.9")
+    implementation("org.slf4j:slf4j-reload4j:2.0.9")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -22,7 +30,6 @@ dependencies {
     // Align versions of all Kotlin components
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
 
-    // Use the Kotlin JDK 8 standard library.
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     // Align versions of all Kotlin components

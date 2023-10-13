@@ -1,8 +1,8 @@
-package lunalauf.rms.centralapp.data.preferences
+package lunalauf.rms.modelapi.states
 
 data class PreferencesState(
     val autoSaveActive: Boolean = false,
     val autoSaveInterval: Float = 30f,
-    val roundThreshold: Float = 40f,
+    val roundThreshold: Float,
     val saveConnectionsActive: Boolean = true
 )

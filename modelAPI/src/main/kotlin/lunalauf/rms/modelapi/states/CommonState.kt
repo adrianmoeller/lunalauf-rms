@@ -1,4 +1,4 @@
-package lunalauf.rms.centralapp.data.model.states
+package lunalauf.rms.modelapi.states
 
 data class CommonState(
     val year: Int,

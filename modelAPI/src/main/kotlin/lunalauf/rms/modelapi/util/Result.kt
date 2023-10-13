@@ -1,8 +1,6 @@
 package lunalauf.rms.modelapi.util
 
-import lunalauf.rms.modelapi.ProcessLogEntry
-import lunalauf.rms.modelapi.ProcessLogEntry.Lvl
-import lunalauf.rms.modelapi.ProcessLogger
+import lunalauf.rms.modelapi.util.ProcessLogEntry.Lvl
 
 /**
  * **Code convention:**

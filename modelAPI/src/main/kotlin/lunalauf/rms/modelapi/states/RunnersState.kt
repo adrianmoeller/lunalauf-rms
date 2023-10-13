@@ -1,4 +1,4 @@
-package lunalauf.rms.centralapp.data.model.states
+package lunalauf.rms.modelapi.states
 
 import LunaLaufLanguage.Runner
 

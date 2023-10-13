@@ -1,4 +1,4 @@
-package lunalauf.rms.centralapp.data.model
+package lunalauf.rms.modelapi
 
 import LunaLaufLanguage.Challenge
 import LunaLaufLanguage.Contributor
@@ -12,8 +12,10 @@ import LunaLaufLanguage.Team
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import lunalauf.rms.centralapp.data.model.states.CommonState
-import lunalauf.rms.centralapp.data.model.states.RunnersState
+import kotlinx.coroutines.sync.Mutex
+import lunalauf.rms.modelapi.states.CommonState
+import lunalauf.rms.modelapi.states.PreferencesState
+import lunalauf.rms.modelapi.states.RunnersState
 import org.eclipse.emf.common.notify.Notification
 import org.eclipse.emf.common.notify.Notification.*
 import org.eclipse.emf.ecore.EAttribute
@@ -23,13 +25,16 @@ import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("ModelState")
 
-sealed class DataModel {
-    data object Unloaded : DataModel()
-    data object Loading : DataModel()
+sealed class ModelState {
+    data object Unloaded : ModelState()
+    data object Loading : ModelState()
     class Loaded(
+        mutex: Mutex,
         val fileName: String,
-        private val model: LunaLauf
-    ) : DataModel() {
+        internal val model: LunaLauf
+    ) : ModelState() {
+        val modelAPI = ModelAPI(mutex, this)
+
         private val _common = MutableStateFlow(
             CommonState(
                 year = model.year,
