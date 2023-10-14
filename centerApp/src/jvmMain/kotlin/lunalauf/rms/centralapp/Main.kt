@@ -11,12 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
-import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.centralapp.ui.screenmodels.MainScreenModel
 import lunalauf.rms.centralapp.ui.screens.FileOpenScreen
 import lunalauf.rms.centralapp.ui.screens.MainWindow
 import lunalauf.rms.centralapp.ui.screens.NoFileOpenScreen
 import lunalauf.rms.centralapp.ui.screens.PublicViewScreen
+import lunalauf.rms.modelapi.ModelState
 import org.apache.log4j.BasicConfigurator
 
 @Composable

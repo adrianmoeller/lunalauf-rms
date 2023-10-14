@@ -1,9 +1,7 @@
 package lunalauf.rms.centralapp.ui.components
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.TooltipArea
-import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,6 +24,7 @@ import compose.icons.fontawesomeicons.regular.StickyNote
 import compose.icons.fontawesomeicons.solid.NetworkWired
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.Tv
+import lunalauf.rms.centralapp.ui.common.FAIconSize
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -43,8 +42,8 @@ fun FeatureRail(
     logOpen: Boolean
 ) {
     NavigationRail(
-        modifier = modifier
-            .shadow(5.dp)
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.secondaryContainer
     ) {
         Box(
             modifier = Modifier.fillMaxHeight(),
@@ -93,7 +92,7 @@ fun FeatureRail(
                 NavigationRailItem(
                     icon = {
                         Icon(
-                            modifier = Modifier.size(25.dp),
+                            modifier = Modifier.size(FAIconSize.medium),
                             imageVector = FontAwesomeIcons.Solid.NetworkWired,
                             contentDescription = "Network"
                         )
@@ -107,7 +106,7 @@ fun FeatureRail(
                 NavigationRailItem(
                     icon = {
                         Icon(
-                            modifier = Modifier.size(25.dp),
+                            modifier = Modifier.size(FAIconSize.medium),
                             imageVector = FontAwesomeIcons.Solid.Robot,
                             contentDescription = "Bots"
                         )
@@ -121,7 +120,7 @@ fun FeatureRail(
                 NavigationRailItem(
                     icon = {
                         Icon(
-                            modifier = Modifier.size(25.dp),
+                            modifier = Modifier.size(FAIconSize.medium),
                             imageVector = FontAwesomeIcons.Regular.StickyNote,
                             contentDescription = "Log"
                         )
@@ -153,16 +152,27 @@ fun PublicViewControls(
             .onPointerEvent(PointerEventType.Exit) { expanded = false }
     ) {
         Column(
+            modifier = Modifier.background(color = MaterialTheme.colorScheme.secondary),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (expanded)
                 Checkbox(
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.onSecondary,
+                        uncheckedColor = MaterialTheme.colorScheme.onSecondary,
+                        checkmarkColor = MaterialTheme.colorScheme.secondary
+                    ),
                     checked = publicViewOpen,
                     onCheckedChange = onPublicViewOpenChange
                 )
             OutlinedCard(
+                border = if (expanded)
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface) else CardDefaults.outlinedCardBorder(),
                 colors = if (publicViewOpen)
-                    CardDefaults.outlinedCardColors(containerColor = Color(0xFFC6EFD2))
+                    CardDefaults.outlinedCardColors(
+                        containerColor = Color(0xFF9AC0AD),
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    )
                 else CardDefaults.outlinedCardColors()
             ) {
                 Box(
@@ -183,6 +193,9 @@ fun PublicViewControls(
             }
             if (expanded)
                 IconButton(
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    ),
                     onClick = onPublicViewSettingsClick
                 ) {
                     Icon(

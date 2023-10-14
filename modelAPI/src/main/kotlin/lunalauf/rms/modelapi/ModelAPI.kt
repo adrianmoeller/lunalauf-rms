@@ -63,6 +63,24 @@ class ModelAPI(
         }
     }
 
+    suspend fun setSponsoringPoolAmount(amount: Double) {
+        mutex.withLock {
+            model.sponsorPoolAmount = amount
+        }
+    }
+
+    suspend fun setSponsoringPoolRounds(rounds: Int) {
+        mutex.withLock {
+            model.sponsorPoolRounds = rounds
+        }
+    }
+
+    suspend fun updateAdditionalContribution(updateFunction: (Double) -> Double) {
+        mutex.withLock {
+            model.additionalContribution = updateFunction(model.additionalContribution)
+        }
+    }
+
     suspend fun addNewRunner(id: Long, name: String?): Result<Runner> {
         mutex.withLock {
             val re = Result<Runner>("Add New Runner")

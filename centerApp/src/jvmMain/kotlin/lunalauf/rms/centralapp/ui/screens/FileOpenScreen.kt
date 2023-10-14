@@ -1,7 +1,6 @@
 package lunalauf.rms.centralapp.ui.screens
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -21,7 +20,8 @@ import compose.icons.fontawesomeicons.regular.File
 import compose.icons.fontawesomeicons.regular.FolderOpen
 import compose.icons.fontawesomeicons.regular.Save
 import compose.icons.fontawesomeicons.regular.TimesCircle
-import lunalauf.rms.centralapp.ui.common.Table
+import lunalauf.rms.centralapp.ui.common.FAIconSize
+import lunalauf.rms.centralapp.ui.components.ModelControl
 import lunalauf.rms.centralapp.ui.preferences.PreferencesSheet
 import lunalauf.rms.centralapp.ui.screenmodels.FileOpenScreenModel
 import lunalauf.rms.modelapi.ModelState
@@ -48,8 +48,9 @@ fun FileOpenScreen(
         modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
-                modifier = Modifier
-                    .shadow(5.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                ),
                 title = {
                     Text(
                         text = modelState.fileName,
@@ -77,7 +78,7 @@ fun FileOpenScreen(
                                 text = { Text("New") },
                                 leadingIcon = {
                                     Icon(
-                                        modifier = Modifier.size(22.dp),
+                                        modifier = Modifier.size(FAIconSize.small),
                                         imageVector = FontAwesomeIcons.Regular.File,
                                         contentDescription = null
                                     )
@@ -88,7 +89,7 @@ fun FileOpenScreen(
                                 text = { Text("Open") },
                                 leadingIcon = {
                                     Icon(
-                                        modifier = Modifier.size(22.dp),
+                                        modifier = Modifier.size(FAIconSize.small),
                                         imageVector = FontAwesomeIcons.Regular.FolderOpen,
                                         contentDescription = null
                                     )
@@ -100,7 +101,7 @@ fun FileOpenScreen(
                                 text = { Text("Save") },
                                 leadingIcon = {
                                     Icon(
-                                        modifier = Modifier.size(22.dp),
+                                        modifier = Modifier.size(FAIconSize.small),
                                         imageVector = FontAwesomeIcons.Regular.Save,
                                         contentDescription = null
                                     )
@@ -111,7 +112,7 @@ fun FileOpenScreen(
                                 text = { Text("Close") },
                                 leadingIcon = {
                                     Icon(
-                                        modifier = Modifier.size(22.dp),
+                                        modifier = Modifier.size(FAIconSize.small),
                                         imageVector = FontAwesomeIcons.Regular.TimesCircle,
                                         contentDescription = null
                                     )
@@ -132,11 +133,9 @@ fun FileOpenScreen(
                     }
                 }
             )
-        },
-        containerColor = Color.Transparent
+        }
     ) { innerPadding ->
         if (settingsOpen) {
-
             PreferencesSheet(
                 onClose = { settingsOpen = false },
                 autoSaveActive = preferences.autoSaveActive,
@@ -152,33 +151,9 @@ fun FileOpenScreen(
             )
         }
 
-        Column(
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            val runnersState by modelState.runners.collectAsState()
-            val data = runnersState.runners.map {
-                listOf(
-                    it.id.toString(),
-                    it.name ?: "",
-                    it.numOfRounds().toString(),
-                    it.team?.name ?: "",
-                    it.totalAmount().toString()
-                )
-            }
-            Table(
-                modifier = Modifier.weight(1f),
-                header = listOf("ID", "Name", "Rounds", "Team", "Total Amount"),
-                data = data,
-                weights = listOf(1f, 3f, 1f, 3f, 1.5f)
-            )
-
-            Button(
-                onClick = {
-//                     ModelAPI.addNewRunner(1234, "")
-                }
-            ) {
-                Text("Add Runner 1234")
-            }
-        }
+        ModelControl(
+            modifier = Modifier.padding(innerPadding),
+            modelState = modelState
+        )
     }
 }

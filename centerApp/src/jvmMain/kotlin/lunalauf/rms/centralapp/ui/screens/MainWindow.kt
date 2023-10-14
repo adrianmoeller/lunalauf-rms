@@ -1,5 +1,6 @@
 package lunalauf.rms.centralapp.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
@@ -25,7 +26,7 @@ fun ApplicationScope.MainWindow(
     Window(
         onCloseRequest = ::exitApplication,
         title = "Luna-Lauf"
-    ){
+    ) {
         window.background = Color.BLACK
 
         MaterialTheme(
@@ -76,7 +77,9 @@ fun ApplicationScope.MainWindow(
                     }
                 }
             ) {
-                Row {
+                Row(
+                    modifier = Modifier.background(color = MaterialTheme.colorScheme.surface)
+                ) {
                     FeatureRail(
                         onPublicViewOpenChange = onPublicViewOpenChange,
                         publicViewOpen = publicViewOpen,
