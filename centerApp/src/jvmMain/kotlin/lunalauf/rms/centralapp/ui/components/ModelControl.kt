@@ -11,8 +11,9 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Bolt
 import compose.icons.fontawesomeicons.solid.ListAlt
 import compose.icons.fontawesomeicons.solid.Running
-import lunalauf.rms.centralapp.ui.common.FAIconSize
+import lunalauf.rms.centralapp.ui.common.IconSize
 import lunalauf.rms.centralapp.ui.common.Table
+import lunalauf.rms.centralapp.ui.screens.CompetitorsControlScreen
 import lunalauf.rms.centralapp.ui.screens.RunControlScreen
 import lunalauf.rms.modelapi.ModelState
 
@@ -38,7 +39,7 @@ fun ModelControl(
                         label = { Text("Run") },
                         icon = {
                             Icon(
-                                modifier = Modifier.size(FAIconSize.small),
+                                modifier = Modifier.size(IconSize.small),
                                 imageVector = FontAwesomeIcons.Solid.ListAlt,
                                 contentDescription = null
                             )
@@ -50,7 +51,7 @@ fun ModelControl(
                         label = { Text("Competitors") },
                         icon = {
                             Icon(
-                                modifier = Modifier.size(FAIconSize.small),
+                                modifier = Modifier.size(IconSize.small),
                                 imageVector = FontAwesomeIcons.Solid.Running,
                                 contentDescription = null
                             )
@@ -62,7 +63,7 @@ fun ModelControl(
                         label = { Text("Funfactors") },
                         icon = {
                             Icon(
-                                modifier = Modifier.size(FAIconSize.small),
+                                modifier = Modifier.size(IconSize.small),
                                 imageVector = FontAwesomeIcons.Solid.Bolt,
                                 contentDescription = null
                             )
@@ -85,6 +86,12 @@ fun ModelControl(
                     )
                 }
                 Tab.Competitors -> {
+                    CompetitorsControlScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        modelState = modelState
+                    )
+                }
+                Tab.Funfactors -> {
                     // TODO
                     Column {
                         val runnersState by modelState.runners.collectAsState()
@@ -104,9 +111,6 @@ fun ModelControl(
                             weights = listOf(1f, 3f, 1f, 3f, 1.5f)
                         )
                     }
-                }
-                Tab.Funfactors -> {
-                    // TODO
                 }
             }
         }

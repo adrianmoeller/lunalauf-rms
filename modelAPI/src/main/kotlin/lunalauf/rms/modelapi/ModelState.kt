@@ -1,21 +1,13 @@
 package lunalauf.rms.modelapi
 
-import LunaLaufLanguage.Challenge
-import LunaLaufLanguage.Contributor
-import LunaLaufLanguage.FunfactorResult
-import LunaLaufLanguage.LogEntry
-import LunaLaufLanguage.LunaLauf
-import LunaLaufLanguage.Minigame
-import LunaLaufLanguage.Round
-import LunaLaufLanguage.Runner
-import LunaLaufLanguage.Team
+import LunaLaufLanguage.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import lunalauf.rms.modelapi.states.CommonState
-import lunalauf.rms.modelapi.states.PreferencesState
 import lunalauf.rms.modelapi.states.RunnersState
+import lunalauf.rms.modelapi.states.TeamsState
 import org.eclipse.emf.common.notify.Notification
 import org.eclipse.emf.common.notify.Notification.*
 import org.eclipse.emf.ecore.EAttribute
@@ -51,7 +43,7 @@ sealed class ModelState {
         private val _runners = MutableStateFlow(RunnersState(model.runners.filterNotNull()))
         val runners get() = _runners.asStateFlow()
 
-        private val _teams = MutableStateFlow(model.teams.filterNotNull())
+        private val _teams = MutableStateFlow(TeamsState(model.teams.filterNotNull()))
         val teams get() = _teams.asStateFlow()
 
         private val _log = MutableStateFlow(model.log.filterNotNull())
@@ -159,7 +151,7 @@ sealed class ModelState {
         }
 
         private fun updateTeams() {
-            _teams.value = model.teams.filterNotNull()
+            _teams.value = TeamsState(model.teams.filterNotNull())
         }
 
         private fun updateLog() {

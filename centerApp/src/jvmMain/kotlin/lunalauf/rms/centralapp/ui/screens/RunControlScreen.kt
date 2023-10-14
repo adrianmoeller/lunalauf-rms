@@ -103,6 +103,7 @@ fun RunControlScreen(
                             imageVector = Icons.Rounded.Add,
                             contentDescription = null
                         )
+                        Spacer(Modifier.width(2.dp))
                         Text("Add to amount")
                     }
                     EditDialog(

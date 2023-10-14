@@ -24,7 +24,7 @@ import compose.icons.fontawesomeicons.regular.StickyNote
 import compose.icons.fontawesomeicons.solid.NetworkWired
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.Tv
-import lunalauf.rms.centralapp.ui.common.FAIconSize
+import lunalauf.rms.centralapp.ui.common.IconSize
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -92,7 +92,7 @@ fun FeatureRail(
                 NavigationRailItem(
                     icon = {
                         Icon(
-                            modifier = Modifier.size(FAIconSize.medium),
+                            modifier = Modifier.size(IconSize.medium),
                             imageVector = FontAwesomeIcons.Solid.NetworkWired,
                             contentDescription = "Network"
                         )
@@ -106,7 +106,7 @@ fun FeatureRail(
                 NavigationRailItem(
                     icon = {
                         Icon(
-                            modifier = Modifier.size(FAIconSize.medium),
+                            modifier = Modifier.size(IconSize.medium),
                             imageVector = FontAwesomeIcons.Solid.Robot,
                             contentDescription = "Bots"
                         )
@@ -120,7 +120,7 @@ fun FeatureRail(
                 NavigationRailItem(
                     icon = {
                         Icon(
-                            modifier = Modifier.size(FAIconSize.medium),
+                            modifier = Modifier.size(IconSize.medium),
                             imageVector = FontAwesomeIcons.Regular.StickyNote,
                             contentDescription = "Log"
                         )

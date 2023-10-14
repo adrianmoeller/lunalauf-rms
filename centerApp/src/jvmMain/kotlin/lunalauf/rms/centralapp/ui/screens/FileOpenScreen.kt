@@ -9,8 +9,6 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -20,7 +18,7 @@ import compose.icons.fontawesomeicons.regular.File
 import compose.icons.fontawesomeicons.regular.FolderOpen
 import compose.icons.fontawesomeicons.regular.Save
 import compose.icons.fontawesomeicons.regular.TimesCircle
-import lunalauf.rms.centralapp.ui.common.FAIconSize
+import lunalauf.rms.centralapp.ui.common.IconSize
 import lunalauf.rms.centralapp.ui.components.ModelControl
 import lunalauf.rms.centralapp.ui.preferences.PreferencesSheet
 import lunalauf.rms.centralapp.ui.screenmodels.FileOpenScreenModel
@@ -78,7 +76,7 @@ fun FileOpenScreen(
                                 text = { Text("New") },
                                 leadingIcon = {
                                     Icon(
-                                        modifier = Modifier.size(FAIconSize.small),
+                                        modifier = Modifier.size(IconSize.small),
                                         imageVector = FontAwesomeIcons.Regular.File,
                                         contentDescription = null
                                     )
@@ -89,7 +87,7 @@ fun FileOpenScreen(
                                 text = { Text("Open") },
                                 leadingIcon = {
                                     Icon(
-                                        modifier = Modifier.size(FAIconSize.small),
+                                        modifier = Modifier.size(IconSize.small),
                                         imageVector = FontAwesomeIcons.Regular.FolderOpen,
                                         contentDescription = null
                                     )
@@ -101,7 +99,7 @@ fun FileOpenScreen(
                                 text = { Text("Save") },
                                 leadingIcon = {
                                     Icon(
-                                        modifier = Modifier.size(FAIconSize.small),
+                                        modifier = Modifier.size(IconSize.small),
                                         imageVector = FontAwesomeIcons.Regular.Save,
                                         contentDescription = null
                                     )
@@ -112,7 +110,7 @@ fun FileOpenScreen(
                                 text = { Text("Close") },
                                 leadingIcon = {
                                     Icon(
-                                        modifier = Modifier.size(FAIconSize.small),
+                                        modifier = Modifier.size(IconSize.small),
                                         imageVector = FontAwesomeIcons.Regular.TimesCircle,
                                         contentDescription = null
                                     )

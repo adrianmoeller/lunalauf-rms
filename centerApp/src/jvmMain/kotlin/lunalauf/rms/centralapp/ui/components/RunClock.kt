@@ -16,7 +16,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
-import lunalauf.rms.centralapp.ui.common.FAIconSize
+import lunalauf.rms.centralapp.ui.common.IconSize
 
 @Composable
 fun RunClock(
@@ -61,7 +61,7 @@ fun RunClock(
                 onClick = onStartStopClick
             ) {
                 Icon(
-                    modifier = Modifier.size(FAIconSize.small),
+                    modifier = Modifier.size(IconSize.small),
                     imageVector = if (running) FontAwesomeIcons.Solid.Pause else FontAwesomeIcons.Solid.Play,
                     contentDescription = if (running) "Pause run" else "Start run"
                 )
