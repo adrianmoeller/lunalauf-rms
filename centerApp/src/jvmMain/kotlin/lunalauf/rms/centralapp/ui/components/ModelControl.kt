@@ -93,24 +93,6 @@ fun ModelControl(
                 }
                 Tab.Funfactors -> {
                     // TODO
-                    Column {
-                        val runnersState by modelState.runners.collectAsState()
-                        val data = runnersState.runners.map {
-                            listOf(
-                                it.id.toString(),
-                                it.name ?: "",
-                                it.numOfRounds().toString(),
-                                it.team?.name ?: "",
-                                it.totalAmount().toString()
-                            )
-                        }
-                        Table(
-                            modifier = Modifier.weight(1f),
-                            header = listOf("ID", "Name", "Rounds", "Team", "Total Amount"),
-                            data = data,
-                            weights = listOf(1f, 3f, 1f, 3f, 1.5f)
-                        )
-                    }
                 }
             }
         }

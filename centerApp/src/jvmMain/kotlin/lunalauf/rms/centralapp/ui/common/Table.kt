@@ -58,7 +58,6 @@ fun Table(
 
     Column(
         modifier = modifier
-            .padding(spacing)
     ) {
         HeaderTableRow(
             header = header,

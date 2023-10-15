@@ -29,11 +29,11 @@ import compose.icons.evaicons.outline.Expand
 import compose.icons.evaicons.outline.Shake
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.SlidersH
-import lunalauf.rms.centralapp.ui.common.IconSize
-import lunalauf.rms.centralapp.ui.common.ListItemDivider
-import lunalauf.rms.centralapp.ui.common.customScrollbarStyle
+import lunalauf.rms.centralapp.ui.common.*
 import lunalauf.rms.centralapp.ui.screenmodels.CompetitorsControlScreenModel
 import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.modelapi.states.RunnersState
+import lunalauf.rms.modelapi.states.TeamsState
 
 @Composable
 fun CompetitorsControlScreen(
@@ -43,6 +43,9 @@ fun CompetitorsControlScreen(
     val screenModel = remember { CompetitorsControlScreenModel(modelState) }
     val teamsState by modelState.teams.collectAsState()
     val runnersState by modelState.runners.collectAsState()
+
+    var teamsTableOpen by remember { mutableStateOf(false) }
+    var runnersTableOpen by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier,
@@ -59,9 +62,7 @@ fun CompetitorsControlScreen(
             CompetitorsControlCard(
                 modifier = Modifier.weight(1f),
                 title = "Teams",
-                onExpand = {
-                    // TODO
-                },
+                onExpand = { teamsTableOpen = true },
                 createLabel = "Create team",
                 onCreate = {
                     // TODO
@@ -82,9 +83,7 @@ fun CompetitorsControlScreen(
             CompetitorsControlCard(
                 modifier = Modifier.weight(1f),
                 title = "Single runners",
-                onExpand = {
-                    // TODO
-                },
+                onExpand = { runnersTableOpen = true },
                 createLabel = "Create single runner",
                 onCreate = {
                     // TODO
@@ -112,7 +111,7 @@ fun CompetitorsControlScreen(
             }
         ) {
             Icon(
-                modifier = Modifier.size(IconSize.large),
+                modifier = Modifier.size(IconSize.large + 5.dp),
                 imageVector = EvaIcons.Outline.Shake,
                 contentDescription = null
             )
@@ -123,6 +122,20 @@ fun CompetitorsControlScreen(
                 style = MaterialTheme.typography.titleMedium
             )
         }
+    }
+
+    if (teamsTableOpen) {
+        ExpandedTeamsTable(
+            onDismissRequest = { teamsTableOpen = false },
+            teamsState = teamsState
+        )
+    }
+
+    if (runnersTableOpen) {
+        ExpandedSingleRunnersTable(
+            onDismissRequest = { runnersTableOpen = false },
+            runnersState = runnersState
+        )
     }
 }
 
@@ -283,5 +296,79 @@ private fun RunnerTile(
                 Spacer(Modifier.width(10.dp))
             }
         }
+    }
+}
+
+@Composable
+private fun ExpandedTeamsTable(
+    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit,
+    teamsState: TeamsState
+) {
+    FullScreenDialog(
+        modifier = modifier,
+        onDismissRequest = onDismissRequest,
+        title = "Teams",
+        maxWidth = 1100.dp
+    ) {
+        val data = teamsState.teams.map {
+            val numOfRounds = it.numOfRounds()
+            val numOfFunfactorPoints = it.numOfFunfactorPoints()
+            listOf(
+                it.name ?: "",
+                it.members.filterNotNull().size.toString(),
+                numOfRounds.toString(),
+                numOfFunfactorPoints.toString(),
+                (numOfRounds + numOfFunfactorPoints).toString(),
+                "${it.totalAmount()} €"
+            )
+        }
+        Table(
+            modifier = Modifier.padding(
+                top = 10.dp,
+                bottom = 20.dp,
+                start = 20.dp,
+                end = 20.dp
+            ),
+            header = listOf("Name", "Members", "Rounds", "Funfactors", "Total rounds", "Total amount"),
+            data = data,
+            weights = listOf(3f, 1f, 1f, 1f, 1f, 1f)
+        )
+    }
+}
+
+@Composable
+private fun ExpandedSingleRunnersTable(
+    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit,
+    runnersState: RunnersState
+) {
+    FullScreenDialog(
+        modifier = modifier,
+        onDismissRequest = onDismissRequest,
+        title = "Single runners",
+        maxWidth = 800.dp
+    ) {
+        val data = runnersState.runners
+            .filter { it.team == null }
+            .map {
+                listOf(
+                    it.id.toString(),
+                    it.name ?: "",
+                    it.numOfRounds().toString(),
+                    "${it.totalAmount()} €"
+                )
+            }
+        Table(
+            modifier = Modifier.padding(
+                top = 10.dp,
+                bottom = 20.dp,
+                start = 20.dp,
+                end = 20.dp
+            ),
+            header = listOf("ID", "Name", "Rounds", "Total Amount"),
+            data = data,
+            weights = listOf(1f, 2.8f, 1f, 1f)
+        )
     }
 }
