@@ -81,47 +81,38 @@ class ModelAPI(
         }
     }
 
-    suspend fun addNewRunner(id: Long, name: String?): Result<Runner> {
+    suspend fun createRunner(id: ULong, name: String): CreateRunnerResult {
         mutex.withLock {
-            val re = Result<Runner>("Add New Runner")
-            if (id < 0) {
-                return re.failed("ID must be a positive number", null)
+            getRunner(id)?.let {
+                logger.warn("Missing UI check if ID already exists when creating a runner")
+                return CreateRunnerResult.Exists(it)
             }
-            val rRe: Result<Runner> = re.makeSub(getRunner(id))
-            if (rRe.hasResult()) {
-                return re.passed(
-                    rRe.result,
-                    2,
-                    "A Runner with this ID already exists: " + rRe.result.toString(),
-                    Lvl.WARN
-                )
-            }
+
             val newRunner = LunaLaufLanguageFactoryImpl.eINSTANCE.createRunner()
-            newRunner.id = id
-            if (!name.isNullOrBlank()) newRunner.name = name
+            newRunner.id = id.toLong()
+            newRunner.name = name
             model.runners.add(newRunner)
-            return re.passed(newRunner, 1, "Done, $newRunner", Lvl.INFO)
+            logger.info("Created {}", newRunner)
+            return CreateRunnerResult.Created(newRunner)
         }
     }
 
-    private fun getRunner(id: Long): Result<Runner> {
-        val re = Result<Runner>("Get Runner")
+    private fun getRunner(id: ULong): Runner? {
         for (runner in model.runners) {
-            if (runner.id == id) {
-                return re.passed(runner, 1, "Done, $runner", Lvl.INFO)
-            }
+            if (runner.id == id.toLong())
+                return runner
         }
-        return re.passed(null, 0, "No existing Runner with ID: $id", Lvl.INFO)
+        return null
     }
 
-    suspend fun changeRunnerID(runner: Runner, newId: Long): Result<Runner> {
+    suspend fun changeRunnerId(runner: Runner, newId: ULong): Result<Runner> {
         mutex.withLock {
             val re = Result<Runner>("Change Runner ID")
-            val rRe: Result<Runner> = re.makeSub(getRunner(newId))
-            if (rRe.hasResult()) {
-                return re.passed(runner, 2, "This ID already exists: " + rRe.result.toString(), Lvl.WARN)
+            val existingRunner = getRunner(newId)
+            if (existingRunner != null) {
+                return re.passed(runner, 2, "This ID already exists: $existingRunner", Lvl.WARN)
             }
-            runner.id = newId
+            runner.id = newId.toLong()
             return re.passed(runner, 1, "Done", Lvl.INFO)
         }
     }

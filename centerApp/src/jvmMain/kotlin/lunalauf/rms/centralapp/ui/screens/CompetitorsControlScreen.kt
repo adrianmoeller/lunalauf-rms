@@ -47,6 +47,9 @@ fun CompetitorsControlScreen(
     var teamsTableOpen by remember { mutableStateOf(false) }
     var runnersTableOpen by remember { mutableStateOf(false) }
 
+    var createTeamOpen by remember { mutableStateOf(false) }
+    var createRunnerOpen by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -85,9 +88,7 @@ fun CompetitorsControlScreen(
                 title = "Single runners",
                 onExpand = { runnersTableOpen = true },
                 createLabel = "Create single runner",
-                onCreate = {
-                    // TODO
-                }
+                onCreate = { createRunnerOpen = true }
             ) {
                 val singleRunners = runnersState.runners.filter { it.team == null }
                 itemsIndexed(singleRunners) { index, runner ->
@@ -135,6 +136,13 @@ fun CompetitorsControlScreen(
         ExpandedSingleRunnersTable(
             onDismissRequest = { runnersTableOpen = false },
             runnersState = runnersState
+        )
+    }
+
+    if (createRunnerOpen) {
+        CreateRunnerScreen(
+            onDismissRequest = { createRunnerOpen = false },
+            modelState = modelState
         )
     }
 }
