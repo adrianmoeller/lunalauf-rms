@@ -10,7 +10,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
@@ -19,13 +18,15 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.evaicons.Outline
 import compose.icons.evaicons.outline.Shake
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Spinner
+import compose.icons.fontawesomeicons.solid.ExclamationTriangle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import lunalauf.rms.centralapp.ui.common.IconSize
 
 @Composable
 fun ScanChipField(
     modifier: Modifier = Modifier,
+    showError: Boolean,
     onNumberKeyEvent: (UInt) -> Unit,
     onEnterKeyEvent: () -> Unit
 ) {
@@ -33,62 +34,89 @@ fun ScanChipField(
     val focusRequester = remember { FocusRequester() }
     var readyForScanning by remember { mutableStateOf(false) }
 
-    OutlinedCard(
-        modifier = modifier
-            .onPreviewKeyEvent {
-                if (it.type == KeyEventType.KeyUp) {
-                    return@onPreviewKeyEvent when (it.key) {
-                        Key.Enter -> {
-                            onEnterKeyEvent()
-                            true
-                        }
-
-                        else -> {
-                            val parsedKey = parseNumberKey(it.key)
-                            if (parsedKey == null) {
-                                false
-                            } else {
-                                onNumberKeyEvent(parsedKey)
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        OutlinedCard(
+            modifier = Modifier
+                .onPreviewKeyEvent {
+                    if (it.type == KeyEventType.KeyUp) {
+                        return@onPreviewKeyEvent when (it.key) {
+                            Key.Enter -> {
+                                onEnterKeyEvent()
                                 true
+                            }
+
+                            else -> {
+                                val parsedKey = parseNumberKey(it.key)
+                                if (parsedKey == null) {
+                                    false
+                                } else {
+                                    onNumberKeyEvent(parsedKey)
+                                    true
+                                }
                             }
                         }
                     }
+                    return@onPreviewKeyEvent false
                 }
-                return@onPreviewKeyEvent false
-            }
-            .onFocusChanged { readyForScanning = it.isCaptured }
-            .focusRequester(focusRequester)
-            .focusable(true),
-        colors = CardDefaults.outlinedCardColors(
-            containerColor = Color.Transparent
-        ),
-    ) {
-        Box(
-            contentAlignment = Alignment.Center
+                .onFocusChanged { readyForScanning = it.isCaptured }
+                .focusRequester(focusRequester)
+                .focusable(true),
+            colors = CardDefaults.outlinedCardColors(
+                containerColor = Color.Transparent
+            ),
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(
-                        vertical = 10.dp,
-                        horizontal = 30.dp
-                    ),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(5.dp)
+            Box(
+                contentAlignment = Alignment.Center
             ) {
-                Icon(
+                Column(
                     modifier = Modifier
-                        .size(60.dp)
-                        .alpha(if (readyForScanning) 1f else 0f),
-                    imageVector = EvaIcons.Outline.Shake,
-                    contentDescription = null
-                )
-                Text(
-                    modifier = Modifier.alpha(if (readyForScanning) 1f else 0f),
-                    text = "Scan chip"
-                )
+                        .padding(
+                            vertical = 10.dp,
+                            horizontal = 30.dp
+                        ),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(60.dp)
+                            .alpha(if (readyForScanning) 1f else 0f),
+                        imageVector = EvaIcons.Outline.Shake,
+                        contentDescription = null
+                    )
+                    Text(
+                        modifier = Modifier.alpha(if (readyForScanning) 1f else 0f),
+                        text = "Scan chip"
+                    )
+                }
+                if (!readyForScanning)
+                    CircularProgressIndicator()
             }
-            if (!readyForScanning)
-                CircularProgressIndicator()
+        }
+        if (showError) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier.size(IconSize.small),
+                        imageVector = FontAwesomeIcons.Solid.ExclamationTriangle,
+                        contentDescription = null
+                    )
+                    Text("Invalid ID format")
+                }
+            }
         }
     }
 

@@ -117,36 +117,30 @@ class ModelAPI(
         }
     }
 
-    suspend fun addNewTeam(name: String): Result<Team> {
+    suspend fun createTeam(name: String): CreateTeamResult {
         mutex.withLock {
-            val re = Result<Team>("Add New Team")
             if (name.isBlank()) {
-                return re.failed("Name is empty", null)
+                logger.warn("Missing UI check if name is not blank when creating a team")
+                return CreateTeamResult.BlankName
             }
-            val tRe: Result<Team> = re.makeSub(getTeam(name))
-            if (tRe.hasResult()) {
-                return re.passed(
-                    tRe.result,
-                    2,
-                    "A Team with this name already exists: " + tRe.result.toString(),
-                    Lvl.WARN
-                )
+            getTeam(name)?.let {
+                logger.warn("Missing UI check if name already exists when creating a team")
+                return CreateTeamResult.Exists(it)
             }
             val newTeam = LunaLaufLanguageFactoryImpl.eINSTANCE.createTeam()
             newTeam.name = name
             model.teams.add(newTeam)
-            return re.passed(newTeam, 1, "Done, $newTeam", Lvl.INFO)
+            logger.info("Created {}", newTeam)
+            return CreateTeamResult.Created(newTeam)
         }
     }
 
-    private fun getTeam(name: String): Result<Team> {
-        val re = Result<Team>("Get Team")
+    private fun getTeam(name: String): Team? {
         for (team in model.teams) {
-            if (team.name == name) {
-                return re.passed(team, 1, "Done, $team", Lvl.INFO)
-            }
+            if (team.name == name)
+                return team
         }
-        return re.passed(null, 0, "No existing Team with name: $name", Lvl.INFO)
+        return null
     }
 
     suspend fun addRunnerToTeam(team: Team, runner: Runner): Result<Runner> {

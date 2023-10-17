@@ -17,14 +17,9 @@ import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.ExclamationTriangle
 import kotlinx.coroutines.launch
-import lunalauf.rms.centralapp.ui.common.IconSize
 import lunalauf.rms.centralapp.ui.components.ScanChipField
 import lunalauf.rms.centralapp.ui.screenmodels.AbstractScreenModel
-import lunalauf.rms.centralapp.ui.screenmodels.IdResult
 import lunalauf.rms.centralapp.ui.screenmodels.ScanChipScreenModel
 import lunalauf.rms.centralapp.util.InputValidator
 import lunalauf.rms.modelapi.CreateRunnerResult
@@ -37,8 +32,17 @@ fun CreateRunnerScreen(
     onDismissRequest: () -> Unit,
     modelState: ModelState.Loaded
 ) {
+    val onDismissRequestClear: (Navigator) -> Unit = {
+        onDismissRequest()
+        it.popAll()
+    }
+    val startScreen = ScanChipRunnerScreen(modelState, onDismissRequestClear)
+
     Navigator(
-        ScanChipScreen(modelState, onDismissRequest)
+        listOf(
+            DummyScreen(startScreen),
+            startScreen
+        )
     ) {
         ModalBottomSheet(
             modifier = modifier,
@@ -66,71 +70,42 @@ fun CreateRunnerScreen(
     }
 }
 
-data class ScanChipScreen(
+private data class ScanChipRunnerScreen(
     val modelState: ModelState.Loaded,
-    val onDismissRequest: () -> Unit
+    val onDismissRequest: (Navigator) -> Unit
 ) : Screen {
     @Composable
     override fun Content() {
         val screenModel = rememberScreenModel { ScanChipScreenModel(modelState) }
         val navigator = LocalNavigator.currentOrThrow
 
-        var showError by remember { mutableStateOf(false) }
-
-        Column (
+        Column(
             modifier = Modifier
                 .padding(vertical = 20.dp)
                 .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ScanChipField(
+                showError = screenModel.showError,
                 onNumberKeyEvent = screenModel::toIdBuffer,
                 onEnterKeyEvent = {
-                    when (val result = screenModel.processBufferedId()) {
-                        IdResult.Error -> {
-                            showError = true
-                        }
-
-                        is IdResult.Known -> {
+                    screenModel.processBufferedId(
+                        onKnown = {
                             // TODO show runner details
-                            onDismissRequest()
-                        }
-
-                        is IdResult.Unknown -> {
+                            onDismissRequest(navigator)
+                        },
+                        onUnknown = {
                             navigator.push(
                                 EnterRunnerNameScreen(
                                     modelState = modelState,
-                                    id = result.id,
+                                    id = it,
                                     onDismissRequest = onDismissRequest
                                 )
                             )
-                            showError = false
                         }
-                    }
+                    )
                 }
             )
-            if (showError) {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(IconSize.small),
-                            imageVector = FontAwesomeIcons.Solid.ExclamationTriangle,
-                            contentDescription = null
-                        )
-                        Text(IdResult.Error.message)
-                    }
-                }
-            }
         }
     }
 }
@@ -138,7 +113,7 @@ data class ScanChipScreen(
 private data class EnterRunnerNameScreen(
     val modelState: ModelState.Loaded,
     val id: ULong,
-    val onDismissRequest: () -> Unit
+    val onDismissRequest: (Navigator) -> Unit
 ) : Screen {
     @Composable
     override fun Content() {
@@ -172,7 +147,7 @@ private data class EnterRunnerNameScreen(
                             if (it.key == Key.Enter) {
                                 if (it.type == KeyEventType.KeyUp && screenModel.nameValid)
                                     screenModel.createRunner(
-                                        onClose = onDismissRequest
+                                        onClose = { onDismissRequest(navigator) }
                                     )
                                 return@onPreviewKeyEvent true
                             }
@@ -182,7 +157,8 @@ private data class EnterRunnerNameScreen(
                     value = screenModel.name,
                     onValueChange = screenModel::updateName,
                     label = { Text("Name") },
-                    isError = !screenModel.nameValid
+                    isError = !screenModel.nameValid,
+                    enabled = !screenModel.processing
                 )
                 Row(
                     modifier = Modifier.align(Alignment.End),
@@ -191,17 +167,18 @@ private data class EnterRunnerNameScreen(
                     TextButton(
                         onClick = {
                             navigator.pop()
-                        }
+                        },
+                        enabled = !screenModel.processing
                     ) {
                         Text("Scan again")
                     }
                     FilledTonalButton(
                         onClick = {
                             screenModel.createRunner(
-                                onClose = onDismissRequest
+                                onClose = { onDismissRequest(navigator) }
                             )
                         },
-                        enabled = screenModel.nameValid
+                        enabled = screenModel.nameValid && !screenModel.processing
                     ) {
                         Text("Create")
                     }

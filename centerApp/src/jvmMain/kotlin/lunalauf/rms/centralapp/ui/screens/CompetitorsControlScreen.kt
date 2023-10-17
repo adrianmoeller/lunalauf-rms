@@ -67,9 +67,7 @@ fun CompetitorsControlScreen(
                 title = "Teams",
                 onExpand = { teamsTableOpen = true },
                 createLabel = "Create team",
-                onCreate = {
-                    // TODO
-                }
+                onCreate = { createTeamOpen = true }
             ) {
                 itemsIndexed(teamsState.teams) { index, team ->
                     TeamTile(
@@ -136,6 +134,13 @@ fun CompetitorsControlScreen(
         ExpandedSingleRunnersTable(
             onDismissRequest = { runnersTableOpen = false },
             runnersState = runnersState
+        )
+    }
+
+    if (createTeamOpen) {
+        CreateTeamScreen(
+            onDismissRequest = {createTeamOpen = false},
+            modelState = modelState
         )
     }
 

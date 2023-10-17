@@ -248,7 +248,8 @@ private fun <V> EditDialog(
                     label = { Text(valueName) },
                     value = newValue,
                     onValueChange = onNewValueChange,
-                    suffix = unit?.let { { Text(it) } }
+                    suffix = unit?.let { { Text(it) } },
+                    isError = parsedNewValue == null
                 )
 
             },
