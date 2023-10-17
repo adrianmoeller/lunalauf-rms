@@ -99,7 +99,7 @@ data class ScanChipScreen(
 
                         is IdResult.Unknown -> {
                             navigator.push(
-                                EnterNameScreen(
+                                EnterRunnerNameScreen(
                                     modelState = modelState,
                                     id = result.id,
                                     onDismissRequest = onDismissRequest
@@ -135,7 +135,7 @@ data class ScanChipScreen(
     }
 }
 
-private data class EnterNameScreen(
+private data class EnterRunnerNameScreen(
     val modelState: ModelState.Loaded,
     val id: ULong,
     val onDismissRequest: () -> Unit
