@@ -11,11 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
-import lunalauf.rms.centralapp.ui.components.main.MainScreenModel
-import lunalauf.rms.centralapp.ui.components.main.FileOpenScreen
-import lunalauf.rms.centralapp.ui.components.windows.MainWindow
-import lunalauf.rms.centralapp.ui.components.main.NoFileOpenScreen
-import lunalauf.rms.centralapp.ui.components.windows.PublicViewWindow
+import lunalauf.rms.centralapp.components.main.MainScreenModel
+import lunalauf.rms.centralapp.components.main.FileOpenScreen
+import lunalauf.rms.centralapp.components.windows.MainWindow
+import lunalauf.rms.centralapp.components.main.NoFileOpenScreen
+import lunalauf.rms.centralapp.components.windows.PublicViewWindow
 import lunalauf.rms.modelapi.ModelState
 import org.apache.log4j.BasicConfigurator
 
