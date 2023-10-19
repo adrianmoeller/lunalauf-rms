@@ -1,12 +1,8 @@
 package lunalauf.rms.centralapp.components.dialogs.createteam
 
 import LunaLaufLanguage.Team
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +12,11 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CheckCircle
+import compose.icons.fontawesomeicons.solid.ExclamationTriangle
+import lunalauf.rms.centralapp.components.commons.IconSize
 import lunalauf.rms.centralapp.components.dialogs.ScanChipField
 import lunalauf.rms.centralapp.components.dialogs.ScanChipScreenModel
 import lunalauf.rms.modelapi.ModelState
@@ -46,10 +47,30 @@ data class ScanChipScreen(
                 onEnterKeyEvent = {
                     screenModel.processBufferedId(
                         onKnown = {
-                            // TODO
+                            if (it.team == team) {
+                                // TODO
+
+                                onDismissRequest(navigator)
+                            } else {
+                                navigator.push(
+                                    ExistingRunnerScreen(
+                                        modelState = modelState,
+                                        team = team,
+                                        runner = it,
+                                        onDismissRequest = onDismissRequest
+                                    )
+                                )
+                            }
                         },
                         onUnknown = {
-                            // TODO
+                            navigator.push(
+                                EnterRunnerNameScreen(
+                                    modelState = modelState,
+                                    team = team,
+                                    id = it,
+                                    onDismissRequest = onDismissRequest
+                                )
+                            )
                         }
                     )
                 }

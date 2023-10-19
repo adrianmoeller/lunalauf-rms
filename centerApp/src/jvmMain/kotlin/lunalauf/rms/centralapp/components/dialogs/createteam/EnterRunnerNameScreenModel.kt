@@ -1,17 +1,20 @@
-package lunalauf.rms.centralapp.components.dialogs.createrunner
+package lunalauf.rms.centralapp.components.dialogs.createteam
 
+import LunaLaufLanguage.Team
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.utils.InputValidator
+import lunalauf.rms.modelapi.AddRunnerToTeamResult
 import lunalauf.rms.modelapi.CreateRunnerResult
 import lunalauf.rms.modelapi.ModelState
 
-class EnterNameScreenModel(
+class EnterRunnerNameScreenModel(
     modelState: ModelState.Loaded,
-    private val id: ULong
+    private val id: ULong,
+    private val team: Team
 ) : ScreenModel, AbstractScreenModel() {
     private val modelAPI = modelState.modelAPI
 
@@ -27,19 +30,33 @@ class EnterNameScreenModel(
         this.name = name
     }
 
-    fun createRunner(onClose: () -> Unit) {
+    fun createRunnerAndAddToTeam(
+        onClose: () -> Unit,
+        onBack: () -> Unit
+    ) {
         processing = true
         launchInModelScope {
-            when (modelAPI.createRunner(id, name)) {
+            when (val result = modelAPI.createRunner(id, name)) {
                 is CreateRunnerResult.Created -> {
-                    // TODO
-                }
+                    when (modelAPI.addRunnerToTeam(team, result.runner)) {
+                        AddRunnerToTeamResult.Added -> {
+                            // TODO
 
+                            onBack()
+                        }
+                        AddRunnerToTeamResult.AlreadyMember -> {
+                            // TODO
+
+                            onClose()
+                        }
+                    }
+                }
                 is CreateRunnerResult.Exists -> {
                     // TODO
+
+                    onClose()
                 }
             }
-            onClose()
         }
     }
 }

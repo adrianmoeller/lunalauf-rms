@@ -9,25 +9,25 @@ class RunControlScreenModel(
     private val modelAPI = modelState.modelAPI
 
     fun updateSponsoringPoolAmount(amount: Double) {
-        launchInDefaultScope {
+        launchInModelScope {
             modelAPI.setSponsoringPoolAmount(amount)
         }
     }
 
     fun updateSponsoringPoolRounds(rounds: Int) {
-        launchInDefaultScope {
+        launchInModelScope {
             modelAPI.setSponsoringPoolRounds(rounds)
         }
     }
 
     fun updateAdditionalContribution(amount: Double) {
-        launchInDefaultScope {
+        launchInModelScope {
             modelAPI.updateAdditionalContribution { amount }
         }
     }
 
     fun addToAdditionalContribution(amount: Double) {
-        launchInDefaultScope {
+        launchInModelScope {
             modelAPI.updateAdditionalContribution { it + amount }
         }
     }

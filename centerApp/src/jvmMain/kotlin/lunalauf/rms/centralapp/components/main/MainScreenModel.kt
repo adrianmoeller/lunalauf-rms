@@ -25,7 +25,7 @@ class MainScreenModel : AbstractScreenModel() {
             val path = showNewFileChooser()
             if (path != null) {
                 modelState = ModelState.Loading
-                launchInDefaultScope {
+                launchInModelScope {
                     val result = modelResourceManager.newFile(URI.createFileURI(path), LocalDate.now().year)
                     modelState = if (result is ModelResult.Available)
                         result.modelState
@@ -41,7 +41,7 @@ class MainScreenModel : AbstractScreenModel() {
             val path = showOpenFileChooser()
             if (path != null) {
                 modelState = ModelState.Loading
-                launchInDefaultScope {
+                launchInModelScope {
                     val result = modelResourceManager.load(URI.createFileURI(path))
                     modelState = if (result is ModelResult.Available)
                         result.modelState
@@ -56,7 +56,7 @@ class MainScreenModel : AbstractScreenModel() {
         if (modelResourceManager is ModelResourceManager.Accessible) {
             val loadedModelState = modelState
             modelState = ModelState.Loading
-            launchInDefaultScope {
+            launchInModelScope {
                 val result = modelResourceManager.save()
                 modelState = when (result) {
                     is SaveResult.Success, SaveResult.NoFileOpen -> ModelState.Unloaded
@@ -68,7 +68,7 @@ class MainScreenModel : AbstractScreenModel() {
 
     fun saveFile() {
         if (modelResourceManager is ModelResourceManager.Accessible) {
-            launchInDefaultScope {
+            launchInModelScope {
                 val result = modelResourceManager.save()
                 when (result) {
                     is SaveResult.Error -> TODO()

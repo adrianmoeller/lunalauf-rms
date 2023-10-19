@@ -31,7 +31,7 @@ class EnterTeamNameScreenModel(
         onCreated: (Team) -> Unit
     ) {
         processing = true
-        launchInDefaultScope {
+        launchInModelScope {
             when (val result = modelAPI.createTeam(name)) {
                 is CreateTeamResult.Created -> {
                     onCreated(result.team)

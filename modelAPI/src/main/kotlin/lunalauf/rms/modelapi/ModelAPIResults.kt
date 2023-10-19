@@ -13,3 +13,8 @@ sealed class CreateTeamResult {
     data object BlankName : CreateTeamResult()
     data class Exists(val team: Team) : CreateTeamResult()
 }
+
+sealed class AddRunnerToTeamResult {
+    data object Added : AddRunnerToTeamResult()
+    data object AlreadyMember : AddRunnerToTeamResult()
+}

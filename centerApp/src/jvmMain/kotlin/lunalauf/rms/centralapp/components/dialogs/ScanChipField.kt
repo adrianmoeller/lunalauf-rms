@@ -27,6 +27,7 @@ import lunalauf.rms.centralapp.components.commons.IconSize
 fun ScanChipField(
     modifier: Modifier = Modifier,
     showError: Boolean,
+    errorText: String = ScanChipFieldDefaults.errorText,
     onNumberKeyEvent: (UInt) -> Unit,
     onEnterKeyEvent: () -> Unit
 ) {
@@ -114,7 +115,7 @@ fun ScanChipField(
                         imageVector = FontAwesomeIcons.Solid.ExclamationTriangle,
                         contentDescription = null
                     )
-                    Text("Invalid ID format")
+                    Text(errorText)
                 }
             }
         }
@@ -149,4 +150,8 @@ private fun parseNumberKey(key: Key): UInt? {
         Key.Zero -> 0
         else -> null
     }?.toUInt()
+}
+
+object ScanChipFieldDefaults {
+    val errorText = "Invalid ID format"
 }

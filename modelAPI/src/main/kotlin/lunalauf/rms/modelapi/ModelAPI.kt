@@ -143,22 +143,15 @@ class ModelAPI(
         return null
     }
 
-    suspend fun addRunnerToTeam(team: Team, runner: Runner): Result<Runner> {
+    suspend fun addRunnerToTeam(team: Team, runner: Runner): AddRunnerToTeamResult {
         mutex.withLock {
-            val re = Result<Runner>("Add Runner To Team")
-            if (runner.team != null) {
-                return if (team.members.contains(runner)) {
-                    re.passed(runner, 2, "Runner is already member of this Team", Lvl.WARN)
-                } else {
-                    re.failed("Runner is still member of another Team: " + runner.team.name, null)
-                }
+            if (runner.team == team) {
+                logger.warn("Missing UI check if runner is already a team member")
+                AddRunnerToTeamResult.AlreadyMember
             }
-            try {
-                runner.team = team
-            } catch (e: Exception) {
-                return re.failed("Failed adding Runner to Team", e)
-            }
-            return re.passed(runner, 1, "Done", Lvl.INFO)
+            runner.team = team
+            logger.info("Added {} to {}", runner, team)
+            return AddRunnerToTeamResult.Added
         }
     }
 

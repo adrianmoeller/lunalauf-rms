@@ -24,7 +24,7 @@ class FileOpenScreenModel(
 
     private val autoSaveTimer = Timer(
         name = "auto-save timer",
-        launcher = { action -> launchInDefaultScope { action() } },
+        launcher = { action -> launchInModelScope { action() } },
         onError = { _preferences.update { it.copy(autoSaveActive = false) } }
     ) {
         if (modelResourceManager is ModelResourceManager.Accessible) {
@@ -58,7 +58,7 @@ class FileOpenScreenModel(
     }
 
     fun updateRoundThreshold() {
-        launchInDefaultScope {
+        launchInModelScope {
             modelAPI.setRoundThreshold(preferences.value.roundThreshold.toInt())
         }
     }
