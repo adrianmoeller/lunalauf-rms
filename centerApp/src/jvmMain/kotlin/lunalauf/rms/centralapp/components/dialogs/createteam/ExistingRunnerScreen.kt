@@ -20,7 +20,8 @@ data class ExistingRunnerScreen(
     private val modelState: ModelState.Loaded,
     private val team: Team,
     private val runner: Runner,
-    private val onDismissRequest: (Navigator) -> Unit
+    private val onDismissRequest: (Navigator) -> Unit,
+    private val snackBarHostState: SnackbarHostState
 ) : Screen {
     @Composable
     override fun Content() {
@@ -28,7 +29,8 @@ data class ExistingRunnerScreen(
             ExistingRunnerScreenModel(
                 modelState = modelState,
                 team = team,
-                runner = runner
+                runner = runner,
+                snackBarHostState = snackBarHostState
             )
         }
         val navigator = LocalNavigator.currentOrThrow

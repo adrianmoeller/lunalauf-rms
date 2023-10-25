@@ -1,10 +1,7 @@
 package lunalauf.rms.centralapp.components.modelcontrols
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,17 +20,18 @@ import lunalauf.rms.modelapi.ModelState
 @Composable
 fun ModelControls(
     modifier: Modifier = Modifier,
-    modelState: ModelState.Loaded
+    modelState: ModelState.Loaded,
+    snackBarHostState: SnackbarHostState
 ) {
     val tabs = remember {
         object {
-            val run = RunControlTab(modelState)
-            val competitors = CompetitorsControlTab(modelState)
-            val funfactors = FunfactorsControlTab(modelState)
+            val run = RunControlTab(modelState, snackBarHostState)
+            val competitors = CompetitorsControlTab(modelState, snackBarHostState)
+            val funfactors = FunfactorsControlTab(modelState, snackBarHostState)
         }
     }
 
-    TabNavigator(RunControlTab(modelState)) {
+    TabNavigator(RunControlTab(modelState, snackBarHostState)) {
         Column(
             modifier = modifier
         ) {
@@ -79,7 +77,8 @@ private fun RowScope.TabNavigationItem(tab: Tab) {
 }
 
 class RunControlTab(
-    private val modelState: ModelState.Loaded
+    private val modelState: ModelState.Loaded,
+    private val snackBarHostState: SnackbarHostState
 ) : Tab {
     override val options: TabOptions
         @Composable
@@ -99,14 +98,16 @@ class RunControlTab(
     override fun Content() {
         RunControlScreen(
             modifier = Modifier.fillMaxSize(),
-            modelState = modelState
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
         )
     }
 
 }
 
 class CompetitorsControlTab(
-    private val modelState: ModelState.Loaded
+    private val modelState: ModelState.Loaded,
+    private val snackBarHostState: SnackbarHostState
 ) : Tab {
     override val options: TabOptions
         @Composable
@@ -125,13 +126,15 @@ class CompetitorsControlTab(
     override fun Content() {
         CompetitorsControlScreen(
             modifier = Modifier.fillMaxSize(),
-            modelState = modelState
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
         )
     }
 }
 
 class FunfactorsControlTab(
-    private val modelState: ModelState.Loaded
+    private val modelState: ModelState.Loaded,
+    private val snackBarHostState: SnackbarHostState
 ) : Tab {
     override val options: TabOptions
         @Composable

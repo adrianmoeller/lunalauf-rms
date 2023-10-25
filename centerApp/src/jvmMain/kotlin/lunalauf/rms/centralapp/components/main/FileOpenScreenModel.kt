@@ -1,5 +1,7 @@
 package lunalauf.rms.centralapp.components.main
 
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -13,9 +15,10 @@ import kotlin.time.Duration.Companion.seconds
 
 class FileOpenScreenModel(
     private val modelResourceManager: ModelResourceManager,
-    private val modelState: ModelState.Loaded
+    modelState: ModelState.Loaded,
+    snackBarHostState: SnackbarHostState
 ) : AbstractScreenModel() {
-    val modelAPI = modelState.modelAPI
+    private val modelAPI = modelState.modelAPI
 
     private val _preferences = MutableStateFlow(
         PreferencesState(roundThreshold = modelAPI.roundThreshold.toFloat())
@@ -28,8 +31,18 @@ class FileOpenScreenModel(
         onError = { _preferences.update { it.copy(autoSaveActive = false) } }
     ) {
         if (modelResourceManager is ModelResourceManager.Accessible) {
-            when (modelResourceManager.save()) {
-                is SaveResult.Error, SaveResult.NoFileOpen -> throw Exception("Terminate task")
+            when (val result = modelResourceManager.save()) {
+                is SaveResult.Error -> {
+                    launchInDefaultScope {
+                        snackBarHostState.showSnackbar(
+                            message = result.message,
+                            withDismissAction = true,
+                            duration = SnackbarDuration.Indefinite
+                        )
+                    }
+                    throw Exception("Terminate task")
+                }
+                is SaveResult.NoFileOpen -> throw Exception("Terminate task")
                 is SaveResult.Success -> {}
             }
         } else {

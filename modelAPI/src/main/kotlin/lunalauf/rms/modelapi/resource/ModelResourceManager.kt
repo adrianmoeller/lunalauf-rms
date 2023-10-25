@@ -189,7 +189,7 @@ sealed class ModelResult {
 
     class Error(val message: String, val exception: Exception? = null) : ModelResult() {
         init {
-            if (exception == null) logger.error(message) else logger.error(message)
+            if (exception == null) logger.error(message) else logger.error(message, exception)
         }
     }
 }

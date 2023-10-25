@@ -25,7 +25,8 @@ data class EnterRunnerNameScreen(
     private val modelState: ModelState.Loaded,
     private val team: Team,
     private val id: ULong,
-    private val onDismissRequest: (Navigator) -> Unit
+    private val onDismissRequest: (Navigator) -> Unit,
+    private val snackBarHostState: SnackbarHostState
 ) : Screen {
     @Composable
     override fun Content() {
@@ -33,7 +34,8 @@ data class EnterRunnerNameScreen(
             EnterRunnerNameScreenModel(
                 modelState = modelState,
                 id = id,
-                team = team
+                team = team,
+                snackBarHostState = snackBarHostState
             )
         }
         val coroutineScope = rememberCoroutineScope()

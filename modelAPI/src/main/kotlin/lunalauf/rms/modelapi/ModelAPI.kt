@@ -105,15 +105,20 @@ class ModelAPI(
         return null
     }
 
-    suspend fun changeRunnerId(runner: Runner, newId: ULong): Result<Runner> {
+    suspend fun updateRunnerId(runner: Runner, newId: ULong): UpdateRunnerIdResult {
         mutex.withLock {
-            val re = Result<Runner>("Change Runner ID")
-            val existingRunner = getRunner(newId)
-            if (existingRunner != null) {
-                return re.passed(runner, 2, "This ID already exists: $existingRunner", Lvl.WARN)
+            getRunner(newId)?.let {
+                logger.warn("Missing UI check if ID already exists when updating a runner ID")
+                return UpdateRunnerIdResult.Exists(it)
             }
             runner.id = newId.toLong()
-            return re.passed(runner, 1, "Done", Lvl.INFO)
+            return UpdateRunnerIdResult.Updated
+        }
+    }
+
+    suspend fun updateRunnerName(runner: Runner, newName: String) {
+        mutex.withLock {
+            runner.name = newName
         }
     }
 

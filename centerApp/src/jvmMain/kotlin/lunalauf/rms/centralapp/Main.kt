@@ -4,6 +4,7 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,7 +40,8 @@ fun ApplicationScope.App() {
         when (modelState) {
             is ModelState.Unloaded -> NoFileOpenScreen(
                 onNewClick = mainScreenModel::newFile,
-                onOpenClick = mainScreenModel::openFile
+                onOpenClick = mainScreenModel::openFile,
+                snackBarHostState = mainScreenModel.snackBarHostState
             )
             is ModelState.Loading -> Box(
                 modifier = Modifier.fillMaxSize(),
@@ -53,7 +55,8 @@ fun ApplicationScope.App() {
                 onMenuNewFile = mainScreenModel::newFile,
                 onMenuOpenFile = mainScreenModel::openFile,
                 onMenuSaveFile = mainScreenModel::saveFile,
-                onMenuCloseFile = mainScreenModel::closeFile
+                onMenuCloseFile = mainScreenModel::closeFile,
+                snackBarHostState = mainScreenModel.snackBarHostState
             )
         }
     }

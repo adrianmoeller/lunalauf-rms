@@ -23,14 +23,16 @@ import lunalauf.rms.modelapi.ModelState
 data class EnterNameScreen(
     private val modelState: ModelState.Loaded,
     private val id: ULong,
-    private val onDismissRequest: (Navigator) -> Unit
+    private val onDismissRequest: (Navigator) -> Unit,
+    private val snackBarHostState: SnackbarHostState
 ) : Screen {
     @Composable
     override fun Content() {
         val screenModel = rememberScreenModel {
             EnterNameScreenModel(
                 modelState = modelState,
-                id = id
+                id = id,
+                snackBarHostState = snackBarHostState
             )
         }
         val coroutineScope = rememberCoroutineScope()

@@ -1,5 +1,7 @@
 package lunalauf.rms.centralapp.components.modelcontrols
 
+import LunaLaufLanguage.Runner
+import LunaLaufLanguage.Team
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,6 +31,7 @@ import compose.icons.evaicons.outline.Expand
 import compose.icons.evaicons.outline.Shake
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.SlidersH
+import kotlinx.coroutines.launch
 import lunalauf.rms.centralapp.components.commons.*
 import lunalauf.rms.centralapp.components.dialogs.createrunner.CreateRunnerScreen
 import lunalauf.rms.centralapp.components.dialogs.createteam.CreateTeamScreen
@@ -39,9 +42,11 @@ import lunalauf.rms.modelapi.states.TeamsState
 @Composable
 fun CompetitorsControlScreen(
     modifier: Modifier = Modifier,
-    modelState: ModelState.Loaded
+    modelState: ModelState.Loaded,
+    snackBarHostState: SnackbarHostState
 ) {
     val screenModel = remember { CompetitorsControlScreenModel(modelState) }
+    val scope = rememberCoroutineScope()
     val teamsState by modelState.teams.collectAsState()
     val runnersState by modelState.runners.collectAsState()
 
@@ -50,6 +55,9 @@ fun CompetitorsControlScreen(
 
     var createTeamOpen by remember { mutableStateOf(false) }
     var createRunnerOpen by remember { mutableStateOf(false) }
+
+    var teamDetailsStatus: TeamDetailsStatus by remember { mutableStateOf(TeamDetailsStatus.Closed) }
+    var runnerDetailsStatus: RunnerDetailsStatus by remember { mutableStateOf(RunnerDetailsStatus.Closed) }
 
     Column(
         modifier = modifier,
@@ -74,9 +82,7 @@ fun CompetitorsControlScreen(
                     TeamTile(
                         modifier = Modifier.fillMaxWidth(),
                         teamName = team.name ?: "",
-                        onClick = {
-                            // TODO
-                        }
+                        onClick = { teamDetailsStatus = TeamDetailsStatus.Open(team) }
                     )
                     if (index < teamsState.teams.lastIndex)
                         ListItemDivider(spacing = 10.dp)
@@ -95,9 +101,7 @@ fun CompetitorsControlScreen(
                     RunnerTile(
                         modifier = Modifier.fillMaxWidth(),
                         runnerName = runnerName,
-                        onClick = {
-                            // TODO
-                        }
+                        onClick = { runnerDetailsStatus = RunnerDetailsStatus.Open(runner) }
                     )
                     if (index < singleRunners.lastIndex)
                         ListItemDivider(spacing = 10.dp)
@@ -140,16 +144,47 @@ fun CompetitorsControlScreen(
 
     if (createTeamOpen) {
         CreateTeamScreen(
-            onDismissRequest = {createTeamOpen = false},
-            modelState = modelState
+            onDismissRequest = { createTeamOpen = false },
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
         )
     }
 
     if (createRunnerOpen) {
         CreateRunnerScreen(
             onDismissRequest = { createRunnerOpen = false },
-            modelState = modelState
+            onShowRunnerDetails = {
+                scope.launch {
+                    val result = snackBarHostState.showSnackbar(
+                        message = "A runner with this ID already exists",
+                        actionLabel = "Show",
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Long
+                    )
+                    if (result == SnackbarResult.ActionPerformed)
+                        runnerDetailsStatus = RunnerDetailsStatus.Open(it)
+                }
+            },
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
         )
+    }
+
+    if (teamDetailsStatus is TeamDetailsStatus.Open) {
+        key(teamsState) {
+            // TODO
+        }
+    }
+
+    if (runnerDetailsStatus is RunnerDetailsStatus.Open) {
+        val runner = (runnerDetailsStatus as RunnerDetailsStatus.Open).runner
+        key(runnersState) {
+            RunnerDetailsScreen(
+                onDismissRequest = { runnerDetailsStatus = RunnerDetailsStatus.Closed },
+                modelState = modelState,
+                runner = runner
+            )
+        }
     }
 }
 
@@ -385,4 +420,14 @@ private fun ExpandedSingleRunnersTable(
             weights = listOf(1f, 2.8f, 1f, 1f)
         )
     }
+}
+
+private sealed class RunnerDetailsStatus {
+    data object Closed : RunnerDetailsStatus()
+    data class Open(val runner: Runner) : RunnerDetailsStatus()
+}
+
+private sealed class TeamDetailsStatus {
+    data object Closed : TeamDetailsStatus()
+    data class Open(val team: Team) : TeamDetailsStatus()
 }

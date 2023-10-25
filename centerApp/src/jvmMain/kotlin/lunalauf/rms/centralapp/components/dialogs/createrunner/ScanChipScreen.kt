@@ -1,8 +1,10 @@
 package lunalauf.rms.centralapp.components.dialogs.createrunner
 
+import LunaLaufLanguage.Runner
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +20,9 @@ import lunalauf.rms.modelapi.ModelState
 
 data class ScanChipScreen(
     private val modelState: ModelState.Loaded,
-    private val onDismissRequest: (Navigator) -> Unit
+    private val onDismissRequest: (Navigator) -> Unit,
+    private val onShowRunnerDetails: (Runner) -> Unit,
+    private val snackBarHostState: SnackbarHostState
 ) : Screen {
     @Composable
     override fun Content() {
@@ -37,7 +41,7 @@ data class ScanChipScreen(
                 onEnterKeyEvent = {
                     screenModel.processBufferedId(
                         onKnown = {
-                            // TODO show runner details
+                            onShowRunnerDetails(it)
                             onDismissRequest(navigator)
                         },
                         onUnknown = {
@@ -45,7 +49,8 @@ data class ScanChipScreen(
                                 EnterNameScreen(
                                     modelState = modelState,
                                     id = it,
-                                    onDismissRequest = onDismissRequest
+                                    onDismissRequest = onDismissRequest,
+                                    snackBarHostState = snackBarHostState
                                 )
                             )
                         }

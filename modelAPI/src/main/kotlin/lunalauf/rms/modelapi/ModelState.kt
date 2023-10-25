@@ -127,6 +127,7 @@ sealed class ModelState {
                     }
                     updateOverallContribution()
                 }
+
                 is LogEntry -> {
                     when (notifier) {
                         is Round -> updateRounds()

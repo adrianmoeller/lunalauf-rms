@@ -1,5 +1,6 @@
 package lunalauf.rms.centralapp.components.dialogs.createrunner
 
+import LunaLaufLanguage.Runner
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,13 +16,20 @@ import lunalauf.rms.modelapi.ModelState
 fun CreateRunnerScreen(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
-    modelState: ModelState.Loaded
+    onShowRunnerDetails: (Runner) -> Unit,
+    modelState: ModelState.Loaded,
+    snackBarHostState: SnackbarHostState
 ) {
     val onDismissRequestClear: (Navigator) -> Unit = {
         onDismissRequest()
         it.popAll()
     }
-    val startScreen = ScanChipScreen(modelState, onDismissRequestClear)
+    val startScreen = ScanChipScreen(
+        modelState = modelState,
+        onDismissRequest = onDismissRequestClear,
+        snackBarHostState = snackBarHostState,
+        onShowRunnerDetails = onShowRunnerDetails
+    )
 
     Navigator(
         listOf(

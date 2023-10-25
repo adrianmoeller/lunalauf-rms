@@ -18,6 +18,7 @@ import compose.icons.fontawesomeicons.regular.File
 import compose.icons.fontawesomeicons.regular.FolderOpen
 import compose.icons.fontawesomeicons.regular.Save
 import compose.icons.fontawesomeicons.regular.TimesCircle
+import lunalauf.rms.centralapp.components.commons.CustomSnackBarHost
 import lunalauf.rms.centralapp.components.commons.IconSize
 import lunalauf.rms.centralapp.components.modelcontrols.ModelControls
 import lunalauf.rms.centralapp.components.dialogs.preferences.PreferencesSheet
@@ -34,8 +35,15 @@ fun FileOpenScreen(
     onMenuOpenFile: () -> Unit,
     onMenuSaveFile: () -> Unit,
     onMenuCloseFile: () -> Unit,
+    snackBarHostState: SnackbarHostState
 ) {
-    val screenModel = remember { FileOpenScreenModel(modelResourceManager, modelState) }
+    val screenModel = remember {
+        FileOpenScreenModel(
+            modelResourceManager = modelResourceManager,
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
+        )
+    }
     val preferences by screenModel.preferences.collectAsState()
 
     var settingsOpen by remember { mutableStateOf(false) }
@@ -43,6 +51,7 @@ fun FileOpenScreen(
 
     Scaffold(
         modifier = modifier,
+        snackbarHost = { CustomSnackBarHost(snackBarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -150,7 +159,8 @@ fun FileOpenScreen(
 
         ModelControls(
             modifier = Modifier.padding(innerPadding),
-            modelState = modelState
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
         )
     }
 }

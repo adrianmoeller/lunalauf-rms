@@ -18,3 +18,8 @@ sealed class AddRunnerToTeamResult {
     data object Added : AddRunnerToTeamResult()
     data object AlreadyMember : AddRunnerToTeamResult()
 }
+
+sealed class UpdateRunnerIdResult {
+    data object Updated : UpdateRunnerIdResult()
+    data class Exists(val runner: Runner) : UpdateRunnerIdResult()
+}

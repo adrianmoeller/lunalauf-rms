@@ -15,13 +15,14 @@ import lunalauf.rms.modelapi.ModelState
 fun CreateTeamScreen(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
-    modelState: ModelState.Loaded
+    modelState: ModelState.Loaded,
+    snackBarHostState: SnackbarHostState
 ) {
     val onDismissRequestClear: (Navigator) -> Unit = {
         onDismissRequest()
         it.popAll()
     }
-    val startScreen = EnterTeamNameScreen(modelState, onDismissRequestClear)
+    val startScreen = EnterTeamNameScreen(modelState, onDismissRequestClear, snackBarHostState)
 
     Navigator(
         listOf(

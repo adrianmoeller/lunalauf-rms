@@ -1,13 +1,7 @@
 package lunalauf.rms.centralapp.components.dialogs.createteam
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,12 +22,13 @@ import lunalauf.rms.modelapi.ModelState
 
 data class EnterTeamNameScreen(
     private val modelState: ModelState.Loaded,
-    private val onDismissRequest: (Navigator) -> Unit
+    private val onDismissRequest: (Navigator) -> Unit,
+    val snackBarHostState: SnackbarHostState
 ) : Screen {
     @Composable
     override fun Content() {
         val screenModel = rememberScreenModel {
-            EnterTeamNameScreenModel(modelState)
+            EnterTeamNameScreenModel(modelState, snackBarHostState)
         }
         val coroutineScope = rememberCoroutineScope()
         val focusRequester = remember { FocusRequester() }
@@ -49,33 +44,57 @@ data class EnterTeamNameScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                OutlinedTextField(
-                    modifier = Modifier
-                        .onPreviewKeyEvent {
-                            if (it.key == Key.Enter) {
-                                if (it.type == KeyEventType.KeyUp && screenModel.nameValid)
-                                    screenModel.createTeam(
-                                        onCreated = { team ->
-                                            navigator.push(
-                                                ScanChipScreen(
-                                                    modelState = modelState,
-                                                    team = team,
-                                                    onDismissRequest = onDismissRequest
-                                                )
-                                            )
-                                        }
-                                    )
-                                return@onPreviewKeyEvent true
-                            }
-                            return@onPreviewKeyEvent false
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(15.dp)
+                ) {
+                    if (screenModel.nameDuplicate) {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(
+                                    vertical = 10.dp,
+                                    horizontal = 15.dp
+                                ),
+                                text = "This team name already exists",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
-                        .focusRequester(focusRequester),
-                    value = screenModel.name,
-                    onValueChange = screenModel::updateName,
-                    label = { Text("Name") },
-                    isError = !screenModel.nameValid,
-                    enabled = !screenModel.processing
-                )
+                    }
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .onPreviewKeyEvent {
+                                if (it.key == Key.Enter) {
+                                    if (it.type == KeyEventType.KeyUp && screenModel.nameValid)
+                                        screenModel.createTeam(
+                                            onCreated = { team ->
+                                                navigator.push(
+                                                    ScanChipScreen(
+                                                        modelState = modelState,
+                                                        team = team,
+                                                        onDismissRequest = onDismissRequest,
+                                                        snackBarHostState = snackBarHostState
+                                                    )
+                                                )
+                                            },
+                                            onClose = { onDismissRequest(navigator) }
+                                        )
+                                    return@onPreviewKeyEvent true
+                                }
+                                return@onPreviewKeyEvent false
+                            }
+                            .focusRequester(focusRequester),
+                        value = screenModel.name,
+                        onValueChange = screenModel::updateName,
+                        label = { Text("Name") },
+                        isError = !screenModel.nameValid,
+                        enabled = !screenModel.processing
+                    )
+                }
                 FilledTonalButton(
                     modifier = Modifier.align(Alignment.End),
                     onClick = {
@@ -85,10 +104,12 @@ data class EnterTeamNameScreen(
                                     ScanChipScreen(
                                         modelState = modelState,
                                         team = it,
-                                        onDismissRequest = onDismissRequest
+                                        onDismissRequest = onDismissRequest,
+                                        snackBarHostState = snackBarHostState
                                     )
                                 )
-                            }
+                            },
+                            onClose = { onDismissRequest(navigator) }
                         )
                     },
                     enabled = screenModel.nameValid && !screenModel.processing
