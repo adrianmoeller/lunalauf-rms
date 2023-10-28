@@ -5,8 +5,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun Modifier.cond(
@@ -69,3 +72,12 @@ suspend fun SnackbarHostState.showSnackbar(
         isError = isError
     )
 )
+
+fun FocusRequester.tryRequestFocusInScope(scope: CoroutineScope) {
+    scope.launch {
+        try {
+            requestFocus()
+        } catch (_: Exception) {
+        }
+    }
+}

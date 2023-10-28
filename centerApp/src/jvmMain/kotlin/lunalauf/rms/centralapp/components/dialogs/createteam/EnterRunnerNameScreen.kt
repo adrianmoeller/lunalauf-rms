@@ -19,6 +19,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
+import lunalauf.rms.centralapp.components.commons.tryRequestFocusInScope
 import lunalauf.rms.modelapi.ModelState
 
 data class EnterRunnerNameScreen(
@@ -105,11 +106,6 @@ data class EnterRunnerNameScreen(
                 CircularProgressIndicator()
         }
 
-        coroutineScope.launch {
-            try {
-                focusRequester.requestFocus()
-            } catch (_: Exception) {
-            }
-        }
+        focusRequester.tryRequestFocusInScope(coroutineScope)
     }
 }

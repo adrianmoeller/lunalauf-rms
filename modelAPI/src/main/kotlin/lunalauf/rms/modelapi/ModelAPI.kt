@@ -152,7 +152,7 @@ class ModelAPI(
         mutex.withLock {
             if (runner.team == team) {
                 logger.warn("Missing UI check if runner is already a team member")
-                AddRunnerToTeamResult.AlreadyMember
+                return AddRunnerToTeamResult.AlreadyMember
             }
             runner.team = team
             logger.info("Added {} to {}", runner, team)
@@ -160,19 +160,29 @@ class ModelAPI(
         }
     }
 
-    suspend fun removeRunnerFromTeam(runner: Runner): Result<Team> {
+    suspend fun removeRunnerFromTeam(runner: Runner): RemoveRunnerFromTeamResult {
         mutex.withLock {
-            val re = Result<Team>("Remove Runner from Team")
             if (runner.team == null) {
-                return re.passed(null, 0, "Runner is already in no Team", Lvl.WARN)
+                logger.warn("Missing UI check if runner is already in no team")
+                return RemoveRunnerFromTeamResult.AlreadyInNoTeam
             }
-            val oldRunnersTeam = runner.team
-            try {
-                runner.team = null
-            } catch (e: Exception) {
-                return re.failed("Failed removing Rummer From Team", e)
-            }
-            return re.passed(oldRunnersTeam, 1, "Done", Lvl.INFO)
+            val oldTeam = runner.team
+            runner.team = null
+            logger.info("Removed {} from {}", runner, oldTeam)
+            return RemoveRunnerFromTeamResult.Removed
+        }
+    }
+
+    suspend fun updateContribution(
+        contributor: Contributor,
+        type: ContrType,
+        amountFix: Double,
+        amountPerRound: Double
+    ) {
+        mutex.withLock {
+            contributor.contribution = type
+            contributor.amountFix = amountFix
+            contributor.amountPerRound = amountPerRound
         }
     }
 

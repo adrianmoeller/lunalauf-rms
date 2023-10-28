@@ -19,6 +19,11 @@ sealed class AddRunnerToTeamResult {
     data object AlreadyMember : AddRunnerToTeamResult()
 }
 
+sealed class RemoveRunnerFromTeamResult {
+    data object Removed : RemoveRunnerFromTeamResult()
+    data object AlreadyInNoTeam : RemoveRunnerFromTeamResult()
+}
+
 sealed class UpdateRunnerIdResult {
     data object Updated : UpdateRunnerIdResult()
     data class Exists(val runner: Runner) : UpdateRunnerIdResult()

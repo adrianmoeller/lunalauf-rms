@@ -42,8 +42,11 @@ fun <V> EditableValueTile(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
+            val displayValue = if (value == null) "None"
+            else if (unit == null) value.toString()
+            else "$value $unit"
             Text(
-                text = if (unit == null) value.toString() else "$value $unit",
+                text = displayValue,
                 fontWeight = FontWeight.Bold
             )
             FilledTonalIconButton(

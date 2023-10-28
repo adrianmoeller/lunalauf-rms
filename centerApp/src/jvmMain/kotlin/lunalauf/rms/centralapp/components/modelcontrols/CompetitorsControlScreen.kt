@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import lunalauf.rms.centralapp.components.commons.*
 import lunalauf.rms.centralapp.components.dialogs.createrunner.CreateRunnerScreen
 import lunalauf.rms.centralapp.components.dialogs.createteam.CreateTeamScreen
+import lunalauf.rms.centralapp.components.dialogs.runnerdetails.RunnerDetailsScreen
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.states.RunnersState
 import lunalauf.rms.modelapi.states.TeamsState
