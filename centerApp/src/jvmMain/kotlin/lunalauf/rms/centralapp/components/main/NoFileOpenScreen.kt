@@ -11,7 +11,6 @@ import compose.icons.fontawesomeicons.Regular
 import compose.icons.fontawesomeicons.regular.File
 import compose.icons.fontawesomeicons.regular.FolderOpen
 import lunalauf.rms.centralapp.components.commons.CustomSnackBarHost
-import lunalauf.rms.centralapp.components.commons.CustomSnackBarVisuals
 import lunalauf.rms.centralapp.components.commons.IconSize
 
 @Composable
@@ -43,7 +42,10 @@ fun NoFileOpenScreen(
                     )
                     Spacer(Modifier.width(10.dp))
                     Text(
-                        modifier = Modifier.padding(bottom = 1.dp),
+                        modifier = Modifier.padding(
+                            top = 5.dp,
+                            bottom = 6.dp
+                        ),
                         text = "New",
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -58,7 +60,10 @@ fun NoFileOpenScreen(
                     )
                     Spacer(Modifier.width(10.dp))
                     Text(
-                        modifier = Modifier.padding(bottom = 1.dp),
+                        modifier = Modifier.padding(
+                            top = 5.dp,
+                            bottom = 6.dp
+                        ),
                         text = "Open",
                         style = MaterialTheme.typography.titleMedium
                     )

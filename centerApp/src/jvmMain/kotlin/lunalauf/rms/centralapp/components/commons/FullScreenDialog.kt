@@ -17,7 +17,7 @@ fun FullScreenDialog(
     onDismissRequest: () -> Unit,
     title: String,
     maxWidth: Dp? = null,
-    content: @Composable () -> Unit
+    content: @Composable ColumnScope.() -> Unit
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,
