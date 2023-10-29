@@ -46,6 +46,7 @@ object IconSize {
     val small = 20.dp
     val medium = 25.dp
     val large = 30.dp
+    val extraLarge = 50.dp
 }
 
 data class CustomSnackBarVisuals(

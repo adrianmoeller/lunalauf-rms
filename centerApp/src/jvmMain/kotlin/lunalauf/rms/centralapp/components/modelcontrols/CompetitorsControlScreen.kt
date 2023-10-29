@@ -33,9 +33,9 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.SlidersH
 import kotlinx.coroutines.launch
 import lunalauf.rms.centralapp.components.commons.*
-import lunalauf.rms.centralapp.components.dialogs.createrunner.CreateRunnerScreen
-import lunalauf.rms.centralapp.components.dialogs.createteam.CreateTeamScreen
-import lunalauf.rms.centralapp.components.dialogs.runnerdetails.RunnerDetailsScreen
+import lunalauf.rms.centralapp.components.dialogs.create.runner.CreateRunnerScreen
+import lunalauf.rms.centralapp.components.dialogs.create.team.CreateTeamScreen
+import lunalauf.rms.centralapp.components.dialogs.details.runner.RunnerDetailsScreen
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.states.RunnersState
 import lunalauf.rms.modelapi.states.TeamsState
@@ -181,9 +181,10 @@ fun CompetitorsControlScreen(
         val runner = (runnerDetailsStatus as RunnerDetailsStatus.Open).runner
         key(runnersState) {
             RunnerDetailsScreen(
+                runner = runner,
                 onDismissRequest = { runnerDetailsStatus = RunnerDetailsStatus.Closed },
                 modelState = modelState,
-                runner = runner
+                snackBarHostState = snackBarHostState
             )
         }
     }

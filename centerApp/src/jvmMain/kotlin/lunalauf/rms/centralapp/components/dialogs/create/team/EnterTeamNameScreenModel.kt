@@ -1,5 +1,6 @@
-package lunalauf.rms.centralapp.components.dialogs.createrunner
+package lunalauf.rms.centralapp.components.dialogs.create.team
 
+import LunaLaufLanguage.Team
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
@@ -9,46 +10,58 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
 import lunalauf.rms.centralapp.utils.InputValidator
-import lunalauf.rms.modelapi.CreateRunnerResult
+import lunalauf.rms.modelapi.CreateTeamResult
 import lunalauf.rms.modelapi.ModelState
 
-class EnterNameScreenModel(
-    modelState: ModelState.Loaded,
-    private val id: ULong,
+class EnterTeamNameScreenModel(
+    private val modelState: ModelState.Loaded,
     private val snackBarHostState: SnackbarHostState
 ) : ScreenModel, AbstractScreenModel() {
     private val modelAPI = modelState.modelAPI
 
     var name by mutableStateOf("")
         private set
-    var nameValid by mutableStateOf(true)
+    var nameValid by mutableStateOf(false)
+        private set
+    var nameDuplicate by mutableStateOf(false)
         private set
     var processing by mutableStateOf(false)
         private set
 
     fun updateName(name: String) {
-        nameValid = InputValidator.validateName(name)
+        nameDuplicate = modelState.teams.value.names.contains(name)
+        nameValid = name.isNotBlank() && InputValidator.validateName(name) && !nameDuplicate
         this.name = name
     }
 
-    fun createRunner(onClose: () -> Unit) {
+    fun createTeam(
+        onCreated: (Team) -> Unit,
+        onClose: () -> Unit
+    ) {
         processing = true
         launchInModelScope {
-            when (modelAPI.createRunner(id, name)) {
-                is CreateRunnerResult.Created -> {
+            when (val result = modelAPI.createTeam(name)) {
+                is CreateTeamResult.Created -> {
+                    onCreated(result.team)
+                }
+
+                is CreateTeamResult.Exists -> {
+                    onClose()
                     launchInDefaultScope {
                         snackBarHostState.showSnackbar(
-                            message = "Created runner '$name' with ID: $id",
+                            message = "A team with name '${result.team.name}' already exists",
                             withDismissAction = true,
-                            duration = SnackbarDuration.Short
+                            duration = SnackbarDuration.Long,
+                            isError = true
                         )
                     }
                 }
 
-                is CreateRunnerResult.Exists -> {
+                CreateTeamResult.BlankName -> {
+                    onClose()
                     launchInDefaultScope {
                         snackBarHostState.showSnackbar(
-                            message = "A runner with this ID already exists",
+                            message = "Please provide a non-blank team name",
                             withDismissAction = true,
                             duration = SnackbarDuration.Long,
                             isError = true
@@ -56,7 +69,6 @@ class EnterNameScreenModel(
                     }
                 }
             }
-            onClose()
         }
     }
 }

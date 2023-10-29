@@ -1,4 +1,4 @@
-package lunalauf.rms.centralapp.components.dialogs.createrunner
+package lunalauf.rms.centralapp.components.dialogs.create.runner
 
 import LunaLaufLanguage.Runner
 import androidx.compose.foundation.layout.Column

@@ -321,35 +321,27 @@ class ModelAPI(
         }
     }
 
-    suspend fun <T : EObject?> deleteElement(element: T): Result<T> {
+    suspend fun <T : EObject> deleteElement(element: T): DeleteElementResult {
         mutex.withLock {
-            val re = Result<T>("Delete Element")
-            if (element is Team) {
-                if (!element.funfactorResults.isEmpty()) return re.passed(
-                    element,
-                    2,
-                    "Not deleted (Team has relevant content)",
-                    Lvl.WARN
-                )
+            when (element) {
+                is Team -> {
+                    if (element.funfactorResults.isNotEmpty())
+                        return DeleteElementResult.NotDeleted("Team has Funfactor results")
+                }
+
+                is Runner -> {
+                    if (element.rounds.isNotEmpty())
+                        return DeleteElementResult.NotDeleted("Runner has counted rounds")
+                }
+
+                is Funfactor -> {
+                    if (element.funfactorResults.isNotEmpty())
+                        return DeleteElementResult.NotDeleted("Funfactor has results")
+                }
             }
-            if (element is Runner) {
-                if (!element.rounds.isEmpty()) return re.passed(
-                    element,
-                    2,
-                    "Not deleted (Runner has relevant content)",
-                    Lvl.WARN
-                )
-            }
-            if (element is Funfactor) {
-                if (!element.funfactorResults.isEmpty()) return re.passed(
-                    element,
-                    2,
-                    "Not deleted (Funfactor has relevant content)",
-                    Lvl.WARN
-                )
-            }
+
             EcoreUtil.delete(element, true)
-            return re.passed(element, 1, "Done", Lvl.INFO)
+            return DeleteElementResult.Deleted
         }
     }
 }

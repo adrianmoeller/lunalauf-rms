@@ -28,3 +28,8 @@ sealed class UpdateRunnerIdResult {
     data object Updated : UpdateRunnerIdResult()
     data class Exists(val runner: Runner) : UpdateRunnerIdResult()
 }
+
+sealed class DeleteElementResult {
+    data object Deleted : DeleteElementResult()
+    data class NotDeleted(val cause: String) : DeleteElementResult()
+}

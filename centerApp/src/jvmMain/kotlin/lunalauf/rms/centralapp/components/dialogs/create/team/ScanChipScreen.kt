@@ -1,4 +1,4 @@
-package lunalauf.rms.centralapp.components.dialogs.createteam
+package lunalauf.rms.centralapp.components.dialogs.create.team
 
 import LunaLaufLanguage.Team
 import androidx.compose.foundation.layout.Arrangement

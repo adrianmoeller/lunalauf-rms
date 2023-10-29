@@ -1,4 +1,4 @@
-package lunalauf.rms.centralapp.components.dialogs.createteam
+package lunalauf.rms.centralapp.components.dialogs.create.team
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -17,7 +17,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import kotlinx.coroutines.launch
 import lunalauf.rms.centralapp.components.commons.tryRequestFocusInScope
 import lunalauf.rms.modelapi.ModelState
 

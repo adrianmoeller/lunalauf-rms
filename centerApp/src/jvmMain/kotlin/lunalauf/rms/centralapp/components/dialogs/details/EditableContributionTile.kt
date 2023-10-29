@@ -1,4 +1,4 @@
-package lunalauf.rms.centralapp.components.dialogs.runnerdetails
+package lunalauf.rms.centralapp.components.dialogs.details
 
 import LunaLaufLanguage.ContrType
 import androidx.compose.foundation.layout.*

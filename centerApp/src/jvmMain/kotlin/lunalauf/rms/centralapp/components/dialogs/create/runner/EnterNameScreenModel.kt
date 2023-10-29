@@ -1,6 +1,5 @@
-package lunalauf.rms.centralapp.components.dialogs.createteam
+package lunalauf.rms.centralapp.components.dialogs.create.runner
 
-import LunaLaufLanguage.Team
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
@@ -10,14 +9,12 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
 import lunalauf.rms.centralapp.utils.InputValidator
-import lunalauf.rms.modelapi.AddRunnerToTeamResult
 import lunalauf.rms.modelapi.CreateRunnerResult
 import lunalauf.rms.modelapi.ModelState
 
-class EnterRunnerNameScreenModel(
+class EnterNameScreenModel(
     modelState: ModelState.Loaded,
     private val id: ULong,
-    private val team: Team,
     private val snackBarHostState: SnackbarHostState
 ) : ScreenModel, AbstractScreenModel() {
     private val modelAPI = modelState.modelAPI
@@ -34,31 +31,20 @@ class EnterRunnerNameScreenModel(
         this.name = name
     }
 
-    fun createRunnerAndAddToTeam(
-        onClose: () -> Unit,
-        onBack: () -> Unit
-    ) {
+    fun createRunner(onClose: () -> Unit) {
         processing = true
         launchInModelScope {
-            when (val result = modelAPI.createRunner(id, name)) {
+            when (modelAPI.createRunner(id, name)) {
                 is CreateRunnerResult.Created -> {
-                    when (modelAPI.addRunnerToTeam(team, result.runner)) {
-                        AddRunnerToTeamResult.Added -> {
-                            onBack()
-                        }
-                        AddRunnerToTeamResult.AlreadyMember -> {
-                            launchInDefaultScope {
-                                snackBarHostState.showSnackbar(
-                                    message = "This runner is already a team member",
-                                    withDismissAction = true,
-                                    duration = SnackbarDuration.Long,
-                                    isError = true
-                                )
-                            }
-                            onClose()
-                        }
+                    launchInDefaultScope {
+                        snackBarHostState.showSnackbar(
+                            message = "Created runner '$name' with ID: $id",
+                            withDismissAction = true,
+                            duration = SnackbarDuration.Short
+                        )
                     }
                 }
+
                 is CreateRunnerResult.Exists -> {
                     launchInDefaultScope {
                         snackBarHostState.showSnackbar(
@@ -68,9 +54,9 @@ class EnterRunnerNameScreenModel(
                             isError = true
                         )
                     }
-                    onClose()
                 }
             }
+            onClose()
         }
     }
 }

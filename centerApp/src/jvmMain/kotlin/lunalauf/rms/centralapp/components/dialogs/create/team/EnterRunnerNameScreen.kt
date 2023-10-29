@@ -1,5 +1,6 @@
-package lunalauf.rms.centralapp.components.dialogs.createrunner
+package lunalauf.rms.centralapp.components.dialogs.create.team
 
+import LunaLaufLanguage.Team
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -17,12 +18,12 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import kotlinx.coroutines.launch
 import lunalauf.rms.centralapp.components.commons.tryRequestFocusInScope
 import lunalauf.rms.modelapi.ModelState
 
-data class EnterNameScreen(
+data class EnterRunnerNameScreen(
     private val modelState: ModelState.Loaded,
+    private val team: Team,
     private val id: ULong,
     private val onDismissRequest: (Navigator) -> Unit,
     private val snackBarHostState: SnackbarHostState
@@ -30,9 +31,10 @@ data class EnterNameScreen(
     @Composable
     override fun Content() {
         val screenModel = rememberScreenModel {
-            EnterNameScreenModel(
+            EnterRunnerNameScreenModel(
                 modelState = modelState,
                 id = id,
+                team = team,
                 snackBarHostState = snackBarHostState
             )
         }
@@ -59,8 +61,9 @@ data class EnterNameScreen(
                         .onPreviewKeyEvent {
                             if (it.key == Key.Enter) {
                                 if (it.type == KeyEventType.KeyUp && screenModel.nameValid)
-                                    screenModel.createRunner(
-                                        onClose = { onDismissRequest(navigator) }
+                                    screenModel.createRunnerAndAddToTeam(
+                                        onClose = { onDismissRequest(navigator) },
+                                        onBack = { navigator.pop() }
                                     )
                                 return@onPreviewKeyEvent true
                             }
@@ -69,7 +72,7 @@ data class EnterNameScreen(
                         .focusRequester(focusRequester),
                     value = screenModel.name,
                     onValueChange = screenModel::updateName,
-                    label = { Text("Name") },
+                    label = { Text("Runner's name") },
                     isError = !screenModel.nameValid,
                     enabled = !screenModel.processing
                 )
@@ -87,13 +90,14 @@ data class EnterNameScreen(
                     }
                     FilledTonalButton(
                         onClick = {
-                            screenModel.createRunner(
-                                onClose = { onDismissRequest(navigator) }
+                            screenModel.createRunnerAndAddToTeam(
+                                onClose = { onDismissRequest(navigator) },
+                                onBack = { navigator.pop() }
                             )
                         },
                         enabled = screenModel.nameValid && !screenModel.processing
                     ) {
-                        Text("Create")
+                        Text("Create & add to team")
                     }
                 }
             }

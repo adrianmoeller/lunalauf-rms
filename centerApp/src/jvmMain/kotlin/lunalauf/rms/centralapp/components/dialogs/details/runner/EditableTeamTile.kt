@@ -1,4 +1,4 @@
-package lunalauf.rms.centralapp.components.dialogs.runnerdetails
+package lunalauf.rms.centralapp.components.dialogs.details.runner
 
 import LunaLaufLanguage.Team
 import androidx.compose.foundation.VerticalScrollbar

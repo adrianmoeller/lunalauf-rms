@@ -1,6 +1,5 @@
-package lunalauf.rms.centralapp.components.dialogs.createrunner
+package lunalauf.rms.centralapp.components.dialogs.create.team
 
-import LunaLaufLanguage.Runner
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,10 +12,9 @@ import lunalauf.rms.modelapi.ModelState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateRunnerScreen(
+fun CreateTeamScreen(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
-    onShowRunnerDetails: (Runner) -> Unit,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
 ) {
@@ -24,12 +22,7 @@ fun CreateRunnerScreen(
         onDismissRequest()
         it.popAll()
     }
-    val startScreen = ScanChipScreen(
-        modelState = modelState,
-        onDismissRequest = onDismissRequestClear,
-        snackBarHostState = snackBarHostState,
-        onShowRunnerDetails = onShowRunnerDetails
-    )
+    val startScreen = EnterTeamNameScreen(modelState, onDismissRequestClear, snackBarHostState)
 
     Navigator(
         listOf(
@@ -39,10 +32,7 @@ fun CreateRunnerScreen(
     ) {
         ModalBottomSheet(
             modifier = modifier,
-            onDismissRequest = {
-                onDismissRequest()
-                it.popAll()
-            },
+            onDismissRequest = { onDismissRequestClear(it) },
             sheetState = rememberModalBottomSheetState(
                 skipPartiallyExpanded = true
             )
@@ -53,7 +43,7 @@ fun CreateRunnerScreen(
                     .padding(bottom = 20.dp)
             ) {
                 Text(
-                    text = "Create single runner",
+                    text = "Create team",
                     style = MaterialTheme.typography.titleLarge
                 )
                 Spacer(Modifier.height(20.dp))

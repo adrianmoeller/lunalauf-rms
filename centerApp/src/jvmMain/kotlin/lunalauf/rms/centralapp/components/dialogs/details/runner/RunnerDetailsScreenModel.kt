@@ -1,4 +1,4 @@
-package lunalauf.rms.centralapp.components.dialogs.runnerdetails
+package lunalauf.rms.centralapp.components.dialogs.details.runner
 
 import LunaLaufLanguage.ContrType
 import LunaLaufLanguage.Runner
