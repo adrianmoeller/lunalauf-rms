@@ -75,5 +75,6 @@ class RunnerDetailsScreenModel(
     private fun Runner.roundDurations() = rounds
         .filterNotNull()
         .map { it.timestamp.time }
+        .sorted()
         .zipWithNext { a, b -> b - a }
 }

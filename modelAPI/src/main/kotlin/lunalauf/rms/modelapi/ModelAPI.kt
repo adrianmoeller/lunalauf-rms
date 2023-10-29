@@ -173,6 +173,12 @@ class ModelAPI(
         }
     }
 
+    suspend fun updateTeamName(team: Team, name: String) {
+        mutex.withLock {
+            team.name = name
+        }
+    }
+
     suspend fun updateContribution(
         contributor: Contributor,
         type: ContrType,

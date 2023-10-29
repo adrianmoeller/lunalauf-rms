@@ -36,6 +36,7 @@ import lunalauf.rms.centralapp.components.commons.*
 import lunalauf.rms.centralapp.components.dialogs.create.runner.CreateRunnerScreen
 import lunalauf.rms.centralapp.components.dialogs.create.team.CreateTeamScreen
 import lunalauf.rms.centralapp.components.dialogs.details.runner.RunnerDetailsScreen
+import lunalauf.rms.centralapp.components.dialogs.details.team.TeamDetailsScreen
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.states.RunnersState
 import lunalauf.rms.modelapi.states.TeamsState
@@ -172,8 +173,14 @@ fun CompetitorsControlScreen(
     }
 
     if (teamDetailsStatus is TeamDetailsStatus.Open) {
+        val team = (teamDetailsStatus as TeamDetailsStatus.Open).team
         key(teamsState) {
-            // TODO
+            TeamDetailsScreen(
+                team = team,
+                onDismissRequest = { teamDetailsStatus = TeamDetailsStatus.Closed },
+                modelState = modelState,
+                snackBarHostState = snackBarHostState
+            )
         }
     }
 

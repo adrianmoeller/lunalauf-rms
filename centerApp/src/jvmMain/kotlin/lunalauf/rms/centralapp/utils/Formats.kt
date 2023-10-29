@@ -5,12 +5,13 @@ import kotlin.time.Duration
 
 object Formats {
     val dayTimeFormat = SimpleDateFormat("HH:mm:ss")
+
     fun minutesFormat(duration: Duration): String {
         var seconds = duration.inWholeSeconds
         if (seconds <= 60)
             return "$seconds sec"
         val minutes = duration.inWholeMinutes
         seconds %= 60
-        return "$minutes:$seconds min"
+        return "$minutes:${seconds.toString().padStart(2, '0')} min"
     }
 }

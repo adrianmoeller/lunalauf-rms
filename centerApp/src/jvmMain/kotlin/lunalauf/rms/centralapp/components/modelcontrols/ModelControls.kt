@@ -1,20 +1,24 @@
 package lunalauf.rms.centralapp.components.modelcontrols
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.tab.*
+import cafe.adriel.voyager.navigator.tab.CurrentTab
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabNavigator
+import cafe.adriel.voyager.navigator.tab.TabOptions
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Bolt
-import compose.icons.fontawesomeicons.solid.ExclamationTriangle
 import compose.icons.fontawesomeicons.solid.ListAlt
 import compose.icons.fontawesomeicons.solid.Running
-import lunalauf.rms.centralapp.components.commons.IconSize
+import lunalauf.rms.centralapp.components.commons.TabNavigationBarItem
 import lunalauf.rms.modelapi.ModelState
 
 @Composable
@@ -31,7 +35,10 @@ fun ModelControls(
         }
     }
 
-    TabNavigator(RunControlTab(modelState, snackBarHostState)) {
+    TabNavigator(
+        key = "ModelControls",
+        tab = tabs.run
+    ) {
         Column(
             modifier = modifier
         ) {
@@ -43,9 +50,9 @@ fun ModelControls(
                     Row(
                         modifier = Modifier.widthIn(max = 700.dp)
                     ) {
-                        TabNavigationItem(tabs.run)
-                        TabNavigationItem(tabs.competitors)
-                        TabNavigationItem(tabs.funfactors)
+                        TabNavigationBarItem(tabs.run)
+                        TabNavigationBarItem(tabs.competitors)
+                        TabNavigationBarItem(tabs.funfactors)
                     }
                 }
             }
@@ -58,25 +65,7 @@ fun ModelControls(
     }
 }
 
-@Composable
-private fun RowScope.TabNavigationItem(tab: Tab) {
-    val tabNavigator = LocalTabNavigator.current
-
-    NavigationBarItem(
-        label = { Text(tab.options.title) },
-        icon = {
-            Icon(
-                modifier = Modifier.size(IconSize.small),
-                painter = tab.options.icon ?: rememberVectorPainter(FontAwesomeIcons.Solid.ExclamationTriangle),
-                contentDescription = null
-            )
-        },
-        selected = tabNavigator.current == tab,
-        onClick = { tabNavigator.current = tab }
-    )
-}
-
-class RunControlTab(
+private class RunControlTab(
     private val modelState: ModelState.Loaded,
     private val snackBarHostState: SnackbarHostState
 ) : Tab {
@@ -89,7 +78,6 @@ class RunControlTab(
                     index = 0u,
                     title = "Run",
                     icon = icon
-
                 )
             }
         }
@@ -105,7 +93,7 @@ class RunControlTab(
 
 }
 
-class CompetitorsControlTab(
+private class CompetitorsControlTab(
     private val modelState: ModelState.Loaded,
     private val snackBarHostState: SnackbarHostState
 ) : Tab {
@@ -132,7 +120,7 @@ class CompetitorsControlTab(
     }
 }
 
-class FunfactorsControlTab(
+private class FunfactorsControlTab(
     private val modelState: ModelState.Loaded,
     private val snackBarHostState: SnackbarHostState
 ) : Tab {
