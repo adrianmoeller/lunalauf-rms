@@ -118,7 +118,10 @@ fun EditTeamDialog(
             },
             confirmButton = {
                 FilledTonalButton(
-                    onClick = { onTeamChange(selectedTeam) },
+                    onClick = {
+                        onTeamChange(selectedTeam)
+                        onClose()
+                    },
                     enabled = selectedTeam != currentTeam
                 ) {
                     Text("Update")

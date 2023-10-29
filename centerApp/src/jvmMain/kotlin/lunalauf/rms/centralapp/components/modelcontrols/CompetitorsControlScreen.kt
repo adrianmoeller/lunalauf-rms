@@ -174,26 +174,22 @@ fun CompetitorsControlScreen(
 
     if (teamDetailsStatus is TeamDetailsStatus.Open) {
         val team = (teamDetailsStatus as TeamDetailsStatus.Open).team
-        key(teamsState) {
-            TeamDetailsScreen(
-                team = team,
-                onDismissRequest = { teamDetailsStatus = TeamDetailsStatus.Closed },
-                modelState = modelState,
-                snackBarHostState = snackBarHostState
-            )
-        }
+        TeamDetailsScreen(
+            team = remember(teamsState) { team },
+            onDismissRequest = { teamDetailsStatus = TeamDetailsStatus.Closed },
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
+        )
     }
 
     if (runnerDetailsStatus is RunnerDetailsStatus.Open) {
         val runner = (runnerDetailsStatus as RunnerDetailsStatus.Open).runner
-        key(runnersState) {
-            RunnerDetailsScreen(
-                runner = runner,
-                onDismissRequest = { runnerDetailsStatus = RunnerDetailsStatus.Closed },
-                modelState = modelState,
-                snackBarHostState = snackBarHostState
-            )
-        }
+        RunnerDetailsScreen(
+            runner = remember(runnersState) { runner },
+            onDismissRequest = { runnerDetailsStatus = RunnerDetailsStatus.Closed },
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
+        )
     }
 }
 

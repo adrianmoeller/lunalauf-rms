@@ -165,6 +165,7 @@ fun EditContributionDialog(
                 else -> ContrType.NONE
             }
             onValuesChange(contributionType, parsedNewAmountFixed ?: 0.0, parsedNewAmountPerRound ?: 0.0)
+            onClose()
         }
 
         AlertDialog(
