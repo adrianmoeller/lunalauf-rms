@@ -139,6 +139,10 @@ private class FunfactorsControlTab(
 
     @Composable
     override fun Content() {
-        // TODO
+        FunfactorsControlScreen(
+            modifier = Modifier.fillMaxSize(),
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
+        )
     }
 }

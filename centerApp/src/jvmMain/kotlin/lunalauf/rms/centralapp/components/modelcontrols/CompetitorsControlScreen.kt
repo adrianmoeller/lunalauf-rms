@@ -150,7 +150,7 @@ fun CompetitorsControlScreen(
         CreateTeamScreen(
             onDismissRequest = { createTeamOpen = false },
             knownTeam = knownTeam,
-            resetKnownTeam = {knownTeam = null},
+            resetKnownTeam = { knownTeam = null },
             modelState = modelState,
             snackBarHostState = snackBarHostState
         )
@@ -235,8 +235,7 @@ private fun CompetitorsControlCard(
     content: LazyListScope.() -> Unit
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -324,11 +323,9 @@ private fun TeamTile(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            modifier = Modifier.padding(
-                start = 10.dp,
-                top = 10.dp,
-                bottom = 10.dp
-            ),
+            modifier = Modifier
+                .padding(vertical = 10.dp)
+                .padding(start = 10.dp),
             text = teamName
         )
         if (hovered) {
@@ -364,11 +361,9 @@ private fun RunnerTile(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            modifier = Modifier.padding(
-                start = 10.dp,
-                top = 10.dp,
-                bottom = 10.dp
-            ),
+            modifier = Modifier
+                .padding(vertical = 10.dp)
+                .padding(start = 10.dp),
             text = runnerName
         )
         if (hovered) {

@@ -5,9 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
-import lunalauf.rms.modelapi.states.CommonState
-import lunalauf.rms.modelapi.states.RunnersState
-import lunalauf.rms.modelapi.states.TeamsState
+import lunalauf.rms.modelapi.states.*
 import org.eclipse.emf.common.notify.Notification
 import org.eclipse.emf.common.notify.Notification.*
 import org.eclipse.emf.ecore.EAttribute
@@ -55,10 +53,10 @@ sealed class ModelState {
         private val _funfactorResults = MutableStateFlow(model.funfactorResults.filterNotNull())
         val funfactorResults get() = _funfactorResults.asStateFlow()
 
-        private val _challenges = MutableStateFlow(model.challenges.filterNotNull())
+        private val _challenges = MutableStateFlow(ChallengesState(model.challenges.filterNotNull()))
         val challenges get() = _challenges.asStateFlow()
 
-        private val _minigames = MutableStateFlow(model.minigames.filterNotNull())
+        private val _minigames = MutableStateFlow(MinigamesState(model.minigames.filterNotNull()))
         val minigames get() = _minigames.asStateFlow()
 
         // Derived:
@@ -168,11 +166,11 @@ sealed class ModelState {
         }
 
         private fun updateChallenges() {
-            _challenges.value = model.challenges.filterNotNull()
+            _challenges.value = ChallengesState(model.challenges.filterNotNull())
         }
 
         private fun updateMinigames() {
-            _minigames.value = model.minigames.filterNotNull()
+            _minigames.value = MinigamesState(model.minigames.filterNotNull())
         }
 
         private fun updateOverallRounds() {

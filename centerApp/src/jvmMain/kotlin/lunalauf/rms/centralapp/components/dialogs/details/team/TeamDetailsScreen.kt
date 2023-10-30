@@ -293,7 +293,7 @@ private enum class Tabs(
 
 private fun Funfactor.print(): String {
     return when (this) {
-        is Minigame -> "Minigame $minigameID: $name"
+        is Minigame -> "Minigame: $name"
         is Challenge -> "Challenge: $name"
         else -> ""
     }
