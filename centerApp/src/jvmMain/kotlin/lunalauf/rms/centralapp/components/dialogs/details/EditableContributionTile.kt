@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.OptionTile
-import lunalauf.rms.centralapp.components.commons.tryRequestFocusInScope
+import lunalauf.rms.centralapp.components.commons.tryRequestFocusWithScope
 
 @Composable
 fun EditableContributionTile(
@@ -287,7 +287,7 @@ private fun ContributionTypeCard(
                     isError = isError
                 )
 
-                focusRequester.tryRequestFocusInScope(coroutineScope)
+                focusRequester.tryRequestFocusWithScope(coroutineScope)
             }
         }
     }

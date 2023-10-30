@@ -74,7 +74,7 @@ suspend fun SnackbarHostState.showSnackbar(
     )
 )
 
-fun FocusRequester.tryRequestFocusInScope(scope: CoroutineScope) {
+fun FocusRequester.tryRequestFocusWithScope(scope: CoroutineScope) {
     scope.launch {
         try {
             requestFocus()

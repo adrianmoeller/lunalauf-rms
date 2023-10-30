@@ -17,7 +17,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import lunalauf.rms.centralapp.components.commons.tryRequestFocusInScope
+import lunalauf.rms.centralapp.components.commons.tryRequestFocusWithScope
 import lunalauf.rms.modelapi.ModelState
 
 data class EnterNameScreen(
@@ -100,6 +100,6 @@ data class EnterNameScreen(
                 CircularProgressIndicator()
         }
 
-        focusRequester.tryRequestFocusInScope(coroutineScope)
+        focusRequester.tryRequestFocusWithScope(coroutineScope)
     }
 }

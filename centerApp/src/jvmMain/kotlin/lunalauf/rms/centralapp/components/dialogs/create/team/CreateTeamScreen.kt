@@ -1,5 +1,6 @@
 package lunalauf.rms.centralapp.components.dialogs.create.team
 
+import LunaLaufLanguage.Team
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,6 +16,8 @@ import lunalauf.rms.modelapi.ModelState
 fun CreateTeamScreen(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
+    knownTeam: Team?,
+    resetKnownTeam: () -> Unit,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
 ) {
@@ -49,6 +52,18 @@ fun CreateTeamScreen(
                 Spacer(Modifier.height(20.dp))
                 CurrentScreen()
             }
+        }
+
+        if (knownTeam != null) {
+            it.push(
+                ScanChipScreen(
+                    modelState = modelState,
+                    team = knownTeam,
+                    onDismissRequest = onDismissRequestClear,
+                    snackBarHostState = snackBarHostState
+                )
+            )
+            resetKnownTeam()
         }
     }
 }

@@ -60,6 +60,7 @@ fun CompetitorsControlScreen(
     var createRunnerOpen by remember { mutableStateOf(false) }
     var scanToShowOpen by remember { mutableStateOf(false) }
     var knownID: ULong? by remember { mutableStateOf(null) }
+    var knownTeam: Team? by remember { mutableStateOf(null) }
 
     var teamDetailsStatus: TeamDetailsStatus by remember { mutableStateOf(TeamDetailsStatus.Closed) }
     var runnerDetailsStatus: RunnerDetailsStatus by remember { mutableStateOf(RunnerDetailsStatus.Closed) }
@@ -148,6 +149,8 @@ fun CompetitorsControlScreen(
     if (createTeamOpen) {
         CreateTeamScreen(
             onDismissRequest = { createTeamOpen = false },
+            knownTeam = knownTeam,
+            resetKnownTeam = {knownTeam = null},
             modelState = modelState,
             snackBarHostState = snackBarHostState
         )
@@ -202,6 +205,10 @@ fun CompetitorsControlScreen(
         TeamDetailsScreen(
             team = remember(teamsState) { team },
             onDismissRequest = { teamDetailsStatus = TeamDetailsStatus.Closed },
+            onAddRunnerRequest = {
+                knownTeam = it
+                createTeamOpen = true
+            },
             modelState = modelState,
             snackBarHostState = snackBarHostState
         )

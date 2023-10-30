@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,6 +37,7 @@ fun TeamDetailsScreen(
     modifier: Modifier = Modifier,
     team: Team,
     onDismissRequest: () -> Unit,
+    onAddRunnerRequest: (Team) -> Unit,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
 ) {
@@ -125,25 +127,44 @@ fun TeamDetailsScreen(
                         }
                     }
                 }
-                DeleteElementDialog(
-                    element = team,
-                    onDeleted = onDismissRequest,
-                    modelState = modelState,
-                    snackBarHostState = snackBarHostState
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    FilledTonalButton(
-                        onClick = it,
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
+                    DeleteElementDialog(
+                        element = team,
+                        onDeleted = onDismissRequest,
+                        modelState = modelState,
+                        snackBarHostState = snackBarHostState
+                    ) {
+                        FilledTonalButton(
+                            onClick = it,
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Delete,
+                                contentDescription = null
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text("Delete team")
+                        }
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            onDismissRequest()
+                            onAddRunnerRequest(team)
+                        }
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.Delete,
+                            imageVector = Icons.Rounded.Add,
                             contentDescription = null
                         )
-                        Spacer(Modifier.width(10.dp))
-                        Text("Delete team")
+                        Spacer(Modifier.width(8.dp))
+                        Text("Add runners")
                     }
                 }
             }

@@ -5,15 +5,20 @@ import LunaLaufLanguage.Team
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import lunalauf.rms.centralapp.components.commons.tryRequestFocusWithScope
 import lunalauf.rms.modelapi.ModelState
 
 data class ExistingRunnerScreen(
@@ -33,6 +38,8 @@ data class ExistingRunnerScreen(
                 snackBarHostState = snackBarHostState
             )
         }
+        val coroutineScope = rememberCoroutineScope()
+        val focusRequester = remember { FocusRequester() }
         val navigator = LocalNavigator.currentOrThrow
 
         Box(
@@ -67,7 +74,9 @@ data class ExistingRunnerScreen(
                     }
                 }
                 FilledTonalButton(
-                    modifier = Modifier.align(Alignment.End),
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .focusRequester(focusRequester),
                     onClick = {
                         screenModel.addRunnerToTeam(
                             onBack = { navigator.pop() },
@@ -82,5 +91,7 @@ data class ExistingRunnerScreen(
             if (screenModel.processing)
                 CircularProgressIndicator()
         }
+
+        focusRequester.tryRequestFocusWithScope(coroutineScope)
     }
 }
