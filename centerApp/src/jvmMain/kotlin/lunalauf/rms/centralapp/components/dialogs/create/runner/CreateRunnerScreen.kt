@@ -17,6 +17,8 @@ fun CreateRunnerScreen(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     onShowRunnerDetails: (Runner) -> Unit,
+    knownID: ULong?,
+    resetKnownID: () -> Unit,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
 ) {
@@ -39,10 +41,7 @@ fun CreateRunnerScreen(
     ) {
         ModalBottomSheet(
             modifier = modifier,
-            onDismissRequest = {
-                onDismissRequest()
-                it.popAll()
-            },
+            onDismissRequest = { onDismissRequestClear(it) },
             sheetState = rememberModalBottomSheetState(
                 skipPartiallyExpanded = true
             )
@@ -59,6 +58,18 @@ fun CreateRunnerScreen(
                 Spacer(Modifier.height(20.dp))
                 CurrentScreen()
             }
+        }
+
+        if (knownID != null) {
+            it.push(
+                EnterNameScreen(
+                    modelState = modelState,
+                    id = knownID,
+                    onDismissRequest = onDismissRequestClear,
+                    snackBarHostState = snackBarHostState
+                )
+            )
+            resetKnownID()
         }
     }
 }

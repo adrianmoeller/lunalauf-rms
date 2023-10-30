@@ -17,11 +17,8 @@ class RunnerDetailsScreenModel(
 
     fun updateID(runner: Runner, id: ULong) {
         launchInModelScope {
-            when (val result = modelAPI.updateRunnerId(runner, id)) {
-                is UpdateRunnerIdResult.Exists -> {
-                    // TODO
-                }
-
+            when (modelAPI.updateRunnerId(runner, id)) {
+                is UpdateRunnerIdResult.Exists -> {}
                 UpdateRunnerIdResult.Updated -> {}
             }
         }

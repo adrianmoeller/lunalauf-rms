@@ -37,6 +37,7 @@ import lunalauf.rms.centralapp.components.dialogs.create.runner.CreateRunnerScre
 import lunalauf.rms.centralapp.components.dialogs.create.team.CreateTeamScreen
 import lunalauf.rms.centralapp.components.dialogs.details.runner.RunnerDetailsScreen
 import lunalauf.rms.centralapp.components.dialogs.details.team.TeamDetailsScreen
+import lunalauf.rms.centralapp.components.dialogs.scantoshow.ScanToShowScreen
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.states.RunnersState
 import lunalauf.rms.modelapi.states.TeamsState
@@ -57,6 +58,8 @@ fun CompetitorsControlScreen(
 
     var createTeamOpen by remember { mutableStateOf(false) }
     var createRunnerOpen by remember { mutableStateOf(false) }
+    var scanToShowOpen by remember { mutableStateOf(false) }
+    var knownID: ULong? by remember { mutableStateOf(null) }
 
     var teamDetailsStatus: TeamDetailsStatus by remember { mutableStateOf(TeamDetailsStatus.Closed) }
     var runnerDetailsStatus: RunnerDetailsStatus by remember { mutableStateOf(RunnerDetailsStatus.Closed) }
@@ -112,9 +115,7 @@ fun CompetitorsControlScreen(
         }
         OutlinedButton(
             modifier = Modifier.padding(bottom = 20.dp),
-            onClick = {
-                // TODO
-            }
+            onClick = { scanToShowOpen = true }
         ) {
             Icon(
                 modifier = Modifier.size(IconSize.large + 5.dp),
@@ -167,8 +168,32 @@ fun CompetitorsControlScreen(
                         runnerDetailsStatus = RunnerDetailsStatus.Open(it)
                 }
             },
+            knownID = knownID,
+            resetKnownID = { knownID = null },
             modelState = modelState,
             snackBarHostState = snackBarHostState
+        )
+    }
+
+    if (scanToShowOpen) {
+        ScanToShowScreen(
+            onDismissRequest = { scanToShowOpen = false },
+            onShowRunnerDetails = { runnerDetailsStatus = RunnerDetailsStatus.Open(it) },
+            onCreateRunner = {
+                scope.launch {
+                    val result = snackBarHostState.showSnackbar(
+                        message = "A runner with this ID does not exists",
+                        actionLabel = "Create",
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Long
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        knownID = it
+                        createRunnerOpen = true
+                    }
+                }
+            },
+            modelState = modelState
         )
     }
 
