@@ -10,9 +10,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class TeamDetailsScreenModel(
     modelState: ModelState.Loaded
-) : AbstractScreenModel() {
-    private val modelAPI = modelState.modelAPI
-
+) : AbstractScreenModel(modelState) {
     fun validateName(name: String): String? {
         return if (InputValidator.validateName(name)) name else null
     }

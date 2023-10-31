@@ -1,5 +1,7 @@
 package lunalauf.rms.modelapi
 
+import LunaLaufLanguage.Challenge
+import LunaLaufLanguage.Minigame
 import LunaLaufLanguage.Runner
 import LunaLaufLanguage.Team
 
@@ -32,4 +34,15 @@ sealed class UpdateRunnerIdResult {
 sealed class DeleteElementResult {
     data object Deleted : DeleteElementResult()
     data class NotDeleted(val cause: String) : DeleteElementResult()
+}
+
+sealed class CreateMinigameResult {
+    data object BlankName : CreateMinigameResult()
+    data class Exists(val minigame: Minigame) : CreateMinigameResult()
+    data class Created(val minigame: Minigame) : CreateMinigameResult()
+}
+
+sealed class CreateChallengeResult {
+    data object BlankName : CreateChallengeResult()
+    data class Created(val challenge: Challenge) : CreateChallengeResult()
 }

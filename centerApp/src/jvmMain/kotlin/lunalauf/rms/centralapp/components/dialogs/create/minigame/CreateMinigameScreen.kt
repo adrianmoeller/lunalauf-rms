@@ -13,14 +13,17 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.tryRequestFocusWithScope
+import lunalauf.rms.modelapi.ModelState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateMinigameScreen(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
+    modelState: ModelState.Loaded,
+    snackBarHostState: SnackbarHostState
 ) {
-    val screenModel = remember {  }
+    val screenModel = remember { CreateMinigameScreenModel(modelState, snackBarHostState) }
 
     val coroutineScope = rememberCoroutineScope()
     val idFocusRequester = remember { FocusRequester() }
@@ -39,7 +42,7 @@ fun CreateMinigameScreen(
                 .padding(bottom = 20.dp)
         ) {
             Text(
-                text = "Scan to show",
+                text = "Create minigame",
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(Modifier.height(20.dp))
@@ -57,7 +60,7 @@ fun CreateMinigameScreen(
                         modifier = Modifier
                             .onPreviewKeyEvent {
                                 if (it.key == Key.Enter) {
-                                    if (it.type == KeyEventType.KeyUp && screenModel.idValid)
+                                    if (it.type == KeyEventType.KeyUp)
                                         nameFocusRequester.requestFocus()
                                     return@onPreviewKeyEvent true
                                 }
@@ -65,7 +68,7 @@ fun CreateMinigameScreen(
                             }
                             .focusRequester(idFocusRequester),
                         value = screenModel.id,
-                        onValueChange = screenModel::updateid,
+                        onValueChange = screenModel::updateId,
                         label = { Text("ID") },
                         isError = !screenModel.idValid,
                         enabled = !screenModel.processing
@@ -74,8 +77,8 @@ fun CreateMinigameScreen(
                         modifier = Modifier
                             .onPreviewKeyEvent {
                                 if (it.key == Key.Enter) {
-                                    if (it.type == KeyEventType.KeyUp && screenModel.nameValid)
-                                        screenModel.createMinigame()
+                                    if (it.type == KeyEventType.KeyUp && screenModel.idValid && screenModel.nameValid)
+                                        screenModel.createMinigame(onDismissRequest)
                                     return@onPreviewKeyEvent true
                                 }
                                 return@onPreviewKeyEvent false
@@ -87,12 +90,19 @@ fun CreateMinigameScreen(
                         isError = !screenModel.nameValid,
                         enabled = !screenModel.processing
                     )
+                    FilledTonalButton(
+                        modifier = Modifier.align(Alignment.End),
+                        onClick = { screenModel.createMinigame(onDismissRequest) },
+                        enabled = screenModel.idValid && screenModel.nameValid && !screenModel.processing
+                    ) {
+                        Text("Create")
+                    }
                 }
                 if (screenModel.processing)
                     CircularProgressIndicator()
             }
         }
-    }
 
-    idFocusRequester.tryRequestFocusWithScope(coroutineScope)
+        remember { idFocusRequester.tryRequestFocusWithScope(coroutineScope) }
+    }
 }

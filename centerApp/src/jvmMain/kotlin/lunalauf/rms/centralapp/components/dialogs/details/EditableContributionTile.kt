@@ -287,7 +287,7 @@ private fun ContributionTypeCard(
                     isError = isError
                 )
 
-                focusRequester.tryRequestFocusWithScope(coroutineScope)
+                remember { focusRequester.tryRequestFocusWithScope(coroutineScope) }
             }
         }
     }

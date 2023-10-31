@@ -12,9 +12,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class RunnerDetailsScreenModel(
     modelState: ModelState.Loaded
-) : AbstractScreenModel() {
-    private val modelAPI = modelState.modelAPI
-
+) : AbstractScreenModel(modelState) {
     fun updateID(runner: Runner, id: ULong) {
         launchInModelScope {
             when (modelAPI.updateRunnerId(runner, id)) {

@@ -1,9 +1,10 @@
 package lunalauf.rms.centralapp.components
 
 import kotlinx.coroutines.*
+import lunalauf.rms.modelapi.ModelState
 import org.slf4j.LoggerFactory
 
-abstract class AbstractScreenModel {
+abstract class AbstractStatelessScreenModel {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     companion object {
@@ -16,6 +17,7 @@ abstract class AbstractScreenModel {
 
         fun freeResources() {
             modelContext.close()
+            // TODO call this
         }
     }
 
@@ -44,4 +46,10 @@ abstract class AbstractScreenModel {
             catchAll(block, this)
         }
     }
+}
+
+abstract class AbstractScreenModel(
+    modelState: ModelState.Loaded
+) : AbstractStatelessScreenModel() {
+    protected val modelAPI = modelState.modelAPI
 }

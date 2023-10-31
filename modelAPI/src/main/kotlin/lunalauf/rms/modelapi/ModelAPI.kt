@@ -192,52 +192,68 @@ class ModelAPI(
         }
     }
 
-    suspend fun addNewMinigame(name: String, id: Int): Result<Minigame> {
+    private fun getMinigame(id: Int): Minigame? {
+        model.minigames.forEach {
+            if (it.minigameID == id)
+                return it
+        }
+        return null
+    }
+
+    suspend fun createMinigame(name: String, id: Int): CreateMinigameResult {
         mutex.withLock {
-            val re = Result<Minigame>("Add New Minigame")
-            if (name.isBlank()) {
-                return re.failed("Name is empty", null)
+            getMinigame(id)?.let {
+                logger.warn("Missing UI check if minigame ID already exists when creating a minigame")
+                return CreateMinigameResult.Exists(it)
             }
+            if (name.isBlank()) {
+                logger.warn("Missing UI check if name is not blank when creating a minigame")
+                return CreateMinigameResult.BlankName
+            }
+
             val minigame = LunaLaufLanguageFactory.eINSTANCE.createMinigame()
             minigame.name = name
             minigame.minigameID = id
             model.minigames.add(minigame)
-            return re.passed(minigame, 1, "Done", Lvl.INFO)
+            logger.info("Created {}", minigame)
+            return CreateMinigameResult.Created(minigame)
         }
     }
 
-    private fun internalAddNewChallenge(name: String, description: String): Result<Challenge> {
-        val re = Result<Challenge>("Add New Challenge")
+    private fun internalCreateChallenge(name: String, description: String): CreateChallengeResult {
         if (name.isBlank()) {
-            return re.failed("Name is empty", null)
+            logger.warn("Missing UI check if name is not blank when creating a challenge")
+            return CreateChallengeResult.BlankName
         }
+
         val challenge = LunaLaufLanguageFactory.eINSTANCE.createChallenge()
         challenge.name = name
         challenge.description = description
         model.challenges.add(challenge)
-        return re.passed(challenge, 1, "Done", Lvl.INFO)
+        logger.info("Created {}", challenge)
+        return CreateChallengeResult.Created(challenge)
     }
 
-    suspend fun addNewChallenge(name: String, description: String): Result<Challenge> {
+    suspend fun createChallenge(name: String, description: String): CreateChallengeResult {
         mutex.withLock {
-            return internalAddNewChallenge(name, description)
+            return internalCreateChallenge(name, description)
         }
     }
 
-    suspend fun addNewChallenge(
-        name: String, description: String, duration: Int, expireMsg: String, receiveImage: Boolean
-    ): Result<Challenge> {
+    suspend fun createChallenge(
+        name: String, description: String, duration: UInt, expireMsg: String, receiveImage: Boolean
+    ): CreateChallengeResult {
         mutex.withLock {
-            val re = internalAddNewChallenge(name, description)
-            if (!re.hasResult()) {
-                return re
-            }
-            val challenge = re.result
-            challenge!!.isExpires = true
-            challenge.duration = duration
+            val result = internalCreateChallenge(name, description)
+            if (result !is CreateChallengeResult.Created)
+                return result
+
+            val challenge = result.challenge
+            challenge.isExpires = true
+            challenge.duration = duration.toInt()
             challenge.expireMsg = expireMsg
             challenge.isReceiveImages = receiveImage
-            return re
+            return result
         }
     }
 

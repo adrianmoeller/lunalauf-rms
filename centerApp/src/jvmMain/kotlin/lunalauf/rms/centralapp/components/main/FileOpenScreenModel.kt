@@ -17,9 +17,7 @@ class FileOpenScreenModel(
     private val modelResourceManager: ModelResourceManager,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
-) : AbstractScreenModel() {
-    private val modelAPI = modelState.modelAPI
-
+) : AbstractScreenModel(modelState) {
     private val _preferences = MutableStateFlow(
         PreferencesState(roundThreshold = modelAPI.roundThreshold.toFloat())
     )

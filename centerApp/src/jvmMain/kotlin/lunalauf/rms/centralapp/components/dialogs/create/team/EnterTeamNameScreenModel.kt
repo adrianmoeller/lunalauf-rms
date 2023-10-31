@@ -16,9 +16,7 @@ import lunalauf.rms.modelapi.ModelState
 class EnterTeamNameScreenModel(
     private val modelState: ModelState.Loaded,
     private val snackBarHostState: SnackbarHostState
-) : ScreenModel, AbstractScreenModel() {
-    private val modelAPI = modelState.modelAPI
-
+) : ScreenModel, AbstractScreenModel(modelState) {
     var name by mutableStateOf("")
         private set
     var nameValid by mutableStateOf(false)

@@ -31,8 +31,7 @@ fun <T : EObject> DeleteElementDialog(
         var confirmed by remember { mutableStateOf(false) }
         var deletionFailed: String? by remember { mutableStateOf(null) }
         val screenModel = remember {
-            object : AbstractScreenModel() {
-                private val modelAPI = modelState.modelAPI
+            object : AbstractScreenModel(modelState) {
                 fun deleteElement() {
                     launchInModelScope {
                         val elementString = element.toString()

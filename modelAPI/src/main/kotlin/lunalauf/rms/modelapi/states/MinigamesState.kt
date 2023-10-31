@@ -4,11 +4,11 @@ import LunaLaufLanguage.Minigame
 
 class MinigamesState(
     val minigames: List<Minigame>,
-    names: List<String>? = null
+    ids: List<Int>? = null
 ) {
-    val names: List<String> = names ?: minigames.map { it.name ?: "" }
+    val ids: List<Int> = ids ?: minigames.map { it.minigameID }
     fun copy() = MinigamesState(
         minigames = minigames,
-        names = names
+        ids = ids
     )
 }

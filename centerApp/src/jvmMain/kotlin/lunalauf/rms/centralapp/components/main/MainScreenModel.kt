@@ -5,7 +5,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import lunalauf.rms.centralapp.components.AbstractScreenModel
+import lunalauf.rms.centralapp.components.AbstractStatelessScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
 import lunalauf.rms.centralapp.utils.showNewFileChooser
 import lunalauf.rms.centralapp.utils.showOpenFileChooser
@@ -16,7 +16,7 @@ import lunalauf.rms.modelapi.resource.SaveResult
 import org.eclipse.emf.common.util.URI
 import java.time.LocalDate
 
-class MainScreenModel : AbstractScreenModel() {
+class MainScreenModel : AbstractStatelessScreenModel() {
 
     val modelResourceManager = ModelResourceManager.initialize()
     var modelState: ModelState by mutableStateOf(ModelState.Unloaded)

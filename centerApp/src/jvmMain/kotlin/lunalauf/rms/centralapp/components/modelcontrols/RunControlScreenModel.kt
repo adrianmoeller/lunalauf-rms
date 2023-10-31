@@ -5,9 +5,7 @@ import lunalauf.rms.modelapi.ModelState
 
 class RunControlScreenModel(
     modelState: ModelState.Loaded
-) : AbstractScreenModel() {
-    private val modelAPI = modelState.modelAPI
-
+) : AbstractScreenModel(modelState) {
     fun updateSponsoringPoolAmount(amount: Double) {
         launchInModelScope {
             modelAPI.setSponsoringPoolAmount(amount)

@@ -16,9 +16,7 @@ class EnterNameScreenModel(
     modelState: ModelState.Loaded,
     private val id: ULong,
     private val snackBarHostState: SnackbarHostState
-) : ScreenModel, AbstractScreenModel() {
-    private val modelAPI = modelState.modelAPI
-
+) : ScreenModel, AbstractScreenModel(modelState) {
     var name by mutableStateOf("")
         private set
     var nameValid by mutableStateOf(true)

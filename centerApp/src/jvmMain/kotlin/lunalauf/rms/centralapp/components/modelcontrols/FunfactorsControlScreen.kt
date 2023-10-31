@@ -29,6 +29,8 @@ import compose.icons.fontawesomeicons.solid.SlidersH
 import lunalauf.rms.centralapp.components.commons.IconSize
 import lunalauf.rms.centralapp.components.commons.ListItemDivider
 import lunalauf.rms.centralapp.components.commons.customScrollbarStyle
+import lunalauf.rms.centralapp.components.dialogs.create.challenge.CreateChallengeScreen
+import lunalauf.rms.centralapp.components.dialogs.create.minigame.CreateMinigameScreen
 import lunalauf.rms.modelapi.ModelState
 
 @Composable
@@ -39,6 +41,9 @@ fun FunfactorsControlScreen(
 ) {
     val minigamesState by modelState.minigames.collectAsState()
     val challengesState by modelState.challenges.collectAsState()
+
+    var createMinigameOpen by remember { mutableStateOf(false) }
+    var createChallengeOpen by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier,
@@ -56,13 +61,12 @@ fun FunfactorsControlScreen(
                 modifier = Modifier.weight(1f),
                 title = "Minigames",
                 createLabel = "Create minigame",
-                onCreate = {
-                    // TODO
-                }
+                onCreate = { createMinigameOpen = true }
             ) {
                 itemsIndexed(minigamesState.minigames) { index, minigame ->
                     MinigameTile(
                         modifier = Modifier.fillMaxWidth(),
+                        minigameId = minigame.minigameID,
                         minigameName = minigame.name ?: "",
                         onClick = {
                             // TODO
@@ -76,9 +80,7 @@ fun FunfactorsControlScreen(
                 modifier = Modifier.weight(1f),
                 title = "Challenges",
                 createLabel = "Create challenge",
-                onCreate = {
-                    // TODO
-                }
+                onCreate = { createChallengeOpen = true }
             ) {
                 itemsIndexed(challengesState.challenges) { index, challenge ->
                     ChallengeTile(
@@ -114,6 +116,22 @@ fun FunfactorsControlScreen(
                 style = MaterialTheme.typography.titleMedium
             )
         }
+    }
+
+    if (createMinigameOpen) {
+        CreateMinigameScreen(
+            onDismissRequest = { createMinigameOpen = false },
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
+        )
+    }
+
+    if (createChallengeOpen) {
+        CreateChallengeScreen(
+            onDismissRequest = { createChallengeOpen = false },
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
+        )
     }
 }
 
@@ -193,6 +211,7 @@ private fun FunfactorsControlCard(
 @Composable
 private fun MinigameTile(
     modifier: Modifier = Modifier,
+    minigameId: Int,
     minigameName: String,
     onClick: () -> Unit
 ) {
@@ -211,7 +230,7 @@ private fun MinigameTile(
             modifier = Modifier
                 .padding(vertical = 10.dp)
                 .padding(start = 10.dp),
-            text = minigameName
+            text = "$minigameId: $minigameName"
         )
         if (hovered) {
             Row {

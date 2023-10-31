@@ -18,9 +18,7 @@ class ExistingRunnerScreenModel(
     private val team: Team,
     private val runner: Runner,
     private val snackBarHostState: SnackbarHostState
-) : ScreenModel, AbstractScreenModel() {
-    private val modelAPI = modelState.modelAPI
-
+) : ScreenModel, AbstractScreenModel(modelState) {
     var displayMessage by mutableStateOf(
         if (runner.team == null) "Existing single runner:"
         else "Runner from another team '${runner.team.name}':"
