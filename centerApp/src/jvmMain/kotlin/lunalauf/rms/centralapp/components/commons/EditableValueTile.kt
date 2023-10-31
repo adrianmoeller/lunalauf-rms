@@ -1,8 +1,6 @@
 package lunalauf.rms.centralapp.components.commons
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.*
@@ -81,6 +79,74 @@ fun <V> EditableValueTile(
 }
 
 @Composable
+fun <V> EditableLongValueTile(
+    modifier: Modifier = Modifier,
+    name: String,
+    value: V,
+    onValueChange: (V) -> Unit,
+    parser: (String) -> V?,
+    default: V,
+    editTitle: String,
+) {
+    var editDialogOpen by remember { mutableStateOf(false) }
+    var newValue by remember { mutableStateOf(TextFieldValue(value.toString())) }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("$name:")
+            FilledTonalIconButton(
+                onClick = {
+                    val text = value.toString()
+                    newValue = TextFieldValue(
+                        text = text,
+                        selection = TextRange(0, text.length)
+                    )
+                    editDialogOpen = true
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Edit,
+                    contentDescription = "Edit"
+                )
+            }
+        }
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(
+                    vertical = 7.dp,
+                    horizontal = 10.dp
+                )
+            ) {
+                Text(
+                    text = value?.toString() ?: "None",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+    EditDialog(
+        editTitle = editTitle,
+        editDialogOpen = editDialogOpen,
+        onClose = { editDialogOpen = false },
+        onValueChange = onValueChange,
+        valueName = name,
+        newValue = newValue,
+        onNewValueChange = { newValue = it },
+        parser = parser,
+        default = default
+    )
+}
+
+@Composable
 fun <V> EditDialog(
     editTitle: String,
     editDialogOpen: Boolean,
@@ -91,7 +157,7 @@ fun <V> EditDialog(
     onNewValueChange: (TextFieldValue) -> Unit,
     parser: (String) -> V?,
     default: V,
-    unit: String?
+    unit: String? = null
 ) {
     if (editDialogOpen) {
         val parsedNewValue = parser(newValue.text)

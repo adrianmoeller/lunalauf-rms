@@ -257,6 +257,47 @@ class ModelAPI(
         }
     }
 
+    suspend fun updateChallengeName(challenge: Challenge, name: String): UpdateChallengeNameResult {
+        mutex.withLock {
+            if (name.isBlank()) {
+                logger.warn("Missing UI check if name is not blank when updating a challenge name")
+                return UpdateChallengeNameResult.BlankName
+            }
+            challenge.name = name
+            return UpdateChallengeNameResult.Updated
+        }
+    }
+
+    suspend fun updateChallengeDescription(challenge: Challenge, description: String) {
+        mutex.withLock {
+            challenge.description = description
+        }
+    }
+
+    suspend fun updateChallengeExpires(challenge: Challenge, expires: Boolean) {
+        mutex.withLock {
+            challenge.isExpires = expires
+        }
+    }
+
+    suspend fun updateChallengeDuration(challenge: Challenge, duration: UInt) {
+        mutex.withLock {
+            challenge.duration = duration.toInt()
+        }
+    }
+
+    suspend fun updateChallengeExpireMessage(challenge: Challenge, expireMessage: String) {
+        mutex.withLock {
+            challenge.expireMsg = expireMessage
+        }
+    }
+
+    suspend fun updateChallengeReceiveImage(challenge: Challenge, receiveImage: Boolean) {
+        mutex.withLock {
+            challenge.isReceiveImages = receiveImage
+        }
+    }
+
     suspend fun logRound(runner: Runner, points: Int, manualLogged: Boolean): Result<Round> {
         val re = Result<Round>("Log Round")
         if (points < 0) {

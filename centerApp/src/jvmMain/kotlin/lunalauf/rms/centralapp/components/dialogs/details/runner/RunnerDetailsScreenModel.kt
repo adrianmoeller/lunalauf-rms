@@ -23,7 +23,8 @@ class RunnerDetailsScreenModel(
     }
 
     fun validateName(name: String): String? {
-        return if (InputValidator.validateName(name)) name else null
+        return if (InputValidator.validateName(name)) name
+        else null
     }
 
     fun updateName(runner: Runner, name: String) {

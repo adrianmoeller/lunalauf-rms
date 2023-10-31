@@ -46,3 +46,8 @@ sealed class CreateChallengeResult {
     data object BlankName : CreateChallengeResult()
     data class Created(val challenge: Challenge) : CreateChallengeResult()
 }
+
+sealed class UpdateChallengeNameResult {
+    data object BlankName : UpdateChallengeNameResult()
+    data object Updated : UpdateChallengeNameResult()
+}

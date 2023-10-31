@@ -1,5 +1,6 @@
 package lunalauf.rms.centralapp.components.modelcontrols
 
+import LunaLaufLanguage.Challenge
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -31,6 +32,7 @@ import lunalauf.rms.centralapp.components.commons.ListItemDivider
 import lunalauf.rms.centralapp.components.commons.customScrollbarStyle
 import lunalauf.rms.centralapp.components.dialogs.create.challenge.CreateChallengeScreen
 import lunalauf.rms.centralapp.components.dialogs.create.minigame.CreateMinigameScreen
+import lunalauf.rms.centralapp.components.dialogs.details.challenge.ChallengeDetailsScreen
 import lunalauf.rms.modelapi.ModelState
 
 @Composable
@@ -44,6 +46,8 @@ fun FunfactorsControlScreen(
 
     var createMinigameOpen by remember { mutableStateOf(false) }
     var createChallengeOpen by remember { mutableStateOf(false) }
+
+    var challengeDetailsStatus: ChallengeDetailsStatus by remember { mutableStateOf(ChallengeDetailsStatus.Closed) }
 
     Column(
         modifier = modifier,
@@ -86,9 +90,7 @@ fun FunfactorsControlScreen(
                     ChallengeTile(
                         modifier = Modifier.fillMaxWidth(),
                         challengeName = challenge.name ?: "",
-                        onClick = {
-                            // TODO
-                        }
+                        onClick = { challengeDetailsStatus = ChallengeDetailsStatus.Open(challenge) }
                     )
                     if (index < challengesState.challenges.lastIndex)
                         ListItemDivider(spacing = 10.dp)
@@ -129,6 +131,16 @@ fun FunfactorsControlScreen(
     if (createChallengeOpen) {
         CreateChallengeScreen(
             onDismissRequest = { createChallengeOpen = false },
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
+        )
+    }
+
+    if (challengeDetailsStatus is ChallengeDetailsStatus.Open) {
+        val challenge = (challengeDetailsStatus as ChallengeDetailsStatus.Open).challenge
+        ChallengeDetailsScreen(
+            challenge = remember(challengesState) { challenge },
+            onDismissRequest = { challengeDetailsStatus = ChallengeDetailsStatus.Closed },
             modelState = modelState,
             snackBarHostState = snackBarHostState
         )
@@ -282,4 +294,9 @@ private fun ChallengeTile(
             }
         }
     }
+}
+
+private sealed class ChallengeDetailsStatus {
+    data object Closed : ChallengeDetailsStatus()
+    data class Open(val challenge: Challenge) : ChallengeDetailsStatus()
 }
