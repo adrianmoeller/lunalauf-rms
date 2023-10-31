@@ -36,7 +36,7 @@ fun RunControlScreen(
             running = true,
             onStartStopClick = {},
             onResetClick = {},
-            runDuration = 90.toUInt(),
+            runDuration = 90,
             onRunDurationChange = {}
         )
         Row(
@@ -56,7 +56,7 @@ fun RunControlScreen(
                     name = "Amount",
                     value = commons.sponsorPoolAmount,
                     onValueChange = screenModel::updateSponsoringPoolAmount,
-                    parser = { it.trim().toDoubleOrNull() },
+                    parser = screenModel::validateSponsoringPoolAmount,
                     default = 0.0,
                     unit = "€",
                     editTitle = "Update pool amount"
@@ -65,7 +65,7 @@ fun RunControlScreen(
                     name = "Rounds to be reached",
                     value = commons.sponsorPoolRounds,
                     onValueChange = screenModel::updateSponsoringPoolRounds,
-                    parser = { it.trim().toUIntOrNull()?.toInt() },
+                    parser = screenModel::validateSponsoringPoolRounds,
                     default = 0,
                     editTitle = "Update pool rounds"
                 )
@@ -78,7 +78,7 @@ fun RunControlScreen(
                     name = "Amount",
                     value = commons.additionalContribution,
                     onValueChange = screenModel::updateAdditionalContribution,
-                    parser = { it.trim().toDoubleOrNull() },
+                    parser = screenModel::validateAdditionalContribution,
                     default = 0.0,
                     unit = "€",
                     editTitle = "Update additional donations"
@@ -113,12 +113,11 @@ fun RunControlScreen(
                         valueName = "Amount to add",
                         newValue = addToAddContrValue,
                         onNewValueChange = { addToAddContrValue = it },
-                        parser = { it.trim().toDoubleOrNull() },
+                        parser = screenModel::validateAdditionalContribution,
                         default = 0.0,
                         unit = "€"
                     )
                 }
-
             }
         }
     }

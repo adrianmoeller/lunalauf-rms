@@ -18,7 +18,7 @@ fun ScanToShowScreen(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     onShowRunnerDetails: (Runner) -> Unit,
-    onCreateRunner: (ULong) -> Unit,
+    onCreateRunner: (Long) -> Unit,
     modelState: ModelState.Loaded
 ) {
     val screenModel = remember { ScanChipScreenModel(modelState) }

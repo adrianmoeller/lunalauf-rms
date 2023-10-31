@@ -86,10 +86,10 @@ fun ChallengeDetailsScreen(
                                 item {
                                     EditableValueTile(
                                         name = "Duration",
-                                        value = challenge.duration.toUInt(),
+                                        value = challenge.duration,
                                         onValueChange = { screenModel.updateDuration(challenge, it) },
                                         parser = screenModel::validateDuration,
-                                        default = 0u,
+                                        default = 0,
                                         unit = "min",
                                         editTitle = "Update duration"
                                     )

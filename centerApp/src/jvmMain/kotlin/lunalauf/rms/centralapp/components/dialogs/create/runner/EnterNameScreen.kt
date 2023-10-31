@@ -22,7 +22,7 @@ import lunalauf.rms.modelapi.ModelState
 
 data class EnterNameScreen(
     private val modelState: ModelState.Loaded,
-    private val id: ULong,
+    private val id: Long,
     private val onDismissRequest: (Navigator) -> Unit,
     private val snackBarHostState: SnackbarHostState
 ) : Screen {

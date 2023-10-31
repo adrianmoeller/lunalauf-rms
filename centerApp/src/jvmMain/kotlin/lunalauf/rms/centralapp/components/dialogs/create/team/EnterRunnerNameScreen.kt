@@ -24,7 +24,7 @@ import lunalauf.rms.modelapi.ModelState
 data class EnterRunnerNameScreen(
     private val modelState: ModelState.Loaded,
     private val team: Team,
-    private val id: ULong,
+    private val id: Long,
     private val onDismissRequest: (Navigator) -> Unit,
     private val snackBarHostState: SnackbarHostState
 ) : Screen {

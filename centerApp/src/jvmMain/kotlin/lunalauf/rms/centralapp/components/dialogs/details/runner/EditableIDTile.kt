@@ -16,8 +16,8 @@ import lunalauf.rms.modelapi.ModelState
 @Composable
 fun EditableIDTile(
     modifier: Modifier = Modifier,
-    value: ULong,
-    onIdChange: (ULong) -> Unit,
+    value: Long,
+    onIdChange: (Long) -> Unit,
     modelState: ModelState.Loaded
 ) {
     var editDialogOpen by remember { mutableStateOf(false) }
@@ -59,7 +59,7 @@ fun EditableIDTile(
 fun EditIdDialog(
     editDialogOpen: Boolean,
     onClose: () -> Unit,
-    onIdChange: (ULong) -> Unit,
+    onIdChange: (Long) -> Unit,
     modelState: ModelState.Loaded
 ) {
     if (editDialogOpen) {

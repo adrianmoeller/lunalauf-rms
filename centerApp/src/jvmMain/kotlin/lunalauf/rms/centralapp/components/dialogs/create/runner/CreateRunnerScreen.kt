@@ -17,7 +17,7 @@ fun CreateRunnerScreen(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     onShowRunnerDetails: (Runner) -> Unit,
-    knownID: ULong?,
+    knownID: Long?,
     resetKnownID: () -> Unit,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState

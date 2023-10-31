@@ -12,7 +12,7 @@ import lunalauf.rms.modelapi.CreateChallengeResult
 import lunalauf.rms.modelapi.ModelState
 
 class CreateChallengeScreenModel(
-    private val modelState: ModelState.Loaded,
+    modelState: ModelState.Loaded,
     private val snackBarHostState: SnackbarHostState
 ) : AbstractScreenModel(modelState) {
     var name by mutableStateOf("")
@@ -49,7 +49,7 @@ class CreateChallengeScreenModel(
 
     fun updateDuration(duration: String) {
         val trimmedDuration = duration.trim()
-        val parsedDuration = trimmedDuration.toUIntOrNull()
+        val parsedDuration = trimmedDuration.toIntOrNull()?.takeIf { it >= 0 }
         durationValid = parsedDuration != null
         this.duration = trimmedDuration
     }
@@ -66,7 +66,7 @@ class CreateChallengeScreenModel(
         processing = true
         launchInModelScope {
             val result = if (expires) {
-                modelAPI.createChallenge(name, description, duration.toUInt(), expireMessage, receiveImage)
+                modelAPI.createChallenge(name, description, duration.toInt(), expireMessage, receiveImage)
             } else {
                 modelAPI.createChallenge(name, description)
             }
@@ -75,6 +75,17 @@ class CreateChallengeScreenModel(
                     launchInDefaultScope {
                         snackBarHostState.showSnackbar(
                             message = "Challenges need a non-blank name",
+                            withDismissAction = true,
+                            duration = SnackbarDuration.Long,
+                            isError = true
+                        )
+                    }
+                }
+
+                CreateChallengeResult.NegativeDuration -> {
+                    launchInDefaultScope {
+                        snackBarHostState.showSnackbar(
+                            message = "Duration of a challenge must be a positive number",
                             withDismissAction = true,
                             duration = SnackbarDuration.Long,
                             isError = true

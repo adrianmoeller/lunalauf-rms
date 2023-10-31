@@ -4,14 +4,14 @@ import LunaLaufLanguage.Challenge
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.utils.InputValidator
 import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.modelapi.UpdateChallengeDurationResult
 import lunalauf.rms.modelapi.UpdateChallengeNameResult
 
 class ChallengeDetailsScreenModel(
     modelState: ModelState.Loaded
 ) : AbstractScreenModel(modelState) {
     fun validateName(name: String): String? {
-        return if (InputValidator.validateName(name) && name.isNotBlank()) name
-        else null
+        return name.takeIf { InputValidator.validateName(it) && it.isNotBlank() }
     }
 
     fun updateName(challenge: Challenge, name: String) {
@@ -39,13 +39,16 @@ class ChallengeDetailsScreenModel(
         }
     }
 
-    fun validateDuration(duration: String): UInt? {
-        return duration.toUIntOrNull()
+    fun validateDuration(duration: String): Int? {
+        return duration.toIntOrNull()?.takeIf { it >= 0 }
     }
 
-    fun updateDuration(challenge: Challenge, duration: UInt) {
+    fun updateDuration(challenge: Challenge, duration: Int) {
         launchInModelScope {
-            modelAPI.updateChallengeDuration(challenge, duration)
+            when (modelAPI.updateChallengeDuration(challenge, duration)) {
+                UpdateChallengeDurationResult.NegativeDuration -> {}
+                UpdateChallengeDurationResult.Updated -> {}
+            }
         }
     }
 

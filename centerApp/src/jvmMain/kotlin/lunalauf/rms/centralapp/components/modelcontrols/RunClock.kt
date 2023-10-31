@@ -25,12 +25,12 @@ fun RunClock(
     running: Boolean,
     onStartStopClick: () -> Unit,
     onResetClick: () -> Unit,
-    runDuration: UInt,
-    onRunDurationChange: (UInt) -> Unit
+    runDuration: Int,
+    onRunDurationChange: (Int) -> Unit
 ) {
     var editRunDurationOpen by remember { mutableStateOf(false) }
     var newRunDuration by remember { mutableStateOf(runDuration.toString()) }
-    val parsedNewRunDuration = newRunDuration.trim().toUIntOrNull()
+    val parsedNewRunDuration = newRunDuration.trim().toIntOrNull()?.takeIf { it >= 0 }
 
     Column(
         modifier = modifier,
@@ -95,7 +95,7 @@ fun RunClock(
             confirmButton = {
                 FilledTonalButton(
                     onClick = {
-                        onRunDurationChange(parsedNewRunDuration ?: 0.toUInt())
+                        onRunDurationChange(parsedNewRunDuration ?: 0)
                         editRunDurationOpen = false
                     },
                     enabled = parsedNewRunDuration != null

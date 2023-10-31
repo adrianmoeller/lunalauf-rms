@@ -28,7 +28,7 @@ fun ScanChipField(
     modifier: Modifier = Modifier,
     showError: Boolean,
     errorText: String = ScanChipFieldDefaults.errorText,
-    onNumberKeyEvent: (UInt) -> Unit,
+    onNumberKeyEvent: (Int) -> Unit,
     onEnterKeyEvent: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -136,7 +136,7 @@ fun ScanChipField(
     }
 }
 
-private fun parseNumberKey(key: Key): UInt? {
+private fun parseNumberKey(key: Key): Int? {
     return when (key) {
         Key.One -> 1
         Key.Two -> 2
@@ -149,7 +149,7 @@ private fun parseNumberKey(key: Key): UInt? {
         Key.Nine -> 9
         Key.Zero -> 0
         else -> null
-    }?.toUInt()
+    }
 }
 
 object ScanChipFieldDefaults {

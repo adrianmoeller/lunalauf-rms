@@ -81,7 +81,7 @@ class ModelAPI(
         }
     }
 
-    suspend fun createRunner(id: ULong, name: String): CreateRunnerResult {
+    suspend fun createRunner(id: Long, name: String): CreateRunnerResult {
         mutex.withLock {
             getRunner(id)?.let {
                 logger.warn("Missing UI check if ID already exists when creating a runner")
@@ -89,7 +89,7 @@ class ModelAPI(
             }
 
             val newRunner = LunaLaufLanguageFactoryImpl.eINSTANCE.createRunner()
-            newRunner.id = id.toLong()
+            newRunner.id = id
             newRunner.name = name
             model.runners.add(newRunner)
             logger.info("Created {}", newRunner)
@@ -97,21 +97,21 @@ class ModelAPI(
         }
     }
 
-    private fun getRunner(id: ULong): Runner? {
+    private fun getRunner(id: Long): Runner? {
         for (runner in model.runners) {
-            if (runner.id == id.toLong())
+            if (runner.id == id)
                 return runner
         }
         return null
     }
 
-    suspend fun updateRunnerId(runner: Runner, newId: ULong): UpdateRunnerIdResult {
+    suspend fun updateRunnerId(runner: Runner, newId: Long): UpdateRunnerIdResult {
         mutex.withLock {
             getRunner(newId)?.let {
                 logger.warn("Missing UI check if ID already exists when updating a runner ID")
                 return UpdateRunnerIdResult.Exists(it)
             }
-            runner.id = newId.toLong()
+            runner.id = newId
             return UpdateRunnerIdResult.Updated
         }
     }
@@ -241,16 +241,21 @@ class ModelAPI(
     }
 
     suspend fun createChallenge(
-        name: String, description: String, duration: UInt, expireMsg: String, receiveImage: Boolean
+        name: String, description: String, duration: Int, expireMsg: String, receiveImage: Boolean
     ): CreateChallengeResult {
         mutex.withLock {
+            if (duration < 0) {
+                logger.warn("Missing UI check if duration is positive when creating a challenge")
+                return CreateChallengeResult.NegativeDuration
+            }
+
             val result = internalCreateChallenge(name, description)
             if (result !is CreateChallengeResult.Created)
                 return result
 
             val challenge = result.challenge
             challenge.isExpires = true
-            challenge.duration = duration.toInt()
+            challenge.duration = duration
             challenge.expireMsg = expireMsg
             challenge.isReceiveImages = receiveImage
             return result
@@ -280,9 +285,15 @@ class ModelAPI(
         }
     }
 
-    suspend fun updateChallengeDuration(challenge: Challenge, duration: UInt) {
+    suspend fun updateChallengeDuration(challenge: Challenge, duration: Int): UpdateChallengeDurationResult {
         mutex.withLock {
-            challenge.duration = duration.toInt()
+            if (duration < 0) {
+                logger.warn("Missing UI check if duration is positive when updating a challenge")
+                return UpdateChallengeDurationResult.NegativeDuration
+            }
+
+            challenge.duration = duration
+            return UpdateChallengeDurationResult.Updated
         }
     }
 

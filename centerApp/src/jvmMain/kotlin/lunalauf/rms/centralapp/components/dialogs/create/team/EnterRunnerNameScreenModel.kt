@@ -16,7 +16,7 @@ import lunalauf.rms.modelapi.ModelState
 
 class EnterRunnerNameScreenModel(
     modelState: ModelState.Loaded,
-    private val id: ULong,
+    private val id: Long,
     private val team: Team,
     private val snackBarHostState: SnackbarHostState
 ) : ScreenModel, AbstractScreenModel(modelState) {

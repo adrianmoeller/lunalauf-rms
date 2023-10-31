@@ -14,15 +14,15 @@ class ScanChipScreenModel(
     var showError by mutableStateOf(false)
         private set
 
-    fun toIdBuffer(key: UInt) {
+    fun toIdBuffer(key: Int) {
         idBuffer.append(key)
     }
 
     fun processBufferedId(
         onKnown: (Runner) -> Unit,
-        onUnknown: (ULong) -> Unit
+        onUnknown: (Long) -> Unit
     ) {
-        val scannedId = idBuffer.toString().toULongOrNull()
+        val scannedId = idBuffer.toString().toLongOrNull()
         idBuffer.clear()
 
         if (scannedId == null) {

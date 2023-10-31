@@ -44,10 +44,16 @@ sealed class CreateMinigameResult {
 
 sealed class CreateChallengeResult {
     data object BlankName : CreateChallengeResult()
+    data object NegativeDuration : CreateChallengeResult()
     data class Created(val challenge: Challenge) : CreateChallengeResult()
 }
 
 sealed class UpdateChallengeNameResult {
     data object BlankName : UpdateChallengeNameResult()
     data object Updated : UpdateChallengeNameResult()
+}
+
+sealed class UpdateChallengeDurationResult {
+    data object NegativeDuration : UpdateChallengeDurationResult()
+    data object Updated : UpdateChallengeDurationResult()
 }

@@ -61,7 +61,7 @@ fun RunnerDetailsScreen(
                             verticalArrangement = Arrangement.spacedBy(5.dp)
                         ) {
                             EditableIDTile(
-                                value = runner.id.toULong(),
+                                value = runner.id,
                                 onIdChange = { screenModel.updateID(runner, it) },
                                 modelState = modelState
                             )

@@ -59,7 +59,7 @@ fun CompetitorsControlScreen(
     var createTeamOpen by remember { mutableStateOf(false) }
     var createRunnerOpen by remember { mutableStateOf(false) }
     var scanToShowOpen by remember { mutableStateOf(false) }
-    var knownID: ULong? by remember { mutableStateOf(null) }
+    var knownID: Long? by remember { mutableStateOf(null) }
     var knownTeam: Team? by remember { mutableStateOf(null) }
 
     var teamDetailsStatus: TeamDetailsStatus by remember { mutableStateOf(TeamDetailsStatus.Closed) }
