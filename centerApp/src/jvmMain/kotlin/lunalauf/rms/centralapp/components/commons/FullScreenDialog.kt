@@ -17,6 +17,7 @@ fun FullScreenDialog(
     onDismissRequest: () -> Unit,
     title: String,
     maxWidth: Dp? = null,
+    maxHeight: Dp? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Dialog(
@@ -27,6 +28,9 @@ fun FullScreenDialog(
             modifier = modifier
                 .cond(maxWidth != null) {
                     widthIn(max = maxWidth!!)
+                }
+                .cond(maxHeight != null) {
+                    heightIn(max = maxHeight!!)
                 }
                 .fillMaxSize(.95f),
             colors = CardDefaults.cardColors(

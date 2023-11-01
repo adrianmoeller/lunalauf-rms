@@ -28,10 +28,8 @@ class CreateMinigameScreenModel(
 
     fun updateId(id: String) {
         val trimmedId = id.trim()
-        val parsedId = trimmedId.toIntOrNull()
+        val parsedId = trimmedId.toIntOrNull()?.takeIf { it >= 0 && !modelState.minigames.value.ids.contains(it) }
         idValid = parsedId != null
-                && parsedId >= 0
-                && !modelState.minigames.value.ids.contains(parsedId)
         this.id = trimmedId
     }
 

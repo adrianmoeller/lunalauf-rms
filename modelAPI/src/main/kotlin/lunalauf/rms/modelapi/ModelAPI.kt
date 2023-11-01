@@ -220,6 +220,30 @@ class ModelAPI(
         }
     }
 
+    suspend fun updateMinigameId(minigame: Minigame, id: Int): UpdateMinigameIdResult {
+        mutex.withLock {
+            getMinigame(id)?.let {
+                logger.warn("Missing UI check if minigame ID already exists when updating a minigame ID")
+                return UpdateMinigameIdResult.Exists(it)
+            }
+
+            minigame.minigameID = id
+            return UpdateMinigameIdResult.Updated
+        }
+    }
+
+    suspend fun updateMinigameName(minigame: Minigame, name: String): UpdateMinigameNameResult {
+        mutex.withLock {
+            if (name.isBlank()) {
+                logger.warn("Missing UI check if name is not blank when updating a minigame name")
+                return UpdateMinigameNameResult.BlankName
+            }
+
+            minigame.name = name
+            return UpdateMinigameNameResult.Updated
+        }
+    }
+
     private fun internalCreateChallenge(name: String, description: String): CreateChallengeResult {
         if (name.isBlank()) {
             logger.warn("Missing UI check if name is not blank when creating a challenge")
