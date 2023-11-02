@@ -78,7 +78,8 @@ fun <T : EObject> DeleteElementDialog(
                         text = element.toString(),
                         fontWeight = FontWeight.Bold
                     )
-                    if (deletionFailed != null) {
+                    val constDeletionFailed = deletionFailed
+                    if (constDeletionFailed != null) {
                         Card(
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -90,7 +91,7 @@ fun <T : EObject> DeleteElementDialog(
                                     vertical = 10.dp,
                                     horizontal = 15.dp
                                 ),
-                                text = "Cannot be deleted: ${deletionFailed!!}",
+                                text = "Cannot be deleted: $constDeletionFailed",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }

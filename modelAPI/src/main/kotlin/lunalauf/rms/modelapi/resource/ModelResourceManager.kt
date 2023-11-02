@@ -75,12 +75,12 @@ sealed class ModelResourceManager {
                     logger.warn("Failed clearing resources in the resource set", e)
                 }
                 resource = resSet.createResource(uri)
-                if (resource == null)
-                    return ModelResult.Error("Failed creating resource")
+                val constResource = resource
+                    ?: return ModelResult.Error("Failed creating resource")
 
                 val model = createModel(year)
                 try {
-                    resource!!.contents.add(model)
+                    constResource.contents.add(model)
                 } catch (e: Exception) {
                     return ModelResult.Error("Failed adding model to resource", e)
                 }
@@ -100,17 +100,17 @@ sealed class ModelResourceManager {
                     logger.warn("Failed clearing resources in the resource set", e)
                 }
                 resource = resSet.createResource(uri)
-                if (resource == null)
-                    return ModelResult.Error("Failed creating resource")
+                val constResource = resource
+                    ?: return ModelResult.Error("Failed creating resource")
 
                 try {
-                    resource!!.load(null)
+                    constResource.load(null)
                 } catch (e: IOException) {
                     ModelResult.Error("Failed loading resource", e)
                 }
 
                 val model = try {
-                    resource!!.contents[0] as LunaLauf
+                    constResource.contents[0] as LunaLauf
                 } catch (index: IndexOutOfBoundsException) {
                     return ModelResult.Error("Corrupted file: no contents found in the resource", index)
                 } catch (e: Exception) {
@@ -133,14 +133,14 @@ sealed class ModelResourceManager {
                 preSaveProcessing?.run()
             } catch (ignored: Exception) {
             }
-            if (resource == null)
-                return SaveResult.NoFileOpen
+            val constResource = resource
+                ?: return SaveResult.NoFileOpen
             try {
-                resource!!.save(null)
+                constResource.save(null)
             } catch (e: IOException) {
                 return SaveResult.Error("Failed saving model", e)
             }
-            return SaveResult.Success(resource!!.uri)
+            return SaveResult.Success(constResource.uri)
         }
 
         suspend fun close(): CloseResult {
@@ -201,6 +201,7 @@ sealed class SaveResult {
             logger.info("Model saved")
         }
     }
+
     class Error(val message: String, val exception: Exception) : SaveResult() {
         init {
             logger.error(message, exception)
