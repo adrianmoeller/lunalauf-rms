@@ -35,6 +35,7 @@ import lunalauf.rms.centralapp.components.dialogs.create.challenge.CreateChallen
 import lunalauf.rms.centralapp.components.dialogs.create.minigame.CreateMinigameScreen
 import lunalauf.rms.centralapp.components.dialogs.details.challenge.ChallengeDetailsScreen
 import lunalauf.rms.centralapp.components.dialogs.details.minigame.MinigameDetailsScreen
+import lunalauf.rms.centralapp.components.dialogs.logfunfactorresults.LogFunfactorResultsScreen
 import lunalauf.rms.modelapi.ModelState
 
 @Composable
@@ -48,6 +49,8 @@ fun FunfactorsControlScreen(
 
     var createMinigameOpen by remember { mutableStateOf(false) }
     var createChallengeOpen by remember { mutableStateOf(false) }
+
+    var logFunfactorResultsOpen by remember { mutableStateOf(false) }
 
     var challengeDetailsStatus: ChallengeDetailsStatus by remember { mutableStateOf(ChallengeDetailsStatus.Closed) }
     var minigameDetailsStatus: MinigameDetailsStatus by remember { mutableStateOf(MinigameDetailsStatus.Closed) }
@@ -100,9 +103,7 @@ fun FunfactorsControlScreen(
         }
         OutlinedButton(
             modifier = Modifier.padding(bottom = 20.dp),
-            onClick = {
-                // TODO
-            }
+            onClick = { logFunfactorResultsOpen = true }
         ) {
             Icon(
                 modifier = Modifier.size(IconSize.medium),
@@ -132,6 +133,14 @@ fun FunfactorsControlScreen(
     if (createChallengeOpen) {
         CreateChallengeScreen(
             onDismissRequest = { createChallengeOpen = false },
+            modelState = modelState,
+            snackBarHostState = snackBarHostState
+        )
+    }
+
+    if (logFunfactorResultsOpen) {
+        LogFunfactorResultsScreen(
+            onDismissRequest = { logFunfactorResultsOpen = false },
             modelState = modelState,
             snackBarHostState = snackBarHostState
         )

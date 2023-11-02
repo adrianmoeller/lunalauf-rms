@@ -1,9 +1,6 @@
 package lunalauf.rms.modelapi
 
-import LunaLaufLanguage.Challenge
-import LunaLaufLanguage.Minigame
-import LunaLaufLanguage.Runner
-import LunaLaufLanguage.Team
+import LunaLaufLanguage.*
 
 sealed class CreateRunnerResult {
     data class Created(val runner: Runner) : CreateRunnerResult()
@@ -66,4 +63,16 @@ sealed class UpdateChallengeNameResult {
 sealed class UpdateChallengeDurationResult {
     data object NegativeDuration : UpdateChallengeDurationResult()
     data object Updated : UpdateChallengeDurationResult()
+}
+
+sealed class LogRoundResult {
+    data object RunDisabled : LogRoundResult()
+    data object LastRoundAlreadyLogged : LogRoundResult()
+    data object ValidationFailed : LogRoundResult()
+    data class Logged(val round: Round) : LogRoundResult()
+}
+
+sealed class LogMinigameResultResult {
+    data object NoMinigameWithId : LogMinigameResultResult()
+    data class Logged(val minigameResult: FunfactorResult) : LogMinigameResultResult()
 }

@@ -32,8 +32,8 @@ class ModelAPI(
     private val _runDryPhase = MutableStateFlow(false)
     val runDryPhase get() = _runDryPhase.asStateFlow()
 
-    private var runDryPhaseFinishedTeams: MutableSet<Team>? = null
-    private var runDryPhaseFinishedRunners: MutableSet<Runner>? = null
+    private var runDryPhaseFinishedTeams: MutableSet<Team> = HashSet()
+    private var runDryPhaseFinishedRunners: MutableSet<Runner> = HashSet()
 
     suspend fun setRoundThreshold(threshold: Int) {
         mutex.withLock { roundThreshold = threshold }
@@ -333,43 +333,36 @@ class ModelAPI(
         }
     }
 
-    suspend fun logRound(runner: Runner, points: Int, manualLogged: Boolean): Result<Round> {
-        val re = Result<Round>("Log Round")
-        if (points < 0) {
-            return re.failed("Points must be positive", null)
-        }
+    suspend fun logRound(runner: Runner, points: Int, manualLogged: Boolean): LogRoundResult {
         val currentTime = Timestamp.valueOf(LocalDateTime.now())
 
         mutex.withLock {
+            val team = runner.team
             if (!manualLogged) {
                 if (!_runEnabled.value) {
-                    return re.passed(null, 4, "Run is disabled", Lvl.WARN)
+                    logger.info("Tried to log round while run is disabled: {}", runner)
+                    return LogRoundResult.RunDisabled
                 }
                 if (_runDryPhase.value) {
-                    val team = runner.team
                     if (team == null) {
-                        if (runDryPhaseFinishedRunners!!.contains(runner)) return re.passed(
-                            null,
-                            5,
-                            "Last round already logged",
-                            Lvl.WARN
-                        )
-                        runDryPhaseFinishedRunners!!.add(runner)
+                        if (runner in runDryPhaseFinishedRunners) {
+                            logger.info("Tried to log round but last round is already logged: {}", runner)
+                            return LogRoundResult.LastRoundAlreadyLogged
+                        }
+                        runDryPhaseFinishedRunners.add(runner)
                     } else {
-                        if (runDryPhaseFinishedTeams!!.contains(team)) return re.passed(
-                            null,
-                            5,
-                            "Last round already logged",
-                            Lvl.WARN
-                        )
-                        runDryPhaseFinishedTeams!!.add(team)
+                        if (team in runDryPhaseFinishedTeams) {
+                            logger.info("Tried to log round but last round is already logged: {}", runner)
+                            return LogRoundResult.LastRoundAlreadyLogged
+                        }
+                        runDryPhaseFinishedTeams.add(team)
                     }
                 }
                 if (!RoundCountValidator.validate(runner, currentTime, roundThreshold)) {
-                    return re.passed(null, 0, "Count interval is too short", Lvl.WARN)
+                    logger.info("Round count interval is too short: {}", runner)
+                    return LogRoundResult.ValidationFailed
                 }
             }
-            val team = runner.team
             val newLogEntry = LunaLaufLanguageFactoryImpl.eINSTANCE.createRound()
             newLogEntry.timestamp = currentTime
             newLogEntry.points = points
@@ -378,15 +371,12 @@ class ModelAPI(
             newLogEntry.isManualLogged = manualLogged
             model.log.add(newLogEntry)
             model.rounds.add(newLogEntry)
-            return re.passed(newLogEntry, 1, "Done", Lvl.INFO)
+            logger.info("Logged {}", newLogEntry)
+            return LogRoundResult.Logged(newLogEntry)
         }
     }
 
-    private fun internalLogFunfactorResult(team: Team, type: Funfactor, points: Int): Result<FunfactorResult> {
-        val re = Result<FunfactorResult>("Log Funfactor Result")
-        if (points < 0) {
-            return re.failed("Points must be positive", null)
-        }
+    private fun internalLogFunfactorResult(team: Team, type: Funfactor, points: Int): FunfactorResult {
         val newLogEntry = LunaLaufLanguageFactoryImpl.eINSTANCE.createFunfactorResult()
         newLogEntry.timestamp = Timestamp.valueOf(LocalDateTime.now())
         newLogEntry.points = points
@@ -394,28 +384,26 @@ class ModelAPI(
         newLogEntry.team = team
         model.log.add(newLogEntry)
         model.funfactorResults.add(newLogEntry)
-        return re.passed(newLogEntry, 1, "Done", Lvl.INFO)
+        logger.info("Logged {}", newLogEntry)
+        return newLogEntry
     }
 
-    suspend fun logFunfactorResult(team: Team, type: Funfactor, points: Int): Result<FunfactorResult> {
+    suspend fun logFunfactorResult(team: Team, type: Funfactor, points: Int): FunfactorResult {
         mutex.withLock {
             return internalLogFunfactorResult(team, type, points)
         }
     }
 
-    suspend fun logMinigameResult(team: Team, minigameID: Int, points: Int): Result<FunfactorResult> {
+    suspend fun logMinigameResult(team: Team, minigameID: Int, points: Int): LogMinigameResultResult {
         mutex.withLock {
-            val re = Result<FunfactorResult>("Log Minigame Result")
-            var minigame: Minigame? = null
-            for (mg in model.minigames) {
-                if (mg.minigameID == minigameID) minigame = mg
-            }
+            val minigame = getMinigame(minigameID)
             if (minigame == null) {
-                return re.failed("There is no Minigame with this ID", null)
+                logger.warn("There is no minigame with ID '{}'", minigameID)
+                return LogMinigameResultResult.NoMinigameWithId
             }
-            val logEntryRe: Result<FunfactorResult> = re.makeSub(internalLogFunfactorResult(team, minigame, points))
-            return if (!logEntryRe.hasResult()) re.failed("Failed", null)
-            else re.passed(logEntryRe.result, 1, "Done", Lvl.INFO)
+
+            val funfactorResult = internalLogFunfactorResult(team, minigame, points)
+            return LogMinigameResultResult.Logged(funfactorResult)
         }
     }
 
