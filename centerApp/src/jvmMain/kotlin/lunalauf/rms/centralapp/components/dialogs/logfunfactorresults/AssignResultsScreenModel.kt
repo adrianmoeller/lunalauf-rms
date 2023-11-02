@@ -10,7 +10,7 @@ import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.modelapi.ModelState
 
 class AssignResultsScreenModel(
-    modelState: ModelState.Loaded,
+    private val modelState: ModelState.Loaded,
     private val funfactor: Funfactor,
     private val snackBarHostState: SnackbarHostState
 ) : ScreenModel, AbstractScreenModel(modelState) {
@@ -84,11 +84,22 @@ class AssignResultsScreenModel(
         }
     }
 
-    private fun validatePoints(points: String): Boolean {
+    fun assignRemainingTeams(points: Int) {
+        val remainingTeams = modelState.teams.value.teams.filterNot { it in assignedTeams }
+        remainingTeams.forEach {
+            assignedTeams.add(it)
+            funfactorResults[it] = points
+        }
+        pointsBeingEdited = null
+        currentPoints = ""
+        currentPointsValid = false
+    }
+
+    fun validatePoints(points: String): Boolean {
         return points.toIntOrNull() != null
     }
 
-    private fun parsePoints(points: String): String {
+    fun parsePoints(points: String): String {
         return points.trim().replace(parsePointsRegex, "")
     }
 }

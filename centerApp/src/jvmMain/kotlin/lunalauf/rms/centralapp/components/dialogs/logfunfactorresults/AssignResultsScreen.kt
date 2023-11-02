@@ -27,6 +27,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -90,13 +91,18 @@ data class AssignResultsScreen(
                             Card {
                                 Column {
                                     val remainingTeams = teamsState.teams.filterNot { it in screenModel.assignedTeams }
-                                    remainingTeams.forEachIndexed { index, team ->
+                                    AllTeamsTile(
+                                        onAssignAll = screenModel::assignRemainingTeams,
+                                        validatePoints = screenModel::validatePoints,
+                                        parsePoints = screenModel::parsePoints,
+                                        enabled = remainingTeams.isNotEmpty()
+                                    )
+                                    remainingTeams.forEach { team ->
+                                        ListItemDivider(spacing = 10.dp)
                                         RemainingTeamTile(
                                             team = team,
                                             onClick = { screenModel.updateTeamAssigned(team, true) }
                                         )
-                                        if (index < remainingTeams.lastIndex)
-                                            ListItemDivider(spacing = 10.dp)
                                     }
                                 }
                             }
@@ -161,6 +167,102 @@ data class AssignResultsScreen(
             if (screenModel.processing)
                 CircularProgressIndicator()
         }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun AllTeamsTile(
+    onAssignAll: (Int) -> Unit,
+    validatePoints: (String) -> Boolean,
+    parsePoints: (String) -> String,
+    enabled: Boolean
+) {
+    var hovered by remember { mutableStateOf(false) }
+    var setPointsOpen by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onPointerEvent(PointerEventType.Enter) { hovered = true }
+            .onPointerEvent(PointerEventType.Exit) { hovered = false }
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(enabled = enabled) { setPointsOpen = true },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            modifier = Modifier
+                .padding(vertical = 10.dp)
+                .padding(start = 10.dp),
+            text = "All",
+            fontStyle = FontStyle.Italic
+        )
+        if (hovered && enabled) {
+            Row {
+                Icon(
+                    imageVector = Icons.Rounded.ArrowForward,
+                    contentDescription = "Assign points",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.width(10.dp))
+            }
+        }
+    }
+
+    if (setPointsOpen) {
+        var points by remember { mutableStateOf("") }
+        var pointsValid by remember { mutableStateOf(false) }
+        val focusRequester = remember { FocusRequester() }
+
+        AlertDialog(
+            title = { Text("Set points for all teams") },
+            text = {
+                OutlinedTextField(
+                    modifier = Modifier
+                        .onPreviewKeyEvent {
+                            if (it.key == Key.Enter) {
+                                if (it.type == KeyEventType.KeyUp && pointsValid) {
+                                    onAssignAll(points.toIntOrNull() ?: 0)
+                                    setPointsOpen = false
+                                }
+                                return@onPreviewKeyEvent true
+                            }
+                            return@onPreviewKeyEvent false
+                        }
+                        .focusRequester(focusRequester),
+                    label = { Text("Points") },
+                    value = points,
+                    onValueChange = {
+                        pointsValid = validatePoints(it)
+                        points = parsePoints(it)
+                    },
+                    isError = !pointsValid
+                )
+
+            },
+            confirmButton = {
+                FilledTonalButton(
+                    onClick = {
+                        onAssignAll(points.toIntOrNull() ?: 0)
+                        setPointsOpen = false
+                    },
+                    enabled = pointsValid
+                ) {
+                    Text("Update")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { setPointsOpen = false }
+                ) {
+                    Text("Cancel")
+                }
+            },
+            onDismissRequest = { setPointsOpen = false }
+        )
+
+        focusRequester.requestFocus()
     }
 }
 
