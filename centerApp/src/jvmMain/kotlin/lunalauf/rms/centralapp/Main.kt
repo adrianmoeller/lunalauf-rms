@@ -15,6 +15,7 @@ import lunalauf.rms.centralapp.components.main.MainScreenModel
 import lunalauf.rms.centralapp.components.main.FileOpenScreen
 import lunalauf.rms.centralapp.components.windows.MainWindow
 import lunalauf.rms.centralapp.components.main.NoFileOpenScreen
+import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
 import lunalauf.rms.centralapp.components.windows.PublicViewWindow
 import lunalauf.rms.modelapi.ModelState
 import org.apache.log4j.BasicConfigurator
@@ -26,13 +27,13 @@ fun ApplicationScope.App() {
 //    val colorScheme = lightColorScheme()
 
     val mainScreenModel = remember { MainScreenModel() }
-    var publicViewOpen by remember { mutableStateOf(false) }
+    val publicViewScreenModel = remember { PublicViewScreenModel(mainScreenModel.snackBarHostState) }
     val modelState = mainScreenModel.modelState
 
     MainWindow(
         colorScheme = colorScheme,
-        onPublicViewOpenChange = { publicViewOpen = it },
-        publicViewOpen = publicViewOpen,
+        onPublicViewOpenChange = publicViewScreenModel::updateOpen,
+        publicViewOpen = publicViewScreenModel.open,
         onPublicViewSettingsClick = { /* TODO */ },
         publicViewAvailable = modelState is ModelState.Loaded
     ) {
@@ -61,10 +62,9 @@ fun ApplicationScope.App() {
     }
     if (modelState is ModelState.Loaded) {
         PublicViewWindow(
-            open = publicViewOpen,
             mainScreenModel = mainScreenModel,
+            publicViewScreenModel = publicViewScreenModel,
             modelState = modelState,
-            onClose = { publicViewOpen = false },
             borderColor = Color.Gray
         )
     }

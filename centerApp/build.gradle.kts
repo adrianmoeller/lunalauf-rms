@@ -48,6 +48,7 @@ kotlin {
 
                 implementation("LunaLaufLanguage:LunaLaufLanguage:1.0.2")
                 implementation(project(":modelAPI"))
+                implementation(project(":utilities"))
             }
         }
         val jvmTest by getting

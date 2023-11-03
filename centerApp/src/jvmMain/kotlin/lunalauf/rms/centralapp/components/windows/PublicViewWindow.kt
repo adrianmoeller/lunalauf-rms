@@ -30,6 +30,7 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberWindowState
 import lunalauf.rms.centralapp.components.commons.PublicViewTable
 import lunalauf.rms.centralapp.components.main.MainScreenModel
+import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
 import lunalauf.rms.centralapp.publicViewTypography
 import lunalauf.rms.centralapp.utils.Formats
 import lunalauf.rms.modelapi.ModelState
@@ -39,20 +40,19 @@ import kotlin.math.min
 
 @Composable
 fun ApplicationScope.PublicViewWindow(
-    open: Boolean,
     mainScreenModel: MainScreenModel,
+    publicViewScreenModel: PublicViewScreenModel,
     modelState: ModelState.Loaded,
-    onClose: () -> Unit,
     borderColor: Color
 ) {
-    if (open) {
+    if (publicViewScreenModel.open) {
         val borderWidth = 4.dp
         val windowState = rememberWindowState()
         val density = LocalDensity.current
         var screenWidth by remember { mutableStateOf(0.sp) }
 
         Window(
-            onCloseRequest = onClose,
+            onCloseRequest = { publicViewScreenModel.updateOpen(false) },
             title = "Luna-Lauf - Public View",
             state = windowState,
             onKeyEvent = {
