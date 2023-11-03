@@ -1,9 +1,9 @@
 package lunalauf.rms.modelapi
 
 import LunaLaufLanguage.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import lunalauf.rms.modelapi.states.*
 import org.eclipse.emf.common.notify.Notification
@@ -23,6 +23,7 @@ sealed class ModelState {
         val fileName: String,
         internal val model: LunaLauf
     ) : ModelState() {
+        val coroutineScope = CoroutineScope(Dispatchers.Default)
         val modelAPI = ModelAPI(mutex, this)
 
         private val _common = MutableStateFlow(
@@ -61,11 +62,15 @@ sealed class ModelState {
 
         // Derived:
 
-        private val _overallRounds = MutableStateFlow(0)
+        private val _overallRounds = MutableStateFlow(calcOverallRounds())
         val overallRounds get() = _overallRounds.asStateFlow()
 
-        private val _overallContribution = MutableStateFlow(0.0)
+        private val _overallContribution = MutableStateFlow(calcOverallContribution())
         val overallContribution get() = _overallContribution.asStateFlow()
+
+        val currentSponsorPoolAmount = overallRounds.combine(common) { rounds, commonState ->
+            calcCurrentSponsorPoolAmount(rounds, commonState.sponsorPoolAmount, commonState.sponsorPoolRounds)
+        }.stateIn(coroutineScope, SharingStarted.Eagerly, 0.0)
 
         init {
             model.eAdapters().add(object : EContentAdapter() {
@@ -174,18 +179,35 @@ sealed class ModelState {
         }
 
         private fun updateOverallRounds() {
-            var rounds = 0
-            for (runner in model.runners) rounds += runner.numOfRounds()
-            for (team in model.teams) rounds += team.numOfFunfactorPoints()
-            _overallRounds.value = rounds
+            _overallRounds.value = calcOverallRounds()
         }
 
         private fun updateOverallContribution() {
+            _overallContribution.value = calcOverallContribution()
+        }
+
+        private fun calcOverallRounds(): Int {
+            var rounds = 0
+            for (runner in model.runners) rounds += runner.numOfRounds()
+            for (team in model.teams) rounds += team.numOfFunfactorPoints()
+            return rounds
+        }
+
+        private fun calcOverallContribution(): Double {
             var contribution = 0.0
             for (team in model.teams) contribution += team.totalAmount()
             for (runner in model.runners) if (runner.team == null) contribution += runner.totalAmount()
             contribution += model.additionalContribution
-            _overallContribution.value = contribution
+            return contribution
+        }
+
+        private fun calcCurrentSponsorPoolAmount(
+            overallRounds: Int,
+            sponsorPoolAmount: Double,
+            sponsorPoolRounds: Int
+        ): Double {
+            return if (overallRounds > sponsorPoolRounds) sponsorPoolAmount
+            else sponsorPoolAmount / sponsorPoolRounds * overallRounds
         }
     }
 }

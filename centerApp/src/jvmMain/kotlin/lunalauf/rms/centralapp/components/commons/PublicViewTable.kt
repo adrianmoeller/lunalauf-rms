@@ -14,11 +14,11 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 @Composable
 fun PublicViewTable(
@@ -28,22 +28,17 @@ fun PublicViewTable(
     weights: List<Float>,
     headerTextStyles: Map<Int, TextStyle>,
     dataTextStyles: Map<Int, TextStyle>,
-    showPlacements: Boolean
+    showPlacements: Boolean,
+    baseFontSize: TextUnit
 ) {
     val density = LocalDensity.current
-    var tableWidth by remember { mutableStateOf(0.sp) }
-    val baseFontSize = tableWidth / 40
 
     Column(
-        modifier = modifier
-            .onGloballyPositioned {
-                tableWidth = with(density) {
-                    it.size.width.toSp()
-                }
-            },
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         var headerHeight by remember { mutableStateOf(0.dp) }
+        val cornerRadius = headerHeight / 2
 
         HeaderTableRow(
             modifier = Modifier
@@ -60,14 +55,13 @@ fun PublicViewTable(
             weights = weights,
             textStyles = headerTextStyles,
             showPlacements = showPlacements,
+            cornerRadius = cornerRadius,
             spacing = 5.dp,
             fontSize = baseFontSize * 0.8
         )
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            val cornerRadius = headerHeight / 2
-
             data.forEachIndexed { index, item ->
                 val placement = when (index) {
                     0 -> 1
@@ -94,7 +88,9 @@ fun PublicViewTable(
                     textStyles = dataTextStyles,
                     showPlacements = showPlacements,
                     placement = placement,
-                    spacing = 5.dp
+                    cornerRadius = cornerRadius,
+                    spacing = 0.dp,
+                    fontSize = baseFontSize
                 )
             }
         }
@@ -108,6 +104,7 @@ private fun HeaderTableRow(
     weights: List<Float>,
     textStyles: Map<Int, TextStyle>,
     showPlacements: Boolean,
+    cornerRadius: Dp,
     spacing: Dp,
     fontSize: TextUnit
 ) {
@@ -120,7 +117,9 @@ private fun HeaderTableRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (showPlacements)
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.weight(.5f))
+        else
+            Spacer(Modifier.width(cornerRadius))
 
         (header zip weights).forEachIndexed { index, it ->
             HeaderTableCell(
@@ -161,8 +160,13 @@ private fun DataTableRow(
     textStyles: Map<Int, TextStyle>,
     showPlacements: Boolean,
     placement: Int? = null,
-    spacing: Dp
+    cornerRadius: Dp,
+    spacing: Dp,
+    fontSize: TextUnit
 ) {
+    val textStyle = TextStyle(fontSize = fontSize)
+    val placementsTextStyle = TextStyle(fontSize = fontSize * 0.9)
+
     Row(
         modifier = modifier
             .padding(vertical = spacing)
@@ -173,17 +177,21 @@ private fun DataTableRow(
             if (placement != null)
                 DataTableCell(
                     text = placement.toString(),
-                    weight = 1f
+                    weight = .5f,
+                    textStyle = placementsTextStyle.merge(TextStyle(fontWeight = FontWeight.SemiBold)),
+                    alignment = Alignment.TopCenter
                 )
             else
-                Spacer(Modifier.weight(1f))
+                Spacer(Modifier.weight(.5f))
+        } else {
+            Spacer(Modifier.width(cornerRadius))
         }
 
         (data zip weights).forEachIndexed { index, it ->
             DataTableCell(
                 text = it.first,
                 weight = it.second,
-                textStyle = textStyles.getOrDefault(index, LocalTextStyle.current)
+                textStyle = textStyle.merge(textStyles.getOrDefault(index, LocalTextStyle.current))
             )
         }
     }
@@ -194,10 +202,12 @@ private fun RowScope.DataTableCell(
     modifier: Modifier = Modifier,
     text: String,
     textStyle: TextStyle = LocalTextStyle.current,
-    weight: Float
+    weight: Float,
+    alignment: Alignment = Alignment.TopStart
 ) {
     Box(
-        modifier = modifier.weight(weight)
+        modifier = modifier.weight(weight),
+        contentAlignment = alignment
     ) {
         Text(
             text = text,

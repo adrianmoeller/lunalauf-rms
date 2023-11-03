@@ -15,11 +15,14 @@ import lunalauf.rms.modelapi.resource.ModelResult
 import lunalauf.rms.modelapi.resource.SaveResult
 import org.eclipse.emf.common.util.URI
 import java.time.LocalDate
+import kotlin.time.Duration
 
 class MainScreenModel : AbstractStatelessScreenModel() {
 
     val modelResourceManager = ModelResourceManager.initialize()
     var modelState: ModelState by mutableStateOf(ModelState.Unloaded)
+        private set
+    var remainingRunTime by mutableStateOf(Duration.ZERO)
         private set
     val snackBarHostState = SnackbarHostState()
 
@@ -90,6 +93,7 @@ class MainScreenModel : AbstractStatelessScreenModel() {
                     is SaveResult.Success, SaveResult.NoFileOpen -> {
                         ModelState.Unloaded
                     }
+
                     is SaveResult.Error -> {
                         snackBarHostState.showSnackbar(
                             message = result.message,

@@ -4,8 +4,7 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,8 +22,8 @@ import org.apache.log4j.BasicConfigurator
 @Composable
 @Preview
 fun ApplicationScope.App() {
-//    val colorScheme = darkColorScheme()
-    val colorScheme = lightColorScheme()
+    val colorScheme = darkColorScheme()
+//    val colorScheme = lightColorScheme()
 
     val mainScreenModel = remember { MainScreenModel() }
     var publicViewOpen by remember { mutableStateOf(false) }
@@ -60,11 +59,15 @@ fun ApplicationScope.App() {
             )
         }
     }
-    PublicViewWindow(
-        open = publicViewOpen,
-        onClose = { publicViewOpen = false },
-        borderColor = Color.Gray
-    )
+    if (modelState is ModelState.Loaded) {
+        PublicViewWindow(
+            open = publicViewOpen,
+            mainScreenModel = mainScreenModel,
+            modelState = modelState,
+            onClose = { publicViewOpen = false },
+            borderColor = Color.Gray
+        )
+    }
 }
 
 fun main() {
