@@ -208,8 +208,8 @@ private enum class Tabs(
                         )
                         ScaleSliderTile(
                             title = "Common panel",
-                            initValue = screenModel.prefState.rns_fontScale,
-                            onValueChange = { screenModel.updatePrefState { copy(rns_fontScale = it) } },
+                            initValue = screenModel.prefState.ps_fontScale,
+                            onValueChange = { screenModel.updatePrefState { copy(ps_fontScale = it) } },
                             valueRange = .5f..1.5f
                         )
                     }

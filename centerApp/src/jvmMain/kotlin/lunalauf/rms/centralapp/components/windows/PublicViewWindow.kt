@@ -66,7 +66,7 @@ fun ApplicationScope.PublicViewWindow(
                     if (windowState.placement != WindowPlacement.Fullscreen)
                         windowState.placement = WindowPlacement.Fullscreen
                     else
-                        windowState.placement = WindowPlacement.Maximized
+                        windowState.placement = WindowPlacement.Floating
                     return@Window true
                 }
                 return@Window false
@@ -120,8 +120,8 @@ fun ApplicationScope.PublicViewWindow(
                                 .weight(pref.cmn_poolSponsorWidth),
                             mainScreenModel = mainScreenModel,
                             modelState = modelState,
-                            padding = (screenWidth.value.dp / 170) * pref.ps_fontScale,
-                            baseFontSize = screenWidth / 50,
+                            padding = screenWidth.value.dp / 170,
+                            baseFontSize = (screenWidth / 50) * pref.ps_fontScale,
                             borderColor = borderColor
                         )
                     }
