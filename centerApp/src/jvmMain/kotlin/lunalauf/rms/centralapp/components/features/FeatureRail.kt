@@ -32,7 +32,7 @@ fun FeatureRail(
     modifier: Modifier = Modifier,
     onPublicViewOpenChange: (Boolean) -> Unit,
     publicViewOpen: Boolean,
-    onPublicViewSettingsClick: () -> Unit,
+    onPublicViewPrefClick: () -> Unit,
     publicViewAvailable: Boolean,
     onNetworkClick: () -> Unit,
     networkOpen: Boolean,
@@ -83,7 +83,7 @@ fun FeatureRail(
                             PublicViewControls(
                                 publicViewOpen = publicViewOpen,
                                 onPublicViewOpenChange = onPublicViewOpenChange,
-                                onPublicViewSettingsClick = onPublicViewSettingsClick
+                                onPublicViewSettingsClick = onPublicViewPrefClick
                             )
                         }
                         Spacer(Modifier.height(10.dp))
@@ -215,7 +215,7 @@ fun PreviewFeatureRail() {
         FeatureRail(
             onPublicViewOpenChange = {},
             publicViewOpen = false,
-            onPublicViewSettingsClick = {},
+            onPublicViewPrefClick = {},
             publicViewAvailable = true,
             onNetworkClick = {},
             networkOpen = false,

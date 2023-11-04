@@ -10,16 +10,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import kotlinx.coroutines.launch
+import lunalauf.rms.centralapp.components.dialogs.preferences.PublicViewPrefSheet
 import lunalauf.rms.centralapp.components.features.*
+import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
 import java.awt.Color
 
 @Composable
 fun ApplicationScope.MainWindow(
     modifier: Modifier = Modifier,
     colorScheme: ColorScheme,
-    onPublicViewOpenChange: (Boolean) -> Unit,
-    publicViewOpen: Boolean,
-    onPublicViewSettingsClick: () -> Unit,
+    publicViewScreenModel: PublicViewScreenModel,
     publicViewAvailable: Boolean,
     content: @Composable () -> Unit
 ) {
@@ -37,6 +37,7 @@ fun ApplicationScope.MainWindow(
             var networkOpen by remember { mutableStateOf(false) }
             var botsOpen by remember { mutableStateOf(false) }
             var logOpen by remember { mutableStateOf(false) }
+            var publicViewPrefOpen by remember { mutableStateOf(false) }
 
             ModalNavigationDrawer(
                 modifier = modifier,
@@ -81,9 +82,9 @@ fun ApplicationScope.MainWindow(
                     modifier = Modifier.background(color = MaterialTheme.colorScheme.surface)
                 ) {
                     FeatureRail(
-                        onPublicViewOpenChange = onPublicViewOpenChange,
-                        publicViewOpen = publicViewOpen,
-                        onPublicViewSettingsClick = onPublicViewSettingsClick,
+                        onPublicViewOpenChange = publicViewScreenModel::updateOpen,
+                        publicViewOpen = publicViewScreenModel.open,
+                        onPublicViewPrefClick = { publicViewPrefOpen = true },
                         publicViewAvailable = publicViewAvailable,
                         onNetworkClick = {
                             networkOpen = true
@@ -109,6 +110,13 @@ fun ApplicationScope.MainWindow(
                     )
                     content()
                 }
+            }
+
+            if (publicViewPrefOpen) {
+                PublicViewPrefSheet(
+                    screenModel = publicViewScreenModel,
+                    onClose = { publicViewPrefOpen = false }
+                )
             }
         }
     }

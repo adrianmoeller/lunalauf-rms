@@ -63,8 +63,5 @@ class PersistenceManager {
     class PersistenceException(
         override val message: String,
         override val cause: Throwable
-    ) : Exception(
-        message = message,
-        cause = cause
-    )
+    ) : Exception()
 }

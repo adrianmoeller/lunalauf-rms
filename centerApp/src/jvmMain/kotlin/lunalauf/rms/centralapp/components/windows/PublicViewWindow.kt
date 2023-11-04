@@ -42,11 +42,17 @@ import kotlin.math.min
 fun ApplicationScope.PublicViewWindow(
     mainScreenModel: MainScreenModel,
     publicViewScreenModel: PublicViewScreenModel,
-    modelState: ModelState.Loaded,
-    borderColor: Color
+    modelState: ModelState.Loaded
 ) {
     if (publicViewScreenModel.open) {
+        val pref = publicViewScreenModel.prefState
         val borderWidth = 4.dp
+        val brightness = (255 * pref.cmn_borderBrightness).toInt()
+        val borderColor = Color(
+            red = brightness,
+            green = brightness,
+            blue = brightness
+        )
         val windowState = rememberWindowState()
         val density = LocalDensity.current
         var screenWidth by remember { mutableStateOf(0.sp) }
@@ -60,7 +66,7 @@ fun ApplicationScope.PublicViewWindow(
                     if (windowState.placement != WindowPlacement.Fullscreen)
                         windowState.placement = WindowPlacement.Fullscreen
                     else
-                        windowState.placement = WindowPlacement.Floating
+                        windowState.placement = WindowPlacement.Maximized
                     return@Window true
                 }
                 return@Window false
@@ -87,33 +93,34 @@ fun ApplicationScope.PublicViewWindow(
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .weight(9f),
+                                .weight(1f - pref.cmn_poolSponsorWidth),
                             verticalArrangement = Arrangement.spacedBy(borderWidth)
                         ) {
                             val teamsState by modelState.teams.collectAsState()
                             TeamPanel(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .weight(2f),
+                                    .weight(pref.cmn_teamsHeight),
                                 teamsState = teamsState,
-                                baseFontSize = screenWidth / 45
+                                baseFontSize = (screenWidth / 45) * pref.tms_fontScale
                             )
                             val runnersState by modelState.runners.collectAsState()
                             RunnerPanel(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .weight(1f),
+                                    .weight(1f - pref.cmn_teamsHeight),
                                 runnersState = runnersState,
-                                baseFontSize = screenWidth / 55
+                                numOfRows = pref.rns_numOfRows,
+                                baseFontSize = (screenWidth / 55) * pref.rns_fontScale
                             )
                         }
                         CommonPanel(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .weight(1f),
+                                .weight(pref.cmn_poolSponsorWidth),
                             mainScreenModel = mainScreenModel,
                             modelState = modelState,
-                            padding = screenWidth.value.dp / 170,
+                            padding = (screenWidth.value.dp / 170) * pref.ps_fontScale,
                             baseFontSize = screenWidth / 50,
                             borderColor = borderColor
                         )
@@ -172,10 +179,9 @@ private fun TeamPanel(
 private fun RunnerPanel(
     modifier: Modifier = Modifier,
     runnersState: RunnersState,
+    numOfRows: Int,
     baseFontSize: TextUnit
 ) {
-    val numOfRows = 4
-
     val singleRunners = runnersState.runners
         .filter { it.team == null }
         .sortedByDescending { it.numOfRounds() }

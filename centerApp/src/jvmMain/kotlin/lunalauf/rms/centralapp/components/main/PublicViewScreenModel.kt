@@ -13,30 +13,29 @@ import lunalauf.rms.utilities.publicviewprefs.PublicViewPrefState
 import lunalauf.rms.utilities.publicviewprefs.toState
 
 class PublicViewScreenModel(
-    snackBarHostState: SnackbarHostState
+    private val snackBarHostState: SnackbarHostState
 ) : AbstractStatelessScreenModel() {
-    val persistenceManager = PersistenceManager()
+    private val persistenceManager = PersistenceManager()
 
-    var prefState by mutableStateOf(PublicViewPrefState())
+    var prefState by mutableStateOf(loadPrefState())
         private set
     var open by mutableStateOf(false)
         private set
 
-    init {
-        launchInIOScope {
-            try {
-                prefState = persistenceManager.load(PublicViewPrefContainer::class.java).toState()
-            } catch (e: PersistenceManager.PersistenceException) {
-                launchInDefaultScope {
-                    snackBarHostState.showSnackbar(
-                        message = e.message,
-                        withDismissAction = true,
-                        duration = SnackbarDuration.Long,
-                        isError = true
-                    )
-                }
+    private fun loadPrefState(): PublicViewPrefState {
+        try {
+            return persistenceManager.load(PublicViewPrefContainer::class.java).toState()
+        } catch (e: PersistenceManager.PersistenceException) {
+            launchInDefaultScope {
+                snackBarHostState.showSnackbar(
+                    message = e.message,
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Long,
+                    isError = true
+                )
             }
         }
+        return PublicViewPrefState()
     }
 
     fun updateOpen(open: Boolean) {
@@ -47,5 +46,15 @@ class PublicViewScreenModel(
         makeCopy: PublicViewPrefState.() -> PublicViewPrefState
     ) {
         prefState = makeCopy(prefState)
+    }
+
+    fun resetPrefState() {
+        prefState = PublicViewPrefState()
+    }
+
+    fun persistPrefState() {
+        launchInIOScope {
+            persistenceManager.store(prefState.toPersistenceContainer())
+        }
     }
 }

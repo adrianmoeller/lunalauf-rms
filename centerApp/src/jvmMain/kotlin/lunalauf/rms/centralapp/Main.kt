@@ -32,9 +32,7 @@ fun ApplicationScope.App() {
 
     MainWindow(
         colorScheme = colorScheme,
-        onPublicViewOpenChange = publicViewScreenModel::updateOpen,
-        publicViewOpen = publicViewScreenModel.open,
-        onPublicViewSettingsClick = { /* TODO */ },
+        publicViewScreenModel = publicViewScreenModel,
         publicViewAvailable = modelState is ModelState.Loaded
     ) {
         when (modelState) {
