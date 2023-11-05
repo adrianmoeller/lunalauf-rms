@@ -110,10 +110,10 @@ fun RunnerDetailsScreen(
                                     verticalArrangement = Arrangement.spacedBy(15.dp),
                                     state = listState
                                 ) {
-                                    items(screenModel.calcStats(runner)) {
+                                    items(screenModel.calcStats(runner)) {(name, value) ->
                                         StatTile(
-                                            name = it.first,
-                                            value = it.second
+                                            name = name,
+                                            value = value
                                         )
                                     }
                                 }

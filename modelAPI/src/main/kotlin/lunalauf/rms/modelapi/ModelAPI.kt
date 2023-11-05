@@ -133,6 +133,43 @@ class ModelAPI(
         }
     }
 
+    suspend fun rounds(runner: Runner): List<Round> {
+        mutex.withLock {
+            return runner.rounds.filterNotNull().toList()
+        }
+    }
+
+    private fun internalNumOfRounds(runner: Runner) = runner.rounds
+        .filterNotNull()
+        .sumOf { it.points }
+
+    suspend fun numOfRounds(runner: Runner): Int {
+        mutex.withLock {
+            return internalNumOfRounds(runner)
+        }
+    }
+
+    suspend fun totalAmount(runner: Runner): Double {
+        mutex.withLock {
+            return when (runner.contribution) {
+                ContrType.FIXED -> runner.amountFix
+                ContrType.PERROUND -> runner.amountPerRound * internalNumOfRounds(runner)
+                ContrType.BOTH -> runner.amountFix + runner.amountPerRound * internalNumOfRounds(runner)
+                ContrType.NONE, null -> 0.0;
+            }
+        }
+    }
+
+    suspend fun roundDurations(runner: Runner): List<Long> {
+        mutex.withLock {
+            return runner.rounds
+                .filterNotNull()
+                .map { it.timestamp.time }
+                .sorted()
+                .zipWithNext { a, b -> b - a }
+        }
+    }
+
     suspend fun createTeam(name: String): CreateTeamResult {
         mutex.withLock {
             if (name.isBlank()) {
@@ -344,7 +381,11 @@ class ModelAPI(
         }
     }
 
-    suspend fun logRound(runner: Runner, points: Int = DEFAULT_ROUND_POINTS, manualLogged: Boolean = false): LogRoundResult {
+    suspend fun logRound(
+        runner: Runner,
+        points: Int = DEFAULT_ROUND_POINTS,
+        manualLogged: Boolean = false
+    ): LogRoundResult {
         val currentTime = Timestamp.valueOf(LocalDateTime.now())
 
         mutex.withLock {
