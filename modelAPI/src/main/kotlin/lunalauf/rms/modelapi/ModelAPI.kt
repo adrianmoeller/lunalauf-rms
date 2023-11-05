@@ -2,8 +2,11 @@ package lunalauf.rms.modelapi
 
 import LunaLaufLanguage.*
 import LunaLaufLanguage.impl.LunaLaufLanguageFactoryImpl
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.eclipse.emf.ecore.EObject
@@ -14,13 +17,23 @@ import java.time.LocalDateTime
 
 class ModelAPI(
     private val mutex: Mutex,
-    private val modelState: ModelState.Loaded
+    modelState: ModelState.Loaded
 ) {
+    companion object {
+        val DEFAULT_ROUND_POINTS = 1
+
+        @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
+        val modelContext = newSingleThreadContext("model")
+
+        fun freeResources() {
+            modelContext.close()
+            // TODO call this
+        }
+    }
+
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val model = modelState.model
-
-    val DEFAULT_ROUND_POINTS = 1
 
     var roundThreshold = 40
         private set
@@ -331,7 +344,7 @@ class ModelAPI(
         }
     }
 
-    suspend fun logRound(runner: Runner, points: Int, manualLogged: Boolean): LogRoundResult {
+    suspend fun logRound(runner: Runner, points: Int = DEFAULT_ROUND_POINTS, manualLogged: Boolean = false): LogRoundResult {
         val currentTime = Timestamp.valueOf(LocalDateTime.now())
 
         mutex.withLock {

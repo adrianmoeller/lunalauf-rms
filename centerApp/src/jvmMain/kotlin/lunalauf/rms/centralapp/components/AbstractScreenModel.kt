@@ -1,6 +1,7 @@
 package lunalauf.rms.centralapp.components
 
 import kotlinx.coroutines.*
+import lunalauf.rms.modelapi.ModelAPI
 import lunalauf.rms.modelapi.ModelState
 import org.slf4j.LoggerFactory
 
@@ -10,15 +11,7 @@ abstract class AbstractStatelessScreenModel {
     companion object {
         private val defaultScope = CoroutineScope(Dispatchers.Default)
         private val ioScope = CoroutineScope(Dispatchers.IO)
-
-        @OptIn(DelicateCoroutinesApi::class)
-        private val modelContext = newSingleThreadContext("model")
-        private val modelScope = CoroutineScope(modelContext)
-
-        fun freeResources() {
-            modelContext.close()
-            // TODO call this
-        }
+        private val modelScope = CoroutineScope(ModelAPI.modelContext)
     }
 
     private suspend fun catchAll(block: suspend CoroutineScope.() -> Unit, scope: CoroutineScope) {
