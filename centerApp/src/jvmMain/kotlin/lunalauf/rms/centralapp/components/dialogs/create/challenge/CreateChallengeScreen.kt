@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -13,7 +12,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.OptionTile
-import lunalauf.rms.centralapp.components.commons.tryRequestFocusWithScope
+import lunalauf.rms.centralapp.components.commons.tryRequestFocus
 import lunalauf.rms.modelapi.ModelState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,7 +25,6 @@ fun CreateChallengeScreen(
 ) {
     val screenModel = remember { CreateChallengeScreenModel(modelState, snackBarHostState) }
 
-    val coroutineScope = rememberCoroutineScope()
     val nameFocusRequester = remember { FocusRequester() }
     val descriptionFocusRequester = remember { FocusRequester() }
     val durationFocusRequester = remember { FocusRequester() }
@@ -127,7 +125,7 @@ fun CreateChallengeScreen(
                             Text("Receive image")
                         }
 
-                        remember { durationFocusRequester.tryRequestFocusWithScope(coroutineScope) }
+                        durationFocusRequester.tryRequestFocus()
                     }
                     FilledTonalButton(
                         modifier = Modifier.align(Alignment.End),
@@ -142,6 +140,6 @@ fun CreateChallengeScreen(
             }
         }
 
-        remember { nameFocusRequester.tryRequestFocusWithScope(coroutineScope) }
+        nameFocusRequester.tryRequestFocus()
     }
 }

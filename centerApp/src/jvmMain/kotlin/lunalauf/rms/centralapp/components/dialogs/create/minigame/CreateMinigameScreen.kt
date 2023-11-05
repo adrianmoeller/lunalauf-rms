@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -12,7 +11,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
-import lunalauf.rms.centralapp.components.commons.tryRequestFocusWithScope
+import lunalauf.rms.centralapp.components.commons.tryRequestFocus
 import lunalauf.rms.modelapi.ModelState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +24,6 @@ fun CreateMinigameScreen(
 ) {
     val screenModel = remember { CreateMinigameScreenModel(modelState, snackBarHostState) }
 
-    val coroutineScope = rememberCoroutineScope()
     val idFocusRequester = remember { FocusRequester() }
     val nameFocusRequester = remember { FocusRequester() }
 
@@ -103,6 +101,6 @@ fun CreateMinigameScreen(
             }
         }
 
-        remember { idFocusRequester.tryRequestFocusWithScope(coroutineScope) }
+        idFocusRequester.tryRequestFocus()
     }
 }

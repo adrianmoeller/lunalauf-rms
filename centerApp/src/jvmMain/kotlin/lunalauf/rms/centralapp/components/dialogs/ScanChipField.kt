@@ -20,18 +20,16 @@ import compose.icons.evaicons.outline.Shake
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.ExclamationTriangle
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import lunalauf.rms.centralapp.components.commons.IconSize
 
 @Composable
 fun ScanChipField(
     modifier: Modifier = Modifier,
     showError: Boolean,
-    errorText: String = ScanChipFieldDefaults.errorText,
+    errorText: String = ScanChipFieldDefaults.ERROR_TEXT,
     onNumberKeyEvent: (Int) -> Unit,
     onEnterKeyEvent: () -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
     var readyForScanning by remember { mutableStateOf(false) }
 
@@ -121,7 +119,7 @@ fun ScanChipField(
         }
     }
 
-    coroutineScope.launch {
+    LaunchedEffect(true) {
         while (true) {
             try {
                 focusRequester.requestFocus()
@@ -153,5 +151,5 @@ private fun parseNumberKey(key: Key): Int? {
 }
 
 object ScanChipFieldDefaults {
-    val errorText = "Invalid ID format"
+    const val ERROR_TEXT = "Invalid ID format"
 }

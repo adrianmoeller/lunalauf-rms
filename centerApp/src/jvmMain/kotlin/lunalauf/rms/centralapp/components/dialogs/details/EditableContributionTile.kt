@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.OptionTile
-import lunalauf.rms.centralapp.components.commons.tryRequestFocusWithScope
+import lunalauf.rms.centralapp.components.commons.tryRequestFocus
 
 @Composable
 fun EditableContributionTile(
@@ -249,7 +249,6 @@ private fun ContributionTypeCard(
     onUpdateRequest: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
-    val coroutineScope = rememberCoroutineScope()
 
     OutlinedCard(
         modifier = modifier
@@ -287,7 +286,7 @@ private fun ContributionTypeCard(
                     isError = isError
                 )
 
-                remember { focusRequester.tryRequestFocusWithScope(coroutineScope) }
+                focusRequester.tryRequestFocus()
             }
         }
     }

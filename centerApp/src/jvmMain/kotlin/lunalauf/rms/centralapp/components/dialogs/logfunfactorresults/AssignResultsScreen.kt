@@ -37,7 +37,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import lunalauf.rms.centralapp.components.commons.ListItemDivider
 import lunalauf.rms.centralapp.components.commons.customScrollbarStyle
-import lunalauf.rms.centralapp.components.commons.tryRequestFocusWithScope
+import lunalauf.rms.centralapp.components.commons.tryRequestFocus
 import lunalauf.rms.modelapi.ModelState
 
 data class AssignResultsScreen(
@@ -366,7 +366,6 @@ private fun AssignedEditingTeamTile(
     onEditDone: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
-    val coroutineScope = rememberCoroutineScope()
 
     Row(
         modifier = Modifier
@@ -410,5 +409,5 @@ private fun AssignedEditingTeamTile(
         }
     }
 
-    focusRequester.tryRequestFocusWithScope(coroutineScope)
+    focusRequester.tryRequestFocus()
 }
