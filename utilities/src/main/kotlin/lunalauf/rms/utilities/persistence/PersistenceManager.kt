@@ -35,26 +35,32 @@ class PersistenceManager {
         try {
             if (file.createNewFile()) {
                 FileWriter(file).use { writer -> gson.toJson(instance, writer) }
+                logger.info("New file created and loaded: {}", file.path)
                 return instance
             } else {
-                FileReader(file).use { reader -> return gson.fromJson(reader, typeOfContent) }
+                FileReader(file).use { reader ->
+                    val loadedInstance = gson.fromJson(reader, typeOfContent)
+                    logger.info("File loaded: {}", file.path)
+                    return loadedInstance
+                }
             }
         } catch (e: IOException) {
-            val message = "Could not create preference file."
+            val message = "Could not load file."
             logger.error(message, e)
             throw PersistenceException(message, e)
         }
     }
 
     @Throws(PersistenceException::class)
-    fun <T : PersistenceContainer> store(content: T) {
+    fun <T : PersistenceContainer> save(content: T) {
         val filePath = content.fileName + FILE_ENDING
         val file = File(filePath)
         try {
             file.createNewFile()
             FileWriter(file).use { writer -> gson.toJson(content, writer) }
+            logger.info("File saved: {}", file.path)
         } catch (e: IOException) {
-            val message = "Could not create preference file."
+            val message = "Could not save file."
             logger.error(message, e)
             throw PersistenceException(message, e)
         }

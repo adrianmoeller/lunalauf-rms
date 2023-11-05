@@ -54,7 +54,7 @@ class PublicViewScreenModel(
 
     fun persistPrefState() {
         launchInIOScope {
-            persistenceManager.store(prefState.toPersistenceContainer())
+            persistenceManager.save(prefState.toPersistenceContainer())
         }
     }
 }

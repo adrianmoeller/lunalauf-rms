@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberWindowState
@@ -36,10 +35,11 @@ import lunalauf.rms.centralapp.utils.Formats
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.states.RunnersState
 import lunalauf.rms.modelapi.states.TeamsState
+import lunalauf.rms.utilities.publicviewprefs.PublicViewPrefState
 import kotlin.math.min
 
 @Composable
-fun ApplicationScope.PublicViewWindow(
+fun PublicViewWindow(
     mainScreenModel: MainScreenModel,
     publicViewScreenModel: PublicViewScreenModel,
     modelState: ModelState.Loaded
@@ -102,7 +102,8 @@ fun ApplicationScope.PublicViewWindow(
                                     .fillMaxSize()
                                     .weight(pref.cmn_teamsHeight),
                                 teamsState = teamsState,
-                                baseFontSize = (screenWidth / 45) * pref.tms_fontScale
+                                baseFontSize = (screenWidth / 45) * pref.tms_fontScale,
+                                pref = pref
                             )
                             val runnersState by modelState.runners.collectAsState()
                             RunnerPanel(
@@ -110,8 +111,8 @@ fun ApplicationScope.PublicViewWindow(
                                     .fillMaxSize()
                                     .weight(1f - pref.cmn_teamsHeight),
                                 runnersState = runnersState,
-                                numOfRows = pref.rns_numOfRows,
-                                baseFontSize = (screenWidth / 55) * pref.rns_fontScale
+                                baseFontSize = (screenWidth / 55) * pref.rns_fontScale,
+                                pref = pref
                             )
                         }
                         CommonPanel(
@@ -135,7 +136,8 @@ fun ApplicationScope.PublicViewWindow(
 private fun TeamPanel(
     modifier: Modifier = Modifier,
     teamsState: TeamsState,
-    baseFontSize: TextUnit
+    baseFontSize: TextUnit,
+    pref: PublicViewPrefState
 ) {
     val data = teamsState.teams
         .sortedByDescending { it.numOfRounds() + it.numOfFunfactorPoints() }
@@ -154,7 +156,13 @@ private fun TeamPanel(
         modifier = modifier,
         header = listOf("Team", "Runden", "Funfactors", "Summe", "Spendenbetrag"),
         data = data,
-        weights = listOf(3.6f, 1f, 1f, 1f, 1.4f),
+        weights = listOf(
+            3.6f,
+            1f * pref.tms_colWidth_rounds,
+            1f * pref.tms_colWidth_funfactors,
+            1f * pref.tms_colWidth_sum,
+            1.4f * pref.tms_colWidth_contribution
+        ),
         headerTextStyles = buildMap {
             put(0, TeamPanelTextStyles.header)
             put(1, TeamPanelTextStyles.header)
@@ -170,6 +178,7 @@ private fun TeamPanel(
             put(4, TeamPanelTextStyles.data)
         },
         showPlacements = true,
+        placementsWeight = .5f * pref.tms_colWidth_placement,
         baseFontSize = baseFontSize
     )
     MaterialTheme.typography
@@ -179,13 +188,13 @@ private fun TeamPanel(
 private fun RunnerPanel(
     modifier: Modifier = Modifier,
     runnersState: RunnersState,
-    numOfRows: Int,
-    baseFontSize: TextUnit
+    baseFontSize: TextUnit,
+    pref: PublicViewPrefState
 ) {
     val singleRunners = runnersState.runners
         .filter { it.team == null }
         .sortedByDescending { it.numOfRounds() }
-    val splitRunners = split(singleRunners, numOfRows)
+    val splitRunners = split(singleRunners, pref.rns_numOfRows)
 
     Row(
         modifier = modifier,
@@ -199,15 +208,19 @@ private fun RunnerPanel(
                     Formats.germanEuroFormat(it.totalAmount())
                 )
             }
-            if (index == splitRunners.lastIndex && data.size < numOfRows) {
-                data = data + 0.until(numOfRows - data.size)
+            if (index == splitRunners.lastIndex && data.size < pref.rns_numOfRows) {
+                data = data + 0.until(pref.rns_numOfRows - data.size)
                     .map { listOf("", "", "") }
             }
             PublicViewTable(
                 modifier = Modifier.weight(1f),
                 header = listOf("Läufer*in", "Runden", "Spendenbetrag"),
                 data = data,
-                weights = listOf(2f, 1f, 1.5f),
+                weights = listOf(
+                    2f,
+                    1f * pref.rns_colWidth_rounds,
+                    1.5f * pref.rns_colWidth_contribution
+                ),
                 headerTextStyles = buildMap {
                     put(0, RunnerPanelTextStyles.header)
                     put(1, RunnerPanelTextStyles.header)

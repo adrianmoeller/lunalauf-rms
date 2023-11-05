@@ -171,13 +171,15 @@ private enum class Tabs(
                             title = "Team panel height",
                             initValue = screenModel.prefState.cmn_teamsHeight,
                             onValueChange = { screenModel.updatePrefState { copy(cmn_teamsHeight = it) } },
-                            valueRange = 0f..1f
+                            valueRange = 0.1f..0.9f,
+                            steps = 39
                         )
                         ScaleSliderTile(
                             title = "Common panel width",
                             initValue = screenModel.prefState.cmn_poolSponsorWidth,
                             onValueChange = { screenModel.updatePrefState { copy(cmn_poolSponsorWidth = it) } },
-                            valueRange = 0f..1f
+                            valueRange = 0.01f..0.25f,
+                            steps = 23
                         )
                     }
                 }
@@ -237,31 +239,36 @@ private enum class Tabs(
                             title = "Placement",
                             initValue = screenModel.prefState.tms_colWidth_placement,
                             onValueChange = { screenModel.updatePrefState { copy(tms_colWidth_placement = it) } },
-                            valueRange = .5f..1.5f
+                            valueRange = .5f..1.5f,
+                            steps = 19
                         )
                         ScaleSliderTile(
                             title = "Rounds",
                             initValue = screenModel.prefState.tms_colWidth_rounds,
                             onValueChange = { screenModel.updatePrefState { copy(tms_colWidth_rounds = it) } },
-                            valueRange = .5f..1.5f
+                            valueRange = .5f..1.5f,
+                            steps = 19
                         )
                         ScaleSliderTile(
                             title = "Funfactors",
                             initValue = screenModel.prefState.tms_colWidth_funfactors,
                             onValueChange = { screenModel.updatePrefState { copy(tms_colWidth_funfactors = it) } },
-                            valueRange = .5f..1.5f
+                            valueRange = .5f..1.5f,
+                            steps = 19
                         )
                         ScaleSliderTile(
                             title = "Sum",
                             initValue = screenModel.prefState.tms_colWidth_sum,
                             onValueChange = { screenModel.updatePrefState { copy(tms_colWidth_sum = it) } },
-                            valueRange = .5f..1.5f
+                            valueRange = .5f..1.5f,
+                            steps = 19
                         )
                         ScaleSliderTile(
                             title = "Contribution",
                             initValue = screenModel.prefState.tms_colWidth_contribution,
                             onValueChange = { screenModel.updatePrefState { copy(tms_colWidth_contribution = it) } },
-                            valueRange = .5f..1.5f
+                            valueRange = .5f..1.5f,
+                            steps = 19
                         )
                     }
                 }
@@ -306,13 +313,15 @@ private enum class Tabs(
                             title = "Rounds",
                             initValue = screenModel.prefState.rns_colWidth_rounds,
                             onValueChange = { screenModel.updatePrefState { copy(rns_colWidth_rounds = it) } },
-                            valueRange = .5f..1.5f
+                            valueRange = .5f..1.5f,
+                            steps = 19
                         )
                         ScaleSliderTile(
                             title = "Contribution",
                             initValue = screenModel.prefState.rns_colWidth_contribution,
                             onValueChange = { screenModel.updatePrefState { copy(rns_colWidth_contribution = it) } },
-                            valueRange = .5f..1.5f
+                            valueRange = .5f..1.5f,
+                            steps = 19
                         )
                     }
                 }

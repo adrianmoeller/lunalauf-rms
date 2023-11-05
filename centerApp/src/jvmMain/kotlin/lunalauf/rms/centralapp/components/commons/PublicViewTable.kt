@@ -29,6 +29,7 @@ fun PublicViewTable(
     headerTextStyles: Map<Int, TextStyle>,
     dataTextStyles: Map<Int, TextStyle>,
     showPlacements: Boolean,
+    placementsWeight: Float = .5f,
     baseFontSize: TextUnit
 ) {
     val density = LocalDensity.current
@@ -55,6 +56,7 @@ fun PublicViewTable(
             weights = weights,
             textStyles = headerTextStyles,
             showPlacements = showPlacements,
+            placementsWeight = placementsWeight,
             cornerRadius = cornerRadius,
             spacing = 5.dp,
             fontSize = baseFontSize * 0.8
@@ -88,6 +90,7 @@ fun PublicViewTable(
                     textStyles = dataTextStyles,
                     showPlacements = showPlacements,
                     placement = placement,
+                    placementsWeight = placementsWeight,
                     cornerRadius = cornerRadius,
                     spacing = 0.dp,
                     fontSize = baseFontSize
@@ -104,6 +107,7 @@ private fun HeaderTableRow(
     weights: List<Float>,
     textStyles: Map<Int, TextStyle>,
     showPlacements: Boolean,
+    placementsWeight: Float,
     cornerRadius: Dp,
     spacing: Dp,
     fontSize: TextUnit
@@ -117,7 +121,7 @@ private fun HeaderTableRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (showPlacements)
-            Spacer(Modifier.weight(.5f))
+            Spacer(Modifier.weight(placementsWeight))
         else
             Spacer(Modifier.width(cornerRadius))
 
@@ -160,6 +164,7 @@ private fun DataTableRow(
     textStyles: Map<Int, TextStyle>,
     showPlacements: Boolean,
     placement: Int? = null,
+    placementsWeight: Float,
     cornerRadius: Dp,
     spacing: Dp,
     fontSize: TextUnit
@@ -177,12 +182,12 @@ private fun DataTableRow(
             if (placement != null)
                 DataTableCell(
                     text = placement.toString(),
-                    weight = .5f,
+                    weight = placementsWeight,
                     textStyle = placementsTextStyle.merge(TextStyle(fontWeight = FontWeight.SemiBold)),
                     alignment = Alignment.TopCenter
                 )
             else
-                Spacer(Modifier.weight(.5f))
+                Spacer(Modifier.weight(placementsWeight))
         } else {
             Spacer(Modifier.width(cornerRadius))
         }
