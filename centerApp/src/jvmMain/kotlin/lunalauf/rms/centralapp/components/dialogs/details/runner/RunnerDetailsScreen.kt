@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.*
 import lunalauf.rms.centralapp.components.dialogs.details.EditableContributionTile
 import lunalauf.rms.centralapp.components.dialogs.details.StatTile
-import lunalauf.rms.centralapp.utils.Formats
 import lunalauf.rms.modelapi.ModelState
 
 @Composable
@@ -38,130 +38,133 @@ fun RunnerDetailsScreen(
         title = "Runner: ${if (runner.name.isNullOrBlank()) runner.id else runner.name}",
         maxWidth = 800.dp
     ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            Column(
-                modifier = Modifier.weight(2f),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+        val runnerDetailsCalc by screenModel.calcRunnerDetails(runner)
+        if (runnerDetailsCalc is CalcResult.Available){
+            val runnerDetails = (runnerDetailsCalc as CalcResult.Available).result
+            Row(
+                modifier = Modifier.padding(20.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                    modifier = Modifier.weight(2f),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    OutlinedCard(
-                        modifier = Modifier.fillMaxWidth()
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(
-                                horizontal = 15.dp,
-                                vertical = 10.dp
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(5.dp)
+                        OutlinedCard(
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            EditableIDTile(
-                                value = runner.id,
-                                onIdChange = { screenModel.updateID(runner, it) },
-                                modelState = modelState
-                            )
-                            EditableValueTile(
-                                name = "Name",
-                                value = runner.name,
-                                onValueChange = { screenModel.updateName(runner, it) },
-                                parser = screenModel::validateName,
-                                default = "",
-                                editTitle = "Update name"
-                            )
-                            EditableTeamTile(
-                                value = runner.team,
-                                onTeamChange = { screenModel.updateTeam(runner, it) },
-                                modelState = modelState
-                            )
-                            EditableContributionTile(
-                                type = runner.contribution,
-                                amountFixed = runner.amountFix,
-                                amountPerRound = runner.amountPerRound,
-                                onValuesChange = { type, fixed, perRound ->
-                                    screenModel.updateContribution(runner, type, fixed, perRound)
-                                }
-                            )
-                        }
-                    }
-                    OutlinedCard(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(
-                                horizontal = 15.dp,
-                                vertical = 10.dp
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(20.dp)
-                        ) {
-                            Text(
-                                text = "Statistics",
-                                style = MaterialTheme.typography.titleLarge,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Box {
-                                val listState = rememberLazyListState()
-                                LazyColumn(
-                                    verticalArrangement = Arrangement.spacedBy(15.dp),
-                                    state = listState
-                                ) {
-                                    items(screenModel.calcStats(runner)) {(name, value) ->
-                                        StatTile(
-                                            name = name,
-                                            value = value
-                                        )
+                            Column(
+                                modifier = Modifier.padding(
+                                    horizontal = 15.dp,
+                                    vertical = 10.dp
+                                ),
+                                verticalArrangement = Arrangement.spacedBy(5.dp)
+                            ) {
+                                EditableIDTile(
+                                    value = runner.id,
+                                    onIdChange = { screenModel.updateID(runner, it) },
+                                    modelState = modelState
+                                )
+                                EditableValueTile(
+                                    name = "Name",
+                                    value = runner.name,
+                                    onValueChange = { screenModel.updateName(runner, it) },
+                                    parser = screenModel::validateName,
+                                    default = "",
+                                    editTitle = "Update name"
+                                )
+                                EditableTeamTile(
+                                    value = runner.team,
+                                    onTeamChange = { screenModel.updateTeam(runner, it) },
+                                    modelState = modelState
+                                )
+                                EditableContributionTile(
+                                    type = runner.contribution,
+                                    amountFixed = runner.amountFix,
+                                    amountPerRound = runner.amountPerRound,
+                                    onValuesChange = { type, fixed, perRound ->
+                                        screenModel.updateContribution(runner, type, fixed, perRound)
                                     }
-                                }
-                                VerticalScrollbar(
-                                    modifier = Modifier.align(Alignment.CenterEnd),
-                                    adapter = rememberScrollbarAdapter(listState),
-                                    style = customScrollbarStyle
                                 )
                             }
                         }
+                        OutlinedCard(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(
+                                    horizontal = 15.dp,
+                                    vertical = 10.dp
+                                ),
+                                verticalArrangement = Arrangement.spacedBy(20.dp)
+                            ) {
+                                Text(
+                                    text = "Statistics",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Box {
+                                    val listState = rememberLazyListState()
+                                    LazyColumn(
+                                        verticalArrangement = Arrangement.spacedBy(15.dp),
+                                        state = listState
+                                    ) {
+                                        items(runnerDetails.stats) { (name, value) ->
+                                            StatTile(
+                                                name = name,
+                                                value = value
+                                            )
+                                        }
+                                    }
+                                    VerticalScrollbar(
+                                        modifier = Modifier.align(Alignment.CenterEnd),
+                                        adapter = rememberScrollbarAdapter(listState),
+                                        style = customScrollbarStyle
+                                    )
+                                }
+                            }
+                        }
                     }
-                }
-                DeleteElementDialog(
-                    element = runner,
-                    onDeleted = onDismissRequest,
-                    modelState = modelState,
-                    snackBarHostState = snackBarHostState
-                ) {
-                    FilledTonalButton(
-                        onClick = it,
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
+                    DeleteElementDialog(
+                        element = runner,
+                        onDeleted = onDismissRequest,
+                        modelState = modelState,
+                        snackBarHostState = snackBarHostState
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Delete,
-                            contentDescription = null
-                        )
-                        Spacer(Modifier.width(10.dp))
-                        Text("Delete runner")
+                        FilledTonalButton(
+                            onClick = it,
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Delete,
+                                contentDescription = null
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Text("Delete runner")
+                        }
                     }
                 }
+                Table(
+                    modifier = Modifier.weight(1f),
+                    header = listOf("Time", "Points"),
+                    data = runnerDetails.roundsData,
+                    weights = listOf(2.5f, 1f)
+                )
             }
-            val data = runner.rounds
-                .filterNotNull()
-                .map {
-                    listOf(
-                        Formats.dayTimeFormat.format(it.timestamp),
-                        it.points.toString()
-                    )
-                }
-            Table(
-                modifier = Modifier.weight(1f),
-                header = listOf("Time", "Points"),
-                data = data,
-                weights = listOf(2.5f, 1f)
-            )
+        } else {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
     }
 }

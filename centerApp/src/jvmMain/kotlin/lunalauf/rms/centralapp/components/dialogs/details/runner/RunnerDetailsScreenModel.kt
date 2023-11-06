@@ -3,7 +3,9 @@ package lunalauf.rms.centralapp.components.dialogs.details.runner
 import LunaLaufLanguage.ContrType
 import LunaLaufLanguage.Runner
 import LunaLaufLanguage.Team
+import androidx.compose.runtime.*
 import lunalauf.rms.centralapp.components.AbstractScreenModel
+import lunalauf.rms.centralapp.components.commons.CalcResult
 import lunalauf.rms.centralapp.utils.Formats
 import lunalauf.rms.centralapp.utils.InputValidator
 import lunalauf.rms.modelapi.ModelState
@@ -11,7 +13,7 @@ import lunalauf.rms.modelapi.UpdateRunnerIdResult
 import kotlin.time.Duration.Companion.milliseconds
 
 class RunnerDetailsScreenModel(
-    modelState: ModelState.Loaded
+    private val modelState: ModelState.Loaded
 ) : AbstractScreenModel(modelState) {
     fun updateID(runner: Runner, id: Long) {
         launchInModelScope {
@@ -48,12 +50,34 @@ class RunnerDetailsScreenModel(
         }
     }
 
-    fun calcStats(runner: Runner): List<Pair<String, String>> {
-        val roundDurations = runner.roundDurations()
+    @Composable
+    fun calcRunnerDetails(runner: Runner): State<CalcResult<RunnerDetails>> {
+        val runnersState by modelState.runners.collectAsState()
+        return produceState<CalcResult<RunnerDetails>>(initialValue = CalcResult.Loading(), runnersState) {
+            value = CalcResult.Loading()
+            launchInModelScope {
+                value = CalcResult.Available(
+                    RunnerDetails(
+                        stats = calcStats(runner),
+                        roundsData = modelAPI.rounds(runner)
+                            .map {
+                                listOf(
+                                    Formats.dayTimeFormat.format(it.timestamp),
+                                    it.points.toString()
+                                )
+                            }
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun calcStats(runner: Runner): List<Pair<String, String>> {
+        val roundDurations = modelAPI.roundDurations(runner)
 
         return listOf(
-            Pair("Rounds", runner.numOfRounds().toString()),
-            Pair("Total contribution", "${runner.totalAmount()} €"),
+            Pair("Rounds", modelAPI.numOfRounds(runner).toString()),
+            Pair("Total contribution", "${modelAPI.totalAmount(runner)} €"),
             Pair("Average round duration", average(roundDurations) ?: "-"),
             Pair("Fastest round", min(roundDurations) ?: "-")
         )
@@ -67,10 +91,4 @@ class RunnerDetailsScreenModel(
         return if (average.isNaN()) null
         else Formats.minutesFormat(average.milliseconds)
     }
-
-    private fun Runner.roundDurations() = rounds
-        .filterNotNull()
-        .map { it.timestamp.time }
-        .sorted()
-        .zipWithNext { a, b -> b - a }
 }
