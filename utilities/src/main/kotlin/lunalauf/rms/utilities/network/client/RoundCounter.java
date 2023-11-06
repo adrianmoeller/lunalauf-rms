@@ -60,7 +60,7 @@ public class RoundCounter {
     public void processInput(long runnerId) {
         if (repetitionHandler.isUnwantedRepetition(runnerId))
             return;
-        requestSubmitter.submit(requestFactory.createRoundCoundRequest(runnerId), client);
+        requestSubmitter.submit(requestFactory.createRoundCountRequest(runnerId), client);
     }
 
     public Client getClient() {
