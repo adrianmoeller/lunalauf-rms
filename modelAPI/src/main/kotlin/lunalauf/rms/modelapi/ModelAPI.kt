@@ -240,6 +240,71 @@ class ModelAPI(
         }
     }
 
+    suspend fun members(team: Team): List<Runner> {
+        mutex.withLock {
+            return team.members.filterNotNull().toList()
+        }
+    }
+
+    suspend fun funfactorResults(team: Team): List<FunfactorResult> {
+        mutex.withLock {
+            return team.funfactorResults.filterNotNull().toList()
+        }
+    }
+
+    suspend fun rounds(team: Team): List<Round> {
+        mutex.withLock {
+            return team.rounds.filterNotNull().toList()
+        }
+    }
+
+    private fun internalNumOfRounds(team: Team) = team.rounds
+        .filterNotNull()
+        .sumOf { it.points }
+
+    suspend fun numOfRounds(team: Team): Int {
+        mutex.withLock {
+            return internalNumOfRounds(team)
+        }
+    }
+
+    private fun internalNumOfFunfactorPoints(team: Team) = team.funfactorResults
+        .filterNotNull()
+        .sumOf { it.points }
+
+    suspend fun numOfFunfactorPoints(team: Team): Int {
+        mutex.withLock {
+            return internalNumOfFunfactorPoints(team)
+        }
+    }
+
+    suspend fun totalAmount(team: Team): Double {
+        mutex.withLock {
+            return when (team.contribution) {
+                ContrType.FIXED -> team.amountFix
+                ContrType.PERROUND -> team.amountPerRound * (
+                        internalNumOfRounds(team) + internalNumOfFunfactorPoints(team)
+                        )
+
+                ContrType.BOTH -> team.amountFix + team.amountPerRound * (
+                        internalNumOfRounds(team) + internalNumOfFunfactorPoints(team)
+                        )
+
+                ContrType.NONE, null -> 0.0
+            }
+        }
+    }
+
+    suspend fun roundDurations(team: Team): List<Long> {
+        mutex.withLock {
+            return team.rounds
+                .filterNotNull()
+                .map { it.timestamp.time }
+                .sorted()
+                .zipWithNext { a, b -> b - a }
+        }
+    }
+
     private fun getMinigame(id: Int): Minigame? {
         model.minigames.forEach {
             if (it.minigameID == id)

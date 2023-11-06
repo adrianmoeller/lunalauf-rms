@@ -39,8 +39,6 @@ import lunalauf.rms.centralapp.components.dialogs.details.runner.RunnerDetailsSc
 import lunalauf.rms.centralapp.components.dialogs.details.team.TeamDetailsScreen
 import lunalauf.rms.centralapp.components.dialogs.scantoshow.ScanToShowScreen
 import lunalauf.rms.modelapi.ModelState
-import lunalauf.rms.modelapi.states.RunnersState
-import lunalauf.rms.modelapi.states.TeamsState
 
 @Composable
 fun CompetitorsControlScreen(
@@ -135,14 +133,14 @@ fun CompetitorsControlScreen(
     if (teamsTableOpen) {
         ExpandedTeamsTable(
             onDismissRequest = { teamsTableOpen = false },
-            teamsState = teamsState
+            screenModel = screenModel
         )
     }
 
     if (runnersTableOpen) {
         ExpandedSingleRunnersTable(
             onDismissRequest = { runnersTableOpen = false },
-            runnersState = runnersState
+            screenModel = screenModel
         )
     }
 
@@ -384,7 +382,7 @@ private fun RunnerTile(
 private fun ExpandedTeamsTable(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
-    teamsState: TeamsState
+    screenModel: CompetitorsControlScreenModel
 ) {
     FullScreenDialog(
         modifier = modifier,
@@ -392,29 +390,28 @@ private fun ExpandedTeamsTable(
         title = "Teams",
         maxWidth = 1100.dp
     ) {
-        val data = teamsState.teams.map {
-            val numOfRounds = it.numOfRounds()
-            val numOfFunfactorPoints = it.numOfFunfactorPoints()
-            listOf(
-                it.name ?: "",
-                it.members.filterNotNull().size.toString(),
-                numOfRounds.toString(),
-                numOfFunfactorPoints.toString(),
-                (numOfRounds + numOfFunfactorPoints).toString(),
-                "${it.totalAmount()} €"
+        val dataCalc by screenModel.calcTeamsData()
+        if (dataCalc is CalcResult.Available) {
+            val data = (dataCalc as CalcResult.Available).result
+            Table(
+                modifier = Modifier.padding(
+                    top = 10.dp,
+                    bottom = 20.dp,
+                    start = 20.dp,
+                    end = 20.dp
+                ),
+                header = listOf("Name", "Members", "Rounds", "Funfactors", "Total rounds", "Total amount"),
+                data = data,
+                weights = listOf(3f, 1f, 1f, 1f, 1f, 1f)
             )
+        } else {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
-        Table(
-            modifier = Modifier.padding(
-                top = 10.dp,
-                bottom = 20.dp,
-                start = 20.dp,
-                end = 20.dp
-            ),
-            header = listOf("Name", "Members", "Rounds", "Funfactors", "Total rounds", "Total amount"),
-            data = data,
-            weights = listOf(3f, 1f, 1f, 1f, 1f, 1f)
-        )
     }
 }
 
@@ -422,7 +419,7 @@ private fun ExpandedTeamsTable(
 private fun ExpandedSingleRunnersTable(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
-    runnersState: RunnersState
+    screenModel: CompetitorsControlScreenModel
 ) {
     FullScreenDialog(
         modifier = modifier,
@@ -430,27 +427,28 @@ private fun ExpandedSingleRunnersTable(
         title = "Single runners",
         maxWidth = 800.dp
     ) {
-        val data = runnersState.runners
-            .filter { it.team == null }
-            .map {
-                listOf(
-                    it.id.toString(),
-                    it.name ?: "",
-                    it.numOfRounds().toString(),
-                    "${it.totalAmount()} €"
-                )
+        val dataCalc by screenModel.calcRunnersData()
+        if (dataCalc is CalcResult.Available) {
+            val data = (dataCalc as CalcResult.Available).result
+            Table(
+                modifier = Modifier.padding(
+                    top = 10.dp,
+                    bottom = 20.dp,
+                    start = 20.dp,
+                    end = 20.dp
+                ),
+                header = listOf("ID", "Name", "Rounds", "Total Amount"),
+                data = data,
+                weights = listOf(1f, 2.8f, 1f, 1f)
+            )
+        } else {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-        Table(
-            modifier = Modifier.padding(
-                top = 10.dp,
-                bottom = 20.dp,
-                start = 20.dp,
-                end = 20.dp
-            ),
-            header = listOf("ID", "Name", "Rounds", "Total Amount"),
-            data = data,
-            weights = listOf(1f, 2.8f, 1f, 1f)
-        )
+        }
     }
 }
 
