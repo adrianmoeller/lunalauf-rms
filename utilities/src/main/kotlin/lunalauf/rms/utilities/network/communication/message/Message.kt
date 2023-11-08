@@ -16,4 +16,8 @@ abstract class Message(
     init {
         this.type = type.name
     }
+
+    override fun toString(): String {
+        return "$type (id: $messageId)"
+    }
 }

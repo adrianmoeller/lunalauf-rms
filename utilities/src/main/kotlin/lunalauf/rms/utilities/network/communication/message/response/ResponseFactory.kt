@@ -49,7 +49,7 @@ class ResponseFactory {
 
     fun createRunnerInfoResponse(
         requestId: Long,
-        runnerName: String?,
+        runnerName: String,
         runnerId: Long,
         numRunnerRounds: Int
     ): RunnerInfoResponse {
@@ -62,8 +62,12 @@ class ResponseFactory {
     }
 
     fun createTeamRunnerInfoResponse(
-        requestId: Long, runnerName: String?, runnerId: Long,
-        numRunnerRounds: Int, teamName: String?, numTeamRounds: Int,
+        requestId: Long,
+        runnerName: String,
+        runnerId: Long,
+        numRunnerRounds: Int,
+        teamName: String,
+        numTeamRounds: Int,
         teamFunfactorPoints: Int
     ): TeamRunnerInfoResponse {
         val response = TeamRunnerInfoResponse()

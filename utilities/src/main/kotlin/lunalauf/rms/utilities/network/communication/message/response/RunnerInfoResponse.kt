@@ -5,7 +5,7 @@ import lunalauf.rms.utilities.network.communication.message.type.ResponseType
 
 open class RunnerInfoResponse : Response {
     @SerializedName("runner")
-    var runnerName: String? = null
+    var runnerName: String = "-"
 
     @SerializedName("runner-id")
     var runnerId: Long = 0

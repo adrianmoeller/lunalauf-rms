@@ -23,7 +23,7 @@ sealed class ModelState {
         val fileName: String,
         internal val model: LunaLauf
     ) : ModelState() {
-        val coroutineScope = CoroutineScope(Dispatchers.Default)
+        private val coroutineScope = CoroutineScope(Dispatchers.Default)
         val modelAPI = ModelAPI(mutex, this)
 
         private val _common = MutableStateFlow(

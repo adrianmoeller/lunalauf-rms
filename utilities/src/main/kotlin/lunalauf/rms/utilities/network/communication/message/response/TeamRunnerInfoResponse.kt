@@ -5,7 +5,7 @@ import lunalauf.rms.utilities.network.communication.message.type.ResponseType
 
 class TeamRunnerInfoResponse : RunnerInfoResponse(ResponseType.TEAMRUNNER_INFO) {
     @SerializedName("team")
-    var teamName: String? = null
+    var teamName: String = "-"
 
     @SerializedName("team-rounds")
     var numTeamRounds = 0
