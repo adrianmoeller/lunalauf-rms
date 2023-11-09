@@ -1,37 +1,35 @@
 package lunalauf.rms.utilities.network.communication
 
 import com.google.gson.JsonParseException
-import javafx.concurrent.Task
 import lunalauf.rms.utilities.network.client.Client
 import lunalauf.rms.utilities.network.communication.message.request.Request
 import lunalauf.rms.utilities.network.communication.message.response.Response
-import java.util.function.Consumer
 
-class RequestSubmitter(private val responseHandler: Consumer<Response>, private val errorHandler: Consumer<ErrorType>) {
-    private val executor: ExecutorService
+class RequestSubmitter(
+    private val responseHandler: (Response) -> Unit,
+    private val errorHandler: (ErrorType) -> Unit
+) {
     private val numMessagesToDump = 5
 
-    init {
-        executor = Executors.newSingleThreadExecutor()
-    }
-
-    fun submit(request: Request, client: Client?) {
+    fun submit(request: Request, client: Client) {
         val task = SubmissionTask(request, client)
         task.setOnSucceeded { event ->
             try {
                 val response: Response = task.get()
-                responseHandler.accept(response)
+                responseHandler(response)
             } catch (e: Exception) {
-                errorHandler.accept(ErrorType.UNWANTED_TERMINATION)
+                errorHandler(ErrorType.UNWANTED_TERMINATION)
             }
         }
-        task.setOnCancelled { event -> errorHandler.accept(ErrorType.UNWANTED_TERMINATION) }
+        task.setOnCancelled { event -> errorHandler(ErrorType.UNWANTED_TERMINATION) }
         task.setOnFailed { event ->
-            val exception: Throwable = task.getException()
-            val error: ErrorType
-            error =
-                if (exception is NoAnswerException) ErrorType.RESPONSE_TIMEOUT else if (exception is NoConnectionException) ErrorType.DISCONNECTED else if (exception is CorruptedMessageException) ErrorType.CORRUPTED_SERVER_MESSAGE else ErrorType.CORRUPTED_SERVER_MESSAGE
-            errorHandler.accept(error)
+            val error = when (task.getException()) {
+                    is Client.NoAnswerException -> ErrorType.RESPONSE_TIMEOUT
+                    is Client.NoConnectionException -> ErrorType.DISCONNECTED
+                    is CorruptedMessageException -> ErrorType.CORRUPTED_SERVER_MESSAGE
+                    else -> ErrorType.CORRUPTED_SERVER_MESSAGE
+                }
+            errorHandler(error)
         }
         executor.execute(task)
     }
@@ -44,20 +42,20 @@ class RequestSubmitter(private val responseHandler: Consumer<Response>, private 
         }
     }
 
-    private inner class SubmissionTask internal constructor(private val request: Request, private val client: Client?) :
+    private inner class SubmissionTask internal constructor(private val request: Request, private val client: Client) :
         Task<Response?>() {
-        @Throws(NoAnswerException::class, NoConnectionException::class, CorruptedMessageException::class)
+        @Throws(Client.NoAnswerException::class, Client.NoConnectionException::class, CorruptedMessageException::class)
         protected fun call(): Response {
-            if (client == null || !client.isConnected()) throw NoConnectionException()
+            if (!client.isConnected()) throw Client.NoConnectionException()
             client.send(MessageProcessor.toJsonString(request))
             return getMatchingResponse(request) ?: throw CorruptedMessageException()
         }
 
-        @Throws(NoAnswerException::class, NoConnectionException::class, CorruptedMessageException::class)
-        private fun getMatchingResponse(request: Request): Response? {
+        @Throws(Client.NoAnswerException::class, Client.NoConnectionException::class, CorruptedMessageException::class)
+        private fun getMatchingResponse(request: Request): Response {
             var it = 0
             while (it < numMessagesToDump) {
-                val receivedString = client!!.receive()
+                val receivedString = client.receive()
                 try {
                     val receivedMessage = MessageProcessor.fromJsonString(receivedString)
                     if (receivedMessage is Response) {
@@ -68,7 +66,7 @@ class RequestSubmitter(private val responseHandler: Consumer<Response>, private 
                 }
                 it++
             }
-            throw NoAnswerException()
+            throw Client.NoAnswerException()
         }
     }
 

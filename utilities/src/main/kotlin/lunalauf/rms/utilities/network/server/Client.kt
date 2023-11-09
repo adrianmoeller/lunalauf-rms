@@ -80,9 +80,7 @@ class Client(
             modelState = modelState,
             status = _status,
             scope = scope,
-        ).apply {
-            run()
-        }
+        )
     }
 
     fun stopListening() {

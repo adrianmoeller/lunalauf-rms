@@ -16,9 +16,9 @@ class RequestHandler(
     private val scope: CoroutineScope
 ) {
     private val responseFactory = ResponseFactory()
-    private var job: Job? = null
+    private val job: Job
 
-    fun run() {
+    init {
         status.value = 0
         job = scope.launch {
             try {
@@ -49,7 +49,7 @@ class RequestHandler(
                         val modelUpdater = ModelUpdater(modelState, message, responseFactory)
                         try {
                             modelUpdater.run()
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             responseFactory.createErrorResponse(message.messageId, ErrorType.BAD_SERVER_STATE)
                         }
                     } else {
@@ -58,7 +58,7 @@ class RequestHandler(
                 } else {
                     responseFactory.createErrorResponse(message.messageId, ErrorType.UNEXPECTED_CLIENT_MESSAGE)
                 }
-            } catch (e: JsonParseException) {
+            } catch (_: JsonParseException) {
                 responseFactory.createErrorResponse(-1, ErrorType.CORRUPTED_CLIENT_MESSAGE)
             }
 
@@ -67,6 +67,6 @@ class RequestHandler(
     }
 
     fun cancel() {
-        job?.cancel()
+        job.cancel()
     }
 }
