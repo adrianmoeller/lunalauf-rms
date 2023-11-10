@@ -1,76 +1,57 @@
 package lunalauf.rms.utilities.network.client
 
+import kotlinx.coroutines.*
 import lunalauf.rms.utilities.network.util.ConnectionInitiationHelper
 import lunalauf.rms.utilities.network.util.PortProvider
+import lunalauf.rms.utilities.network.util.Service
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
 
-class Connector {
+class Connector : Service<Connector.Input, Connector.Result>(Dispatchers.IO) {
     companion object {
         private const val TIMEOUT = 200 // ms
     }
 
-    private var currentTask: ConnectionTask? = null
+    override fun CoroutineScope.run(input: Input): Result {
+        while (true) {
+            if (!isActive) return Result.Aborted
 
-    fun connect(
-        host: String,
-        port: Int,
-        onConnected: (Client) -> Unit,
-        onAborted: () -> Unit
-    ) {
-        cancel()
-        currentTask = ConnectionTask(host, port)
-        currentTask.setOnSucceeded { event ->
-            try {
-                val client: Client = currentTask.get()
-                onConnected(client)
-            } catch (e: Exception) {
-                onAborted()
-            }
-        }
-        currentTask.setOnCancelled { event -> onAborted() }
-        currentTask.setOnFailed { event -> onAborted() }
-        executor.execute(currentTask)
-    }
+            if (input.port in 1..65535) {
+                try {
+                    val socket = Socket()
+                    socket.connect(InetSocketAddress(input.host, input.port), TIMEOUT * 2)
+                    val client = Client(socket)
+                    return if (initialCommunicationTest(client)) {
+                        Result.Connected(client)
+                    } else {
+                        client.close()
+                        Result.Failed("Communication test failed")
+                    }
+                } catch (_: Exception) {
+                }
+            } else {
+                for (prefPort in PortProvider.getPreferredPorts()) {
+                    if (!isActive) return Result.Aborted
 
-    fun cancel() {
-        if (currentTask != null) currentTask.cancel()
-    }
-
-    private inner class ConnectionTask(private val host: String, private val port: Int) : Task<Client?>() {
-        @Throws(Exception::class)
-        protected fun call(): Client? {
-            while (true) {
-                if (isCancelled()) return null
-                if (port > 0 && port <= 65535) {
                     try {
                         val socket = Socket()
-                        socket.connect(InetSocketAddress(host, port), TIMEOUT * 2)
+                        socket.connect(InetSocketAddress(input.host, prefPort), TIMEOUT)
                         val client = Client(socket)
-                        return if (initialCommunicationTest(client)) client else {
+                        return if (initialCommunicationTest(client)) {
+                            Result.Connected(client)
+                        } else {
                             client.close()
-                            throw Exception("Communication test failed")
+                            Result.Failed("Communication test failed")
                         }
-                    } catch (ignored: IOException) {
-                    }
-                } else {
-                    for (prefPort in PortProvider.getPreferredPorts()) {
-                        if (isCancelled()) return null
-                        try {
-                            val socket = Socket()
-                            socket.connect(InetSocketAddress(host, prefPort), TIMEOUT)
-                            val client = Client(socket)
-                            if (initialCommunicationTest(client)) return client else client.close()
-                        } catch (ignored: Exception) {
-                        }
+                    } catch (_: Exception) {
                     }
                 }
             }
         }
     }
 
-    @Throws(Exception::class)
+    @Throws(IOException::class)
     private fun initialCommunicationTest(client: Client): Boolean {
         client.setTimeout(5000)
         return try {
@@ -87,5 +68,16 @@ class Connector {
         } finally {
             client.resetTimeout()
         }
+    }
+
+    data class Input(
+        val host: String,
+        val port: Int
+    )
+
+    sealed class Result {
+        data object Aborted : Result()
+        data class Failed(val reason: String) : Result()
+        data class Connected(val client: Client) : Result()
     }
 }

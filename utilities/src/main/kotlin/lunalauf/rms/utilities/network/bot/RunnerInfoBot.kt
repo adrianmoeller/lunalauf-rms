@@ -65,7 +65,7 @@ class RunnerInfoBot(
 
     private val chatId2runner: MutableMap<Long, Runner> = HashMap()
 
-    override fun saveConnectionData() {
+    override suspend fun saveConnectionData() {
         // NO-OP
     }
 

@@ -5,15 +5,14 @@ import LunaLaufLanguage.Team
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import lunalauf.rms.modelapi.LogRoundResult
 import lunalauf.rms.modelapi.ModelAPI
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.utilities.network.bot.util.ImageReceiveValidator
-import lunalauf.rms.utilities.network.bot.util.reply.*
 import lunalauf.rms.utilities.network.bot.util.ImageViewData
+import lunalauf.rms.utilities.network.bot.util.reply.*
 import org.apache.commons.io.FileUtils
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.telegram.telegrambots.meta.api.methods.ActionType
 import org.telegram.telegrambots.meta.api.methods.GetFile
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction
@@ -26,6 +25,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 import java.io.IOException
 import java.net.URI
+import java.nio.file.Paths
 import java.util.*
 
 class RoundCounterBot(
@@ -148,46 +148,39 @@ class RoundCounterBot(
     }
 
     private fun loadConnectionData() {
-        // TODO
-//        val re = Result<Void>("Load Connection Data")
-//        synchronized(modelState) {
-//            val llRes: Result<LunaLauf> = re.makeSub(modelState.getLunaLauf())
-//            if (!llRes.hasResult()) {
-//                Platform.runLater { re.failed("Luna-Lauf file is not loaded", null).log() }
-//                return
-//            }
-//            for (entry in llRes.getResult().getConnections()) regChatId(entry.getChatId(), entry.getRunner())
-//        }
-//        Platform.runLater { re.passed(null, 0, "Done", Lvl.INFO).log() }
+        if (modelState is ModelState.Loaded) {
+            runBlocking(ModelAPI.modelContext) {
+                modelState.modelAPI.connections()
+            }.forEach {
+                registerChatId(it.chatId, it.runner)
+            }
+        } else {
+            logger.error("Cannot load connection data since model is not available")
+        }
     }
 
-    override fun saveConnectionData() {
-        // TODO
-//        val re = Result<Void>("Save Connection Data")
-//        val llRes: Result<LunaLauf> = re.makeSub(modelState.getLunaLauf())
-//        if (!llRes.hasResult()) {
-//            Platform.runLater { re.failed("Luna-Lauf file is not loaded", null).log() }
-//            return
-//        }
-//        val connectionEntries: MutableSet<ConnectionEntry> = HashSet<ConnectionEntry>()
-//        for ((key, value) in chatId2runner) {
-//            // TODO do this in LunaLaufApi
-//            val connectionEntry: ConnectionEntry = LunaLaufLanguageFactory.eINSTANCE.createConnectionEntry()
-//            connectionEntry.setChatId(key)
-//            connectionEntry.setRunner(value)
-//            connectionEntries.add(connectionEntry)
-//        }
-//        synchronized(modelState) {
-//            llRes.getResult().getConnections().clear()
-//            llRes.getResult().getConnections().addAll(connectionEntries)
-//        }
-//        Platform.runLater { re.passed(null, 0, "Done", Lvl.INFO).log() }
+    override suspend fun saveConnectionData() {
+        if (modelState is ModelState.Loaded) {
+            val connectionId2Runner = getChatId2Runner()
+            withContext(ModelAPI.modelContext) {
+                modelState.modelAPI.storeConnections(connectionId2Runner)
+            }
+        } else {
+            logger.error("Cannot save connection data since model is not available")
+        }
+    }
+
+    private fun getChatId2Runner(): Map<Long, Runner> {
+        synchronized(this) {
+            return chatId2runner.toMap()
+        }
     }
 
     @Throws(TelegramApiException::class)
     fun sendGlobalMessage(message: String, onlyTeams: Boolean) {
-        for ((chatId, runner) in chatId2runner) {
-            if (onlyTeams && runner.team == null) continue
+        for ((chatId, runner) in getChatId2Runner()) {
+            if (onlyTeams && runner.team == null)
+                continue
             execute(send(chatId, message))
         }
     }
@@ -216,9 +209,18 @@ class RoundCounterBot(
         }
     }
 
-    protected fun regChatId(chatId: Long, runner: Runner) {
-        chatId2runner[chatId] = runner
-        runner2chatId[runner] = chatId
+    private fun registerChatId(chatId: Long, runner: Runner) {
+        synchronized(this) {
+            chatId2runner[chatId] = runner
+            runner2chatId[runner] = chatId
+        }
+    }
+
+    private fun unregisterChatId(runner: Runner, oldChatId: Long) {
+        synchronized(this) {
+            runner2chatId.remove(runner)
+            chatId2runner.remove(oldChatId)
+        }
     }
 
     @Throws(TelegramApiException::class)
@@ -298,30 +300,29 @@ class RoundCounterBot(
 
     @Throws(IllegalStateException::class, TelegramApiException::class)
     private fun register(chatId: Long, runner: Runner) {
-        val registeredChatId = chatId2runner.containsKey(chatId)
-        val registeredRunner = runner2chatId.containsKey(runner)
-        var isTeam: Boolean
-        synchronized(modelState) { isTeam = runner.team != null }
+        val registeredRunner = chatId2runner[chatId]
+        val registeredChatId = runner2chatId[runner]
+        val isChatIdRegistered = registeredRunner != null
+        val isRunnerRegistered = registeredChatId != null
+        val isTeam = runner.team != null
 
-        if (!registeredChatId && !registeredRunner) {
-            regChatId(chatId, runner)
+        if (!isChatIdRegistered && !isRunnerRegistered) {
+            registerChatId(chatId, runner)
             val sMsg = send(chatId, if (isTeam) AWR_REGISTERED_T else AWR_REGISTERED_R)
             sMsg.replyMarkup = countKeyboard
             pendingReplies.setCountReply(chatId, execute(sMsg))
-        } else if (registeredChatId && registeredRunner && chatId2runner[chatId] == runner) {
+        } else if (isChatIdRegistered && isRunnerRegistered && registeredRunner == runner) {
             execute(send(chatId, if (isTeam) AWR_ALREADY_REG_T else AWR_ALREADY_REG_R))
-        } else if (registeredRunner) {
+        } else if (isRunnerRegistered) {
             val sMsg: SendMessage = send(chatId, AWR_OTHER_DEV)
             sMsg.replyMarkup = confirmationKeyboard
             val message = execute(sMsg)
 
             val reply = pendingReplies.setConfirmationReply(chatId, message, AWR_OTHER_DEV)
             reply.setConfirmAction {
-                val oldChatId = runner2chatId[runner]!!
-                runner2chatId.remove(runner)
-                chatId2runner.remove(oldChatId)
-
-                regChatId(chatId, runner)
+                val oldChatId = registeredChatId!!
+                unregisterChatId(runner, oldChatId)
+                registerChatId(chatId, runner)
 
                 execute(send(oldChatId, AWR_REMOVED))
                 pendingReplies.removeReply(oldChatId)
@@ -329,14 +330,14 @@ class RoundCounterBot(
                 sMsgReply.replyMarkup = countKeyboard
                 pendingReplies.setCountReply(chatId, execute(sMsgReply))
             }
-        } else if (registeredChatId) {
+        } else if (isChatIdRegistered) {
             val sMsg: SendMessage = send(chatId, AWR_OTHER_REG)
             sMsg.replyMarkup = confirmationKeyboard
             val message = execute(sMsg)
             val reply = pendingReplies.setConfirmationReply(chatId, message, AWR_OTHER_REG)
             reply.setConfirmAction {
-                runner2chatId.remove(chatId2runner[chatId])
-                regChatId(chatId, runner)
+                runner2chatId.remove(registeredRunner)
+                registerChatId(chatId, runner)
                 val sMsgReply = send(chatId, if (isTeam) AWR_REGISTERED_T else AWR_REGISTERED_R)
                 sMsgReply.replyMarkup = countKeyboard
                 pendingReplies.setCountReply(chatId, execute(sMsgReply))
@@ -504,7 +505,7 @@ class RoundCounterBot(
             val getFile = GetFile()
             getFile.fileId = bigPhotoSize.fileId
             val file = execute(getFile)
-            val fileURL = file.getFileUrl(botToken)
+            val fileURL = file.getFileUrl(token)
             val photoFilePath = calcPhotoFilePath(team, file)
             val systemFile = java.io.File(photoFilePath)
             try {
@@ -522,9 +523,8 @@ class RoundCounterBot(
     }
 
     private fun calcPhotoFilePath(team: Team, file: File): String {
-        val modelPath: String = modelState.getResource().getURI().devicePath()
-        val path = modelPath.substring(0, modelPath.lastIndexOf("/") + 1)
+        val path = Paths.get("").toAbsolutePath().toString()
         val extension = file.filePath.substring(file.filePath.lastIndexOf("."))
-        return path + "team_photos/" + team.name + extension
+        return path + "/team_photos/" + team.name + extension
     }
 }

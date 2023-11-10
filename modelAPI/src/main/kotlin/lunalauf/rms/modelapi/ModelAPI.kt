@@ -524,6 +524,27 @@ class ModelAPI(
         }
     }
 
+    suspend fun connections(): List<ConnectionEntry> {
+        mutex.withLock {
+            return model.connections.filterNotNull().toList()
+        }
+    }
+
+    suspend fun storeConnections(connectionId2Runner: Map<Long, Runner>) {
+        mutex.withLock {
+            model.connections.clear()
+            model.connections.addAll(
+                connectionId2Runner.map { (id, runner) ->
+                    LunaLaufLanguageFactory.eINSTANCE.createConnectionEntry().apply {
+                        this.chatId = id
+                        this.runner = runner
+                    }
+                }
+            )
+            logger.info("Connections stored")
+        }
+    }
+
     suspend fun <T : EObject> deleteElement(element: T): DeleteElementResult {
         mutex.withLock {
             when (element) {

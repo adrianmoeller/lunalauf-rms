@@ -12,10 +12,10 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 
 abstract class AbstractBot(
-    protected val botToken: String,
+    protected val token: String,
     protected val modelState: ModelState,
     silentStart: Boolean
-) : TelegramLongPollingBot(botToken) {
+) : TelegramLongPollingBot(token) {
     companion object {
         protected const val SILENT_DURATION: Long = 3000 // ms
     }
@@ -55,7 +55,7 @@ abstract class AbstractBot(
     }
 
     // TODO instantly save connection data in model object?
-    abstract fun saveConnectionData()
+    abstract suspend fun saveConnectionData()
 
     protected fun beSilent(): Boolean {
         if (!silentStart) return false

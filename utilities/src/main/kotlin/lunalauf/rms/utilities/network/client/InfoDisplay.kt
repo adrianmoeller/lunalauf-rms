@@ -7,37 +7,37 @@ import lunalauf.rms.utilities.network.communication.message.response.ErrorRespon
 import lunalauf.rms.utilities.network.communication.message.response.Response
 import lunalauf.rms.utilities.network.communication.message.response.RunnerInfoResponse
 import lunalauf.rms.utilities.network.util.RepetitionHandler
-import java.util.function.Consumer
 
-class InfoDisplay {
-    var client: Client? = null
+class InfoDisplay(
+    private val client: Client
+) {
     private val requestSubmitter: RequestSubmitter
     private val requestFactory: RequestFactory
     private val repetitionHandler: RepetitionHandler
-    private var succeededAction: Consumer<RunnerInfoResponse>? = null
-    private var failedAction: Consumer<ErrorType>? = null
-    private var onConnectionLost: Runnable? = null
+    private var succeededAction: (RunnerInfoResponse) -> Unit = {}
+    private var failedAction: (ErrorType) -> Unit = {}
+    private var onConnectionLost: () -> Unit = {}
 
     init {
-        requestSubmitter =
-            RequestSubmitter({ response: Response -> handleResponse(response) }) { error: ErrorType -> handleError(error) }
+        requestSubmitter = RequestSubmitter(
+            responseHandler = { handleResponse(it) },
+            errorHandler = { handleError(it) }
+        )
         requestFactory = RequestFactory()
         repetitionHandler = RepetitionHandler(3000)
     }
 
     private fun handleResponse(response: Response) {
-        if (response is RunnerInfoResponse) {
-            if (succeededAction != null) succeededAction!!.accept(response)
-        } else if (response is ErrorResponse) {
-            if (failedAction != null) failedAction!!.accept(response.error)
-        } else {
-            if (failedAction != null) failedAction!!.accept(ErrorType.UNEXPECTED_SERVER_MESSAGE)
+        when (response) {
+            is ErrorResponse -> failedAction(response.error)
+            is RunnerInfoResponse -> succeededAction(response)
+            else -> failedAction(ErrorType.UNEXPECTED_SERVER_MESSAGE)
         }
     }
 
     private fun handleError(error: ErrorType) {
-        if (failedAction != null) failedAction!!.accept(error)
-        if (error == ErrorType.DISCONNECTED && onConnectionLost != null) onConnectionLost!!.run()
+        failedAction(error)
+        if (error == ErrorType.DISCONNECTED) onConnectionLost()
     }
 
     fun processInput(runnerId: Long) {
@@ -45,16 +45,15 @@ class InfoDisplay {
         requestSubmitter.submit(requestFactory.createRunnerInfoRequest(runnerId), client)
     }
 
-    fun hasClient(): Boolean {
-        return client != null
-    }
-
-    fun setActions(succeeded: Consumer<RunnerInfoResponse>?, failed: Consumer<ErrorType>?) {
+    fun setActions(
+        succeeded: (RunnerInfoResponse) -> Unit,
+        failed: (ErrorType) -> Unit
+    ) {
         succeededAction = succeeded
         failedAction = failed
     }
 
-    fun setOnConnectionLost(onConnectionLost: Runnable?) {
+    fun setOnConnectionLost(onConnectionLost: () -> Unit) {
         this.onConnectionLost = onConnectionLost
     }
 
