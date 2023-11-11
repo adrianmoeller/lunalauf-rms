@@ -8,13 +8,16 @@ import lunalauf.rms.utilities.network.communication.ErrorType
 import lunalauf.rms.utilities.network.communication.MessageProcessor
 import lunalauf.rms.utilities.network.communication.message.request.Request
 import lunalauf.rms.utilities.network.communication.message.response.ResponseFactory
+import org.slf4j.LoggerFactory
 
 class RequestHandler(
     private val client: Client,
     private val modelState: ModelState,
     private val status: MutableStateFlow<Int>,
-    private val scope: CoroutineScope
+    scope: CoroutineScope
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     private val responseFactory = ResponseFactory()
     private val job: Job
 
@@ -25,7 +28,8 @@ class RequestHandler(
                 executeProtocol()
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Throwable) {
+            } catch (e: Throwable) {
+                logger.error("Exception occurred while running the protocol", e)
             } finally {
                 status.value = -1
             }
@@ -49,20 +53,25 @@ class RequestHandler(
                         val modelUpdater = ModelUpdater(modelState, message, responseFactory)
                         try {
                             modelUpdater.run()
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
+                            logger.error("Exception occurred while updating the model", e)
                             responseFactory.createErrorResponse(message.messageId, ErrorType.BAD_SERVER_STATE)
                         }
                     } else {
+                        logger.warn("Request handler needs available model!")
                         responseFactory.createErrorResponse(message.messageId, ErrorType.NO_MODEL_STATE)
                     }
                 } else {
+                    logger.warn("Received unexpected client message: {} from: {}", message, client.remoteAddress)
                     responseFactory.createErrorResponse(message.messageId, ErrorType.UNEXPECTED_CLIENT_MESSAGE)
                 }
             } catch (_: JsonParseException) {
+                logger.warn("Received corrupted client message from: {}", client.remoteAddress)
                 responseFactory.createErrorResponse(-1, ErrorType.CORRUPTED_CLIENT_MESSAGE)
             }
 
             client.send(MessageProcessor.toJsonString(response))
+            logger.info("Response sent: {} to: {}", response, client.remoteAddress)
         }
     }
 

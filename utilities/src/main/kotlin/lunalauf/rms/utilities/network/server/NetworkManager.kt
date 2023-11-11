@@ -36,31 +36,30 @@ sealed class NetworkManager {
         modelState: ModelState
     ) : NetworkManager() {
         private var serverSocket = createServerSocket()
-        val clientHandler: ClientHandler
-        val clientCatcher: ClientCatcher
+        val clientHandler = ClientHandler(modelState)
+        val clientCatcher = ClientCatcher(clientHandler, serverSocket)
 
-        val port get() = serverSocket.getLocalPort()
-        val localAddress get() = serverSocket.getInetAddress()?.hostAddress ?: "None"
+        val port get() = serverSocket.localPort
+        val localAddress get() = serverSocket.inetAddress?.hostAddress ?: "None"
 
-        init {
-            createServerSocket()
-            clientHandler = ClientHandler(modelState)
-            clientCatcher = ClientCatcher(clientHandler, serverSocket)
-        }
-
+        @Throws(IOException::class)
         private fun createServerSocket(): ServerSocket {
             for (port in getPreferredPorts()) {
                 try {
-                    return ServerSocket(port)
+                    val socket = ServerSocket(port)
+                    logger.info("Created server socket. Bound to port {}", socket.localPort)
+                    return socket
                 } catch (_: IOException) {
                 }
             }
-            return ServerSocket(0)
+            val socket = ServerSocket(0)
+            logger.info("Created server socket. Bound to port {}", socket.localPort)
+            return socket
         }
 
         fun shutdown() {
             clientCatcher.stop()
-            clientHandler.clients.value.forEach { obj: Client -> obj.stopListening() }
+            clientHandler.clients.value.forEach { it.stopListening() }
         }
     }
 }

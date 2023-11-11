@@ -32,8 +32,9 @@ class ClientCatcher(
         var it = 0
         while (isActive && it < MAX_ITERATIONS) {
             try {
-                val socket: Socket = serverSocket.accept()
+                val socket = serverSocket.accept()
                 val client = Client(socket)
+                logger.info("Client accepted: {}. Passing to client handler", client.remoteAddress)
                 clientHandler.handleClient(client)
             } catch (_: SocketTimeoutException) {
                 it++

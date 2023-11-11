@@ -11,6 +11,7 @@ import java.net.Socket
 class Connector : Service<Connector.Input, Connector.Result>(Dispatchers.IO) {
     companion object {
         private const val TIMEOUT = 200 // ms
+        private const val TIMEOUT_COMMUNICATION_TEST = 5000 // ms
     }
 
     override fun CoroutineScope.run(input: Input): Result {
@@ -23,6 +24,7 @@ class Connector : Service<Connector.Input, Connector.Result>(Dispatchers.IO) {
                     socket.connect(InetSocketAddress(input.host, input.port), TIMEOUT * 2)
                     val client = Client(socket)
                     return if (initialCommunicationTest(client)) {
+                        logger.info("Connected to port: {}", client.port)
                         Result.Connected(client)
                     } else {
                         client.close()
@@ -39,6 +41,7 @@ class Connector : Service<Connector.Input, Connector.Result>(Dispatchers.IO) {
                         socket.connect(InetSocketAddress(input.host, prefPort), TIMEOUT)
                         val client = Client(socket)
                         return if (initialCommunicationTest(client)) {
+                            logger.info("Connected to port: {}", client.port)
                             Result.Connected(client)
                         } else {
                             client.close()
@@ -47,23 +50,29 @@ class Connector : Service<Connector.Input, Connector.Result>(Dispatchers.IO) {
                     } catch (_: Exception) {
                     }
                 }
+                logger.info("Could no connect to any preferred port. Retrying...")
             }
         }
     }
 
     @Throws(IOException::class)
     private fun initialCommunicationTest(client: Client): Boolean {
-        client.setTimeout(5000)
+        client.setTimeout(TIMEOUT_COMMUNICATION_TEST)
         return try {
             val synMessage: String = ConnectionInitiationHelper.synMessage
             val expectedAckMessage: String = ConnectionInitiationHelper.getAckMessage(synMessage)
             client.send(synMessage)
             val ackMessage = client.receive()
-            if (expectedAckMessage != ackMessage) return false
+            if (expectedAckMessage != ackMessage) {
+                logger.warn("Communication test failed")
+                return false
+            }
             val synAckMessage: String = ConnectionInitiationHelper.getAckMessage(ackMessage)
             client.send(synAckMessage)
+            logger.info("Communication test successful")
             true
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            logger.warn("Communication test failed due to an exception", e)
             false
         } finally {
             client.resetTimeout()

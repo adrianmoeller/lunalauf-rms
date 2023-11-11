@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.utilities.network.util.ConnectionInitiationHelper
+import org.slf4j.LoggerFactory
 import java.net.SocketException
 
 class ClientHandler(
@@ -16,6 +17,8 @@ class ClientHandler(
     companion object {
         private const val TIMEOUT_COMMUNICATION_TEST = 2000 // ms
     }
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val scope = CoroutineScope(Dispatchers.IO)
     private val _clients = MutableStateFlow<ArrayList<Client>>(arrayListOf())
@@ -40,13 +43,17 @@ class ClientHandler(
             client.send(ackMessage)
             val synAckMessage = client.receive()
             val expectedSynAckMessage: String = ConnectionInitiationHelper.getAckMessage(ackMessage)
-            expectedSynAckMessage == synAckMessage
-        } catch (_: Exception) {
+            val result = expectedSynAckMessage == synAckMessage
+            logger.info("Communication test {}: {}", if (result) "successful" else "failed", client.remoteAddress)
+            result
+        } catch (e: Exception) {
+            logger.warn("Communication test failed due to an exception: {}", client.remoteAddress, e)
             false
         } finally {
             try {
                 client.resetTimeout()
-            } catch (_: SocketException) {
+            } catch (e: SocketException) {
+                logger.error("Failed to reset socket timeout. Behaviour unpredictable: {}", client.remoteAddress, e)
             }
         }
     }
@@ -64,6 +71,7 @@ class ClientHandler(
                 else add(client)
             }
         }
+        logger.info("Client registered: {}", client.remoteAddress)
     }
 
     fun onLostClients(listener: (List<Client>) -> Unit) {

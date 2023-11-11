@@ -5,6 +5,7 @@ import kotlinx.coroutines.*
 import lunalauf.rms.utilities.network.client.Client
 import lunalauf.rms.utilities.network.communication.message.request.Request
 import lunalauf.rms.utilities.network.communication.message.response.Response
+import org.slf4j.LoggerFactory
 
 class RequestSubmitter(
     private val responseHandler: (Response) -> Unit,
@@ -13,6 +14,8 @@ class RequestSubmitter(
     companion object {
         private const val NUM_MESSAGES_TO_DUMP = 5
     }
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val scope = CoroutineScope(Dispatchers.IO)
     private var job: Job? = null
@@ -54,9 +57,12 @@ class RequestSubmitter(
         request: Request,
         client: Client
     ): Response {
-        if (!client.isConnected)
+        if (!client.isConnected) {
+            logger.error("Not connected to server")
             throw Client.NoConnectionException()
+        }
         client.send(MessageProcessor.toJsonString(request))
+        logger.info("Request sent: {}", request)
 
         var it = 0
         while (it < NUM_MESSAGES_TO_DUMP) {
@@ -67,14 +73,18 @@ class RequestSubmitter(
             try {
                 val receivedMessage = MessageProcessor.fromJsonString(receivedString)
                 if (receivedMessage is Response) {
-                    if (receivedMessage.messageId == request.messageId || receivedMessage.messageId == -1L)
+                    if (receivedMessage.messageId == request.messageId || receivedMessage.messageId == -1L) {
+                        logger.info("Received message: {}", receivedMessage)
                         return receivedMessage
+                    }
                 }
             } catch (e: JsonParseException) {
+                logger.warn("Received corrupted server message", e)
                 throw CorruptedMessageException(e)
             }
             it++
         }
+        logger.error("Server did not respond")
         throw Client.NoAnswerException()
     }
 

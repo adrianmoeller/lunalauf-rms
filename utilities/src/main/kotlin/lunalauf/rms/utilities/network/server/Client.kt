@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import lunalauf.rms.modelapi.ModelState
+import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -17,6 +18,8 @@ import java.util.concurrent.ExecutorService
 class Client(
     private val socket: Socket
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     private val writer: PrintWriter = PrintWriter(socket.getOutputStream(), true)
     private val reader: BufferedReader = BufferedReader(InputStreamReader(socket.getInputStream()))
 
@@ -34,7 +37,7 @@ class Client(
     private val scope = CoroutineScope(Dispatchers.IO)
     private var requestHandler: RequestHandler? = null
 
-    fun send(data: String?) {
+    fun send(data: String) {
         writer.println(data)
     }
 
@@ -81,6 +84,7 @@ class Client(
             status = _status,
             scope = scope,
         )
+        logger.info("Started listening to: {}", remoteAddress)
     }
 
     fun stopListening() {
@@ -89,7 +93,9 @@ class Client(
             if (!socket.isClosed)
                 socket.close()
         } catch (_: IOException) {
+            logger.error("Failed to close socket: {}", remoteAddress)
         }
+        logger.info("Stopped listening to: {}", remoteAddress)
     }
 
     val remoteAddress: String
