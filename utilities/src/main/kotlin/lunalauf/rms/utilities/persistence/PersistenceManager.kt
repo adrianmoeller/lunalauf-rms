@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
-import java.io.IOException
 
 class PersistenceManager {
     companion object {
@@ -44,7 +43,7 @@ class PersistenceManager {
                     return loadedInstance
                 }
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             val message = "Could not load file."
             logger.error(message, e)
             throw PersistenceException(message, e)
@@ -59,7 +58,7 @@ class PersistenceManager {
             file.createNewFile()
             FileWriter(file).use { writer -> gson.toJson(content, writer) }
             logger.info("File saved: {}", file.path)
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             val message = "Could not save file."
             logger.error(message, e)
             throw PersistenceException(message, e)
