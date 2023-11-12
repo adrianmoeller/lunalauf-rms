@@ -12,4 +12,9 @@ abstract class Request(requestType: RequestType) : Message(MessageType.REQUEST) 
     init {
         this.requestType = requestType.name
     }
+
+    override fun toString(): String {
+        return super.toString()
+            .replace(")", ", type: $requestType)")
+    }
 }

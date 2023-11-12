@@ -7,4 +7,9 @@ import lunalauf.rms.utilities.network.communication.message.type.ResponseType
 class ErrorResponse : Response(ResponseType.ERROR) {
     @SerializedName("error")
     var error: ErrorType = ErrorType.UNKNOWN_ERROR
+
+    override fun toString(): String {
+        return super.toString()
+            .replace(")", "[$error])")
+    }
 }

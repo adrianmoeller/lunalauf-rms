@@ -11,7 +11,11 @@ import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import kotlinx.coroutines.launch
 import lunalauf.rms.centralapp.components.dialogs.preferences.PublicViewPrefSheet
-import lunalauf.rms.centralapp.components.features.*
+import lunalauf.rms.centralapp.components.features.BotSheetContent
+import lunalauf.rms.centralapp.components.features.BotStatus
+import lunalauf.rms.centralapp.components.features.FeatureRail
+import lunalauf.rms.centralapp.components.features.NetworkSheetContent
+import lunalauf.rms.centralapp.components.main.MainScreenModel
 import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
 import java.awt.Color
 
@@ -19,6 +23,7 @@ import java.awt.Color
 fun ApplicationScope.MainWindow(
     modifier: Modifier = Modifier,
     colorScheme: ColorScheme,
+    mainScreenModel: MainScreenModel,
     publicViewScreenModel: PublicViewScreenModel,
     publicViewAvailable: Boolean,
     content: @Composable () -> Unit
@@ -45,18 +50,10 @@ fun ApplicationScope.MainWindow(
                 gesturesEnabled = true,
                 drawerContent = {
                     ModalDrawerSheet {
-                        var searching by remember { mutableStateOf(false) }
                         if (networkOpen) {
                             NetworkSheetContent(
                                 modifier = Modifier.padding(10.dp),
-                                port = 5000,
-                                onSearchClick = { searching = !searching },
-                                searching = searching,
-                                connections = listOf(
-                                    Pair(ConnectionStatus.CONNECTED, "1.2.3.4"),
-                                    Pair(ConnectionStatus.WAITING, "4.3.2.1"),
-                                    Pair(ConnectionStatus.DISCONNECTED, "6.7.8.9")
-                                )
+                                networkManager = mainScreenModel.networkManager
                             )
                         }
                         if (botsOpen) {

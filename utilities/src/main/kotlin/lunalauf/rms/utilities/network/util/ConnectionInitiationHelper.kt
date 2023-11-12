@@ -11,6 +11,6 @@ object ConnectionInitiationHelper {
     @Throws(NumberFormatException::class)
     fun getAckMessage(synMessage: String): String {
         val number = synMessage.toLong()
-        return (abs(number.toDouble()) - 11).toString()
+        return (abs(number) - 11).toString()
     }
 }

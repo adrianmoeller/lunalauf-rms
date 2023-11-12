@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,14 +30,16 @@ fun ApplicationScope.App() {
 
     val mainScreenModel = remember { MainScreenModel() }
     val publicViewScreenModel = remember { PublicViewScreenModel(mainScreenModel.snackBarHostState) }
-    val modelState = mainScreenModel.modelState
+    val modelState by mainScreenModel.modelState.collectAsState()
 
+    val constModelState = modelState
     MainWindow(
         colorScheme = colorScheme,
+        mainScreenModel = mainScreenModel,
         publicViewScreenModel = publicViewScreenModel,
-        publicViewAvailable = modelState is ModelState.Loaded
+        publicViewAvailable = constModelState is ModelState.Loaded
     ) {
-        when (modelState) {
+        when (constModelState) {
             is ModelState.Unloaded -> NoFileOpenScreen(
                 onNewClick = mainScreenModel::newFile,
                 onOpenClick = mainScreenModel::openFile,
@@ -49,7 +53,7 @@ fun ApplicationScope.App() {
             }
             is ModelState.Loaded -> FileOpenScreen(
                 modelResourceManager = mainScreenModel.modelResourceManager,
-                modelState = modelState,
+                modelState = constModelState,
                 onMenuNewFile = mainScreenModel::newFile,
                 onMenuOpenFile = mainScreenModel::openFile,
                 onMenuSaveFile = mainScreenModel::saveFile,
@@ -58,11 +62,11 @@ fun ApplicationScope.App() {
             )
         }
     }
-    if (modelState is ModelState.Loaded) {
+    if (constModelState is ModelState.Loaded) {
         PublicViewWindow(
             mainScreenModel = mainScreenModel,
             publicViewScreenModel = publicViewScreenModel,
-            modelState = modelState
+            modelState = constModelState
         )
     }
 }

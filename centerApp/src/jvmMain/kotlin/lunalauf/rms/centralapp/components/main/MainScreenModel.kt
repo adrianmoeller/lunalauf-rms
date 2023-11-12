@@ -2,9 +2,12 @@ package lunalauf.rms.centralapp.components.main
 
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import lunalauf.rms.centralapp.components.AbstractStatelessScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
 import lunalauf.rms.centralapp.utils.showNewFileChooser
@@ -13,6 +16,7 @@ import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.resource.ModelResourceManager
 import lunalauf.rms.modelapi.resource.ModelResult
 import lunalauf.rms.modelapi.resource.SaveResult
+import lunalauf.rms.utilities.network.server.NetworkManager
 import org.eclipse.emf.common.util.URI
 import java.time.LocalDate
 import kotlin.time.Duration
@@ -20,8 +24,10 @@ import kotlin.time.Duration
 class MainScreenModel : AbstractStatelessScreenModel() {
 
     val modelResourceManager = ModelResourceManager.initialize()
-    var modelState: ModelState by mutableStateOf(ModelState.Unloaded)
-        private set
+    private val _modelState: MutableStateFlow<ModelState> = MutableStateFlow(ModelState.Unloaded)
+    val modelState = _modelState.asStateFlow()
+    val networkManager = NetworkManager.initialize(modelState)
+
     var remainingRunTime by mutableStateOf(Duration.ZERO)
         private set
     val snackBarHostState = SnackbarHostState()
@@ -30,10 +36,10 @@ class MainScreenModel : AbstractStatelessScreenModel() {
         if (modelResourceManager is ModelResourceManager.Accessible) {
             val path = showNewFileChooser()
             if (path != null) {
-                modelState = ModelState.Loading
+                _modelState.value = ModelState.Loading
                 launchInModelScope {
                     val result = modelResourceManager.newFile(URI.createFileURI(path), LocalDate.now().year)
-                    modelState = when (result) {
+                    _modelState.value = when (result) {
                         is ModelResult.Available -> {
                             result.modelState
                         }
@@ -58,10 +64,10 @@ class MainScreenModel : AbstractStatelessScreenModel() {
         if (modelResourceManager is ModelResourceManager.Accessible) {
             val path = showOpenFileChooser()
             if (path != null) {
-                modelState = ModelState.Loading
+                _modelState.value = ModelState.Loading
                 launchInModelScope {
                     val result = modelResourceManager.load(URI.createFileURI(path))
-                    modelState = when (result) {
+                    _modelState.value = when (result) {
                         is ModelResult.Available -> {
                             result.modelState
                         }
@@ -85,11 +91,11 @@ class MainScreenModel : AbstractStatelessScreenModel() {
 
     fun closeFile() {
         if (modelResourceManager is ModelResourceManager.Accessible) {
-            val loadedModelState = modelState
-            modelState = ModelState.Loading
+            val loadedModelState = _modelState.value
+            _modelState.value = ModelState.Loading
             launchInModelScope {
                 val result = modelResourceManager.save()
-                modelState = when (result) {
+                _modelState.value = when (result) {
                     is SaveResult.Success, SaveResult.NoFileOpen -> {
                         ModelState.Unloaded
                     }
@@ -121,7 +127,7 @@ class MainScreenModel : AbstractStatelessScreenModel() {
                         )
                     }
 
-                    SaveResult.NoFileOpen -> modelState = ModelState.Unloaded
+                    SaveResult.NoFileOpen -> _modelState.value = ModelState.Unloaded
                     is SaveResult.Success -> launchInDefaultScope {
                         snackBarHostState.showSnackbar(
                             message = "Model saved to file: ${result.uri.path()}",

@@ -1,5 +1,6 @@
 package lunalauf.rms.utilities.network.server
 
+import kotlinx.coroutines.flow.StateFlow
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.utilities.network.util.PortProvider.getPreferredPorts
 import org.slf4j.LoggerFactory
@@ -11,7 +12,7 @@ private val logger = LoggerFactory.getLogger(NetworkManager::class.java)
 
 sealed class NetworkManager {
     companion object {
-        fun initialize(modelState: ModelState): NetworkManager {
+        fun initialize(modelState: StateFlow<ModelState>): NetworkManager {
             return try {
                 Available(modelState)
             } catch (e: Exception) {
@@ -33,7 +34,7 @@ sealed class NetworkManager {
     }
 
     class Available(
-        modelState: ModelState
+        modelState: StateFlow<ModelState>
     ) : NetworkManager() {
         private var serverSocket = createServerSocket()
         val clientHandler = ClientHandler(modelState)

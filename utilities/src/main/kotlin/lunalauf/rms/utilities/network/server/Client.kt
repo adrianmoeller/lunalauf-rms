@@ -3,7 +3,10 @@ package lunalauf.rms.utilities.network.server
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import lunalauf.rms.modelapi.ModelState
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
@@ -77,7 +80,7 @@ class Client(
         socket.close()
     }
 
-    fun startListening(modelState: ModelState) {
+    fun startListening(modelState: StateFlow<ModelState>) {
         requestHandler = RequestHandler(
             client = this,
             modelState = modelState,
@@ -100,4 +103,12 @@ class Client(
 
     val remoteAddress: String
         get() = socket.getInetAddress()?.hostAddress ?: "None"
+
+    fun onLost(action: () -> Unit) {
+        scope.launch {
+            status.collect {
+                if (it < 0) action()
+            }
+        }
+    }
 }

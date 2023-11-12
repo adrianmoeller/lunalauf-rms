@@ -12,4 +12,9 @@ open class Response(responseType: ResponseType) : Message(MessageType.RESPONSE) 
     init {
         this.responseType = responseType.name
     }
+
+    override fun toString(): String {
+        return super.toString()
+            .replace(")", ", type: $responseType)")
+    }
 }

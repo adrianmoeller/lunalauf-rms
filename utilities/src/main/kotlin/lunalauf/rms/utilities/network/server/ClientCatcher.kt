@@ -1,12 +1,10 @@
 package lunalauf.rms.utilities.network.server
 
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
 import lunalauf.rms.utilities.network.util.Service
-import org.slf4j.LoggerFactory
 import java.net.ServerSocket
-import java.net.Socket
 import java.net.SocketException
 import java.net.SocketTimeoutException
 
@@ -25,10 +23,11 @@ class ClientCatcher(
         } catch (e: SocketException) {
             logger.error("Could not set socket timeout. Behaviour unpredictable", e)
         }
-        clientHandler.onLostClients { start(Unit) }
+        clientHandler.onLostClient { start(Unit) }
     }
 
     override fun CoroutineScope.run(input: Unit) {
+        logger.info("Client catcher started")
         var it = 0
         while (isActive && it < MAX_ITERATIONS) {
             try {
@@ -40,5 +39,6 @@ class ClientCatcher(
                 it++
             }
         }
+        logger.info("Client catcher stopped")
     }
 }

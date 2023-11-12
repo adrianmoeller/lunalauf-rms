@@ -3,6 +3,7 @@ package lunalauf.rms.utilities.network.server
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory
 import java.net.SocketException
 
 class ClientHandler(
-    private val modelState: ModelState
+    private val modelState: StateFlow<ModelState>
 ) {
     companion object {
         private const val TIMEOUT_COMMUNICATION_TEST = 2000 // ms
@@ -21,8 +22,10 @@ class ClientHandler(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val scope = CoroutineScope(Dispatchers.IO)
-    private val _clients = MutableStateFlow<ArrayList<Client>>(arrayListOf())
+    private val _clients = MutableStateFlow<List<Client>>(listOf())
     val clients get() = _clients.asStateFlow()
+
+    private var onLostClient: (Client) -> Unit = {}
 
     fun handleClient(client: Client) {
         scope.launch {
@@ -59,6 +62,8 @@ class ClientHandler(
     }
 
     private fun registerClient(client: Client) {
+        client.onLost { onLostClient(client) }
+
         var existing: Client? = null
         _clients.value.forEach {
             if (it.remoteAddress == client.remoteAddress)
@@ -66,7 +71,7 @@ class ClientHandler(
                     existing = it
         }
         _clients.update {
-            it.apply {
+            it.toMutableList().apply {
                 if (existing != null) set(it.indexOf(existing), client)
                 else add(client)
             }
@@ -74,13 +79,16 @@ class ClientHandler(
         logger.info("Client registered: {}", client.remoteAddress)
     }
 
-    fun onLostClients(listener: (List<Client>) -> Unit) {
-        scope.launch {
-            clients.collect { newClients ->
-                val lostClients = newClients.filter { it.status.value < 0 }
-                if (lostClients.isNotEmpty())
-                    listener(lostClients)
+    fun onLostClient(action: (Client) -> Unit) {
+        onLostClient = action
+    }
+
+    fun removeClient(client: Client) {
+        if (client.status.value < 0)
+            _clients.update {
+                it.toMutableList().apply {
+                    remove(client)
+                }
             }
-        }
     }
 }

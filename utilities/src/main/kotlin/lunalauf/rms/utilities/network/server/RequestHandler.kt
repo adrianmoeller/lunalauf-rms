@@ -3,6 +3,7 @@ package lunalauf.rms.utilities.network.server
 import com.google.gson.JsonParseException
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.utilities.network.communication.ErrorType
 import lunalauf.rms.utilities.network.communication.MessageProcessor
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory
 
 class RequestHandler(
     private val client: Client,
-    private val modelState: ModelState,
+    private val modelState: StateFlow<ModelState>,
     private val status: MutableStateFlow<Int>,
     scope: CoroutineScope
 ) {
@@ -49,8 +50,9 @@ class RequestHandler(
                 val message = MessageProcessor.fromJsonString(messageString)
 
                 if (message is Request) {
-                    if (modelState is ModelState.Loaded) {
-                        val modelUpdater = ModelUpdater(modelState, message, responseFactory)
+                    val constModelState = modelState.value
+                    if (constModelState is ModelState.Loaded) {
+                        val modelUpdater = ModelUpdater(constModelState, message, responseFactory)
                         try {
                             modelUpdater.run()
                         } catch (e: Exception) {
