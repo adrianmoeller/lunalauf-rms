@@ -1,6 +1,5 @@
 package lunalauf.rms.utilities.network.bot.util.reply
 
-import lunalauf.rms.utilities.network.bot.util.TelegramRunnable
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
@@ -46,22 +45,22 @@ class ConfirmationReply(
 
     @Throws(TelegramApiException::class)
     private fun changeMessageToConfirmed() {
-        val newMessage = EditMessageText().apply {
-            chatId = chatId.toString()
-            messageId = message.messageId
-            text += CONFIRMED
-            enableHtml(true)
+        val newMessage = EditMessageText().also {
+            it.chatId = chatId.toString()
+            it.messageId = message.messageId
+            it.text = text + CONFIRMED
+            it.enableHtml(true)
         }
         wrapper.bot.execute(newMessage)
     }
 
     @Throws(TelegramApiException::class)
     private fun changeMessageToCancelled() {
-        val newMessage = EditMessageText().apply {
-            chatId = chatId.toString()
-            messageId = message.messageId
-            text += CANCELLED
-            enableHtml(true)
+        val newMessage = EditMessageText().also {
+            it.chatId = chatId.toString()
+            it.messageId = message.messageId
+            it.text = text + CANCELLED
+            it.enableHtml(true)
         }
         wrapper.bot.execute(newMessage)
     }

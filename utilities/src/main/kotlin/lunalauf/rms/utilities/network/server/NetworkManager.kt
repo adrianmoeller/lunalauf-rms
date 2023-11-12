@@ -17,14 +17,14 @@ sealed class NetworkManager {
                 Available(modelState)
             } catch (e: Exception) {
                 InitializationError(
-                    message = "Could not create server socket",
+                    message = "Could not create server.\n Please restart",
                     exception = e
                 )
             }
         }
     }
 
-    data class InitializationError(
+    class InitializationError internal constructor(
         val message: String,
         val exception: Exception
     ) : NetworkManager() {
@@ -33,7 +33,7 @@ sealed class NetworkManager {
         }
     }
 
-    class Available(
+    class Available internal constructor(
         modelState: StateFlow<ModelState>
     ) : NetworkManager() {
         private var serverSocket = createServerSocket()

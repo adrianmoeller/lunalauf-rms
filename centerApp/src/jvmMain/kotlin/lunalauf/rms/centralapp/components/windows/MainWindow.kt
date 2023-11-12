@@ -11,10 +11,9 @@ import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import kotlinx.coroutines.launch
 import lunalauf.rms.centralapp.components.dialogs.preferences.PublicViewPrefSheet
-import lunalauf.rms.centralapp.components.features.BotSheetContent
-import lunalauf.rms.centralapp.components.features.BotStatus
+import lunalauf.rms.centralapp.components.features.BotSheetScreen
 import lunalauf.rms.centralapp.components.features.FeatureRail
-import lunalauf.rms.centralapp.components.features.NetworkSheetContent
+import lunalauf.rms.centralapp.components.features.NetworkSheetScreen
 import lunalauf.rms.centralapp.components.main.MainScreenModel
 import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
 import java.awt.Color
@@ -51,22 +50,15 @@ fun ApplicationScope.MainWindow(
                 drawerContent = {
                     ModalDrawerSheet {
                         if (networkOpen) {
-                            NetworkSheetContent(
+                            NetworkSheetScreen(
                                 modifier = Modifier.padding(10.dp),
                                 networkManager = mainScreenModel.networkManager
                             )
                         }
                         if (botsOpen) {
-                            BotSheetContent(
+                            BotSheetScreen(
                                 modifier = Modifier.padding(10.dp),
-                                roundCounterBotStatus = BotStatus.INITIALIZING,
-                                onRoundCounterBotClick = {},
-                                runnerInfoBotStatus = BotStatus.STOPPED,
-                                onRunnerInfoBotClick = {},
-                                silentStart = false,
-                                onSilentStartClick = {},
-                                loadConnectionData = true,
-                                onLoadConnectionDataClick = {}
+                                botManager = mainScreenModel.botManager
                             )
                         }
                         if (logOpen) {

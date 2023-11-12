@@ -67,8 +67,7 @@ fun <T : EObject> DeleteElementDialog(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Icon(
-                        modifier = Modifier
-                            .size(IconSize.extraLarge),
+                        modifier = Modifier.size(IconSize.extraLarge),
                         imageVector = Icons.Rounded.Warning,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error

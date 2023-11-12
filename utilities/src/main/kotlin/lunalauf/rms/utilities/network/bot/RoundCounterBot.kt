@@ -30,7 +30,7 @@ import java.util.*
 
 class RoundCounterBot(
     token: String,
-    modelState: ModelState,
+    modelState: StateFlow<ModelState>,
     silentStart: Boolean,
     loadData: Boolean
 ) : AbstractBot(token, modelState, silentStart) {
@@ -148,9 +148,10 @@ class RoundCounterBot(
     }
 
     private fun loadConnectionData() {
-        if (modelState is ModelState.Loaded) {
+        val constModelState = modelState.value
+        if (constModelState is ModelState.Loaded) {
             runBlocking(ModelAPI.modelContext) {
-                modelState.modelAPI.connections()
+                constModelState.modelAPI.connections()
             }.forEach {
                 registerChatId(it.chatId, it.runner)
             }
@@ -160,10 +161,11 @@ class RoundCounterBot(
     }
 
     override suspend fun saveConnectionData() {
-        if (modelState is ModelState.Loaded) {
+        val constModelState = modelState.value
+        if (constModelState is ModelState.Loaded) {
             val connectionId2Runner = getChatId2Runner()
             withContext(ModelAPI.modelContext) {
-                modelState.modelAPI.storeConnections(connectionId2Runner)
+                constModelState.modelAPI.storeConnections(connectionId2Runner)
             }
         } else {
             logger.error("Cannot save connection data since model is not available")
@@ -275,8 +277,9 @@ class RoundCounterBot(
         execute(typingAction)
 
         val sendMsg: SendMessage
-        if (modelState is ModelState.Loaded) {
-            val runnersState = modelState.runners.value
+        val constModelState = modelState.value
+        if (constModelState is ModelState.Loaded) {
+            val runnersState = constModelState.runners.value
             sendMsg = try {
                 val chipId = msg.text.toLong()
                 val runner = runnersState.getRunner(chipId)
@@ -445,9 +448,10 @@ class RoundCounterBot(
             return
         }
 
-        val sMsg = if (modelState is ModelState.Loaded) {
+        val constModelState = modelState.value
+        val sMsg = if (constModelState is ModelState.Loaded) {
             val result = runBlocking(ModelAPI.modelContext) {
-                runCatching { modelState.modelAPI.logRound(runner) }.getOrNull()
+                runCatching { constModelState.modelAPI.logRound(runner) }.getOrNull()
             }
             if (result == null) {
                 send(chatId, AWR_FAILURE)

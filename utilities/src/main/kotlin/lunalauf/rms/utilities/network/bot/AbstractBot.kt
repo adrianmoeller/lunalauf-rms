@@ -2,6 +2,7 @@ package lunalauf.rms.utilities.network.bot
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import lunalauf.rms.modelapi.ModelAPI
 import lunalauf.rms.modelapi.ModelState
@@ -13,7 +14,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 
 abstract class AbstractBot(
     protected val token: String,
-    protected val modelState: ModelState,
+    protected val modelState: StateFlow<ModelState>,
     silentStart: Boolean
 ) : TelegramLongPollingBot(token) {
     companion object {

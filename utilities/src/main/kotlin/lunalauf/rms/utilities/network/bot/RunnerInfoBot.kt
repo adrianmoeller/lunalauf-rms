@@ -1,11 +1,10 @@
 package lunalauf.rms.utilities.network.bot
 
 import LunaLaufLanguage.Runner
+import kotlinx.coroutines.flow.StateFlow
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.states.RunnersState
 import lunalauf.rms.utilities.network.bot.util.reply.CommandReply
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.telegram.telegrambots.meta.api.methods.ActionType
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
@@ -15,7 +14,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 
 class RunnerInfoBot(
     token: String,
-    modelState: ModelState,
+    modelState: StateFlow<ModelState>,
     silentStart: Boolean,
     loadData: Boolean
 ) : AbstractBot(token, modelState, silentStart) {
@@ -165,8 +164,9 @@ class RunnerInfoBot(
         typingAction.setAction(ActionType.TYPING)
         execute(typingAction)
 
-        val sMsg = if (modelState is ModelState.Loaded) {
-            val runnersState: RunnersState = modelState.runners.value
+        val constModelState = modelState.value
+        val sMsg = if (constModelState is ModelState.Loaded) {
+            val runnersState: RunnersState = constModelState.runners.value
             try {
                 val chipId = msg.text.toLong()
                 val runner = runnersState.getRunner(chipId)

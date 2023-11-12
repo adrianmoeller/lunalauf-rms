@@ -4,7 +4,9 @@ import lunalauf.rms.utilities.network.bot.AbstractBot
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 
-class ReplyContainer(val bot: AbstractBot) {
+class ReplyContainer(
+    val bot: AbstractBot
+) {
     private val replies: MutableMap<Long, Reply> = HashMap()
 
     fun hasReply(chatId: Long): Boolean {

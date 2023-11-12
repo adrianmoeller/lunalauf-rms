@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.EvaIcons
@@ -27,8 +28,10 @@ import compose.icons.evaicons.outline.Loader
 import compose.icons.evaicons.outline.Wifi
 import compose.icons.evaicons.outline.WifiOff
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ExclamationTriangle
 import compose.icons.fontawesomeicons.solid.Search
 import compose.icons.fontawesomeicons.solid.Stop
+import lunalauf.rms.centralapp.components.commons.IconSize
 import lunalauf.rms.centralapp.components.commons.ListItemDivider
 import lunalauf.rms.centralapp.components.commons.cond
 import lunalauf.rms.centralapp.components.commons.listItemHoverColor
@@ -36,7 +39,7 @@ import lunalauf.rms.utilities.network.server.NetworkManager
 import lunalauf.rms.utilities.network.util.Service
 
 @Composable
-fun NetworkSheetContent(
+fun NetworkSheetScreen(
     modifier: Modifier = Modifier,
     networkManager: NetworkManager
 ) {
@@ -115,14 +118,24 @@ fun NetworkSheetContent(
         }
     } else {
         Box(
-            modifier = modifier.fillMaxHeight(),
+            modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // TODO
+                Icon(
+                    modifier = Modifier.size(IconSize.extraLarge),
+                    imageVector = FontAwesomeIcons.Solid.ExclamationTriangle,
+                    contentDescription = null
+                )
+                if (networkManager is NetworkManager.InitializationError) {
+                    Text(
+                        text = networkManager.message,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
