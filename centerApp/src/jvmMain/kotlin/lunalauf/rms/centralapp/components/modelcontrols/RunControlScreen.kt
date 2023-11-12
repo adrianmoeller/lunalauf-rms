@@ -11,7 +11,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.EditDialog
 import lunalauf.rms.centralapp.components.commons.EditableValueTile
+import lunalauf.rms.centralapp.utils.Formats
 import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.modelapi.RunTimer
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun RunControlScreen(
@@ -21,6 +24,11 @@ fun RunControlScreen(
 ) {
     val screenModel = remember { RunControlScreenModel(modelState) }
     val commons by modelState.common.collectAsState()
+
+    var runDuration by remember { mutableStateOf(90) } // min
+    val runTimer = modelState.modelAPI.runTimer
+    val remainingTime by runTimer.remainingTime.collectAsState()
+    val timerState by runTimer.state.collectAsState()
 
     Column(
         modifier = modifier,
@@ -32,12 +40,18 @@ fun RunControlScreen(
                 top = 20.dp,
                 bottom = 10.dp
             ),
-            remainingTime = "00:29:34",
-            running = true,
-            onStartStopClick = {},
-            onResetClick = {},
-            runDuration = 90,
-            onRunDurationChange = {}
+            remainingTime = Formats.clockFormat(remainingTime.seconds),
+            state = timerState,
+            onStartStopClick = {
+                when (timerState) {
+                    RunTimer.State.RUNNING -> runTimer.pause()
+                    RunTimer.State.PAUSED -> runTimer.resume()
+                    RunTimer.State.EXPIRED -> runTimer.start(runDuration * 60L)
+                }
+            },
+            onResetClick = { runTimer.reset() },
+            runDuration = runDuration,
+            onRunDurationChange = { runDuration = it }
         )
         Row(
             modifier = Modifier

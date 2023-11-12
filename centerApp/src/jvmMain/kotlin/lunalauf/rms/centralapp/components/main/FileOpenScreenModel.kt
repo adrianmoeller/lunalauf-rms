@@ -11,10 +11,12 @@ import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.resource.ModelResourceManager
 import lunalauf.rms.modelapi.resource.SaveResult
 import lunalauf.rms.modelapi.states.PreferencesState
+import lunalauf.rms.utilities.network.bot.BotManager
 import kotlin.time.Duration.Companion.seconds
 
 class FileOpenScreenModel(
     private val modelResourceManager: ModelResourceManager,
+    private val botManager: BotManager,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
 ) : AbstractScreenModel(modelState) {
@@ -40,6 +42,7 @@ class FileOpenScreenModel(
                     }
                     throw Exception("Terminate task")
                 }
+
                 is SaveResult.NoFileOpen -> throw Exception("Terminate task")
                 is SaveResult.Success -> {}
             }
@@ -75,8 +78,18 @@ class FileOpenScreenModel(
     }
 
     fun updateSaveConnectionsActive(active: Boolean) {
-        _preferences.update { it.copy(saveConnectionsActive = active) }
+        if (modelResourceManager is ModelResourceManager.Accessible && botManager is BotManager.Available) {
+            _preferences.update { it.copy(saveConnectionsActive = active) }
 
-        TODO()
+            launchInDefaultScope {
+                if (active) {
+                    modelResourceManager.setPreSaveProcessing { botManager.saveConnectionData() }
+                } else {
+                    modelResourceManager.removePreSaveProcessing()
+                }
+            }
+        } else {
+            _preferences.update { it.copy(saveConnectionsActive = false) }
+        }
     }
 }

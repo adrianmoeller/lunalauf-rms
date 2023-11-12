@@ -36,8 +36,8 @@ import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.states.RunnersState
 import lunalauf.rms.modelapi.states.TeamsState
 import lunalauf.rms.utilities.publicviewprefs.PublicViewPrefState
-import org.jetbrains.skia.Image
 import kotlin.math.min
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun PublicViewWindow(
@@ -264,6 +264,7 @@ private fun CommonPanel(
     val overallRounds by modelState.overallRounds.collectAsState()
     val overallContribution by modelState.overallContribution.collectAsState()
     val currentSponsorPoolAmount by modelState.currentSponsorPoolAmount.collectAsState()
+    val remainingTime by modelState.modelAPI.runTimer.remainingTime.collectAsState()
     val baseTextStyle = TextStyle(fontSize = baseFontSize)
     var clockHeight by remember { mutableStateOf(0.dp) }
     val cornerRadius = clockHeight / 2
@@ -288,7 +289,7 @@ private fun CommonPanel(
         ) {
             Text(
                 modifier = Modifier.padding(vertical = padding / 3),
-                text = Formats.clockFormat(mainScreenModel.remainingRunTime),
+                text = Formats.clockFormat(remainingTime.seconds),
                 style = TextStyle(fontSize = baseFontSize * 1.1).merge(CommonPanelTextStyles.clock)
             )
         }

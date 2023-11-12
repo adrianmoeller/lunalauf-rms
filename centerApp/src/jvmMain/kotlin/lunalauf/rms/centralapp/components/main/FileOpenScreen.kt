@@ -24,12 +24,14 @@ import lunalauf.rms.centralapp.components.modelcontrols.ModelControls
 import lunalauf.rms.centralapp.components.dialogs.preferences.PreferencesSheet
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.resource.ModelResourceManager
+import lunalauf.rms.utilities.network.bot.BotManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FileOpenScreen(
     modifier: Modifier = Modifier,
     modelResourceManager: ModelResourceManager,
+    botManager: BotManager,
     modelState: ModelState.Loaded,
     onMenuNewFile: () -> Unit,
     onMenuOpenFile: () -> Unit,
@@ -40,6 +42,7 @@ fun FileOpenScreen(
     val screenModel = remember {
         FileOpenScreenModel(
             modelResourceManager = modelResourceManager,
+            botManager = botManager,
             modelState = modelState,
             snackBarHostState = snackBarHostState
         )

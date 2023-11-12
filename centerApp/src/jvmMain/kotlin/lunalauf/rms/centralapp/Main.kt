@@ -55,6 +55,7 @@ fun ApplicationScope.App() {
             }
             is ModelState.Loaded -> FileOpenScreen(
                 modelResourceManager = mainScreenModel.modelResourceManager,
+                botManager = mainScreenModel.botManager,
                 modelState = constModelState,
                 onMenuNewFile = mainScreenModel::newFile,
                 onMenuOpenFile = mainScreenModel::openFile,

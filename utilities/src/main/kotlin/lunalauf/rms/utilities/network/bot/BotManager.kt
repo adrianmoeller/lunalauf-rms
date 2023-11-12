@@ -180,6 +180,11 @@ sealed class BotManager {
         private val isRoundCounterBotRunning: Boolean
             get() = roundCounterBotSession?.isRunning ?: false
 
+        fun saveConnectionData() {
+            runnerInfoBot?.saveConnectionData()
+            roundCounterBot?.saveConnectionData()
+        }
+
         fun shutdown() {
             botSessions.forEach {
                 if (it.isRunning) it.stop()

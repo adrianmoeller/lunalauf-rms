@@ -56,7 +56,7 @@ abstract class AbstractBot(
     }
 
     // TODO instantly save connection data in model object?
-    abstract suspend fun saveConnectionData()
+    abstract fun saveConnectionData()
 
     protected fun beSilent(): Boolean {
         if (!silentStart) return false

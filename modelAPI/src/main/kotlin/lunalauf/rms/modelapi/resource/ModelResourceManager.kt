@@ -3,6 +3,7 @@ package lunalauf.rms.modelapi.resource
 import LunaLaufLanguage.LunaLauf
 import LunaLaufLanguage.LunaLaufLanguagePackage
 import LunaLaufLanguage.impl.LunaLaufLanguageFactoryImpl
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import lunalauf.rms.modelapi.ModelState
@@ -61,9 +62,10 @@ sealed class ModelResourceManager {
         private val mutex = Mutex()
 
         private var resource: Resource? = null
-        private var preSaveProcessing: Runnable? = null
+        private var preSaveProcessing: () -> Unit = {}
 
         suspend fun newFile(uri: URI, year: Int): ModelResult {
+            runPreSaveProcessing()
             mutex.withLock {
                 if (resource != null) {
                     if (internalSave() is SaveResult.Error)
@@ -89,6 +91,7 @@ sealed class ModelResourceManager {
         }
 
         suspend fun load(uri: URI): ModelResult {
+            runPreSaveProcessing()
             mutex.withLock {
                 if (resource != null) {
                     if (internalSave() is SaveResult.Error)
@@ -123,16 +126,20 @@ sealed class ModelResourceManager {
         }
 
         suspend fun save(): SaveResult {
+            runPreSaveProcessing()
             mutex.withLock {
                 return internalSave()
             }
         }
 
-        private fun internalSave(): SaveResult {
+        private fun runPreSaveProcessing() {
             try {
-                preSaveProcessing?.run()
-            } catch (ignored: Exception) {
+                preSaveProcessing()
+            } catch (_: Exception) {
             }
+        }
+
+        private fun internalSave(): SaveResult {
             val constResource = resource
                 ?: return SaveResult.NoFileOpen
             try {
@@ -162,10 +169,10 @@ sealed class ModelResourceManager {
         }
 
         suspend fun removePreSaveProcessing() {
-            mutex.withLock { preSaveProcessing = null }
+            mutex.withLock { preSaveProcessing = {} }
         }
 
-        suspend fun setPreSaveProcessing(preSaveProcessing: Runnable) {
+        suspend fun setPreSaveProcessing(preSaveProcessing: () -> Unit) {
             mutex.withLock { this.preSaveProcessing = preSaveProcessing }
         }
 

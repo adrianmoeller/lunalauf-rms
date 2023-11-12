@@ -60,6 +60,9 @@ sealed class ModelState {
         private val _minigames = MutableStateFlow(MinigamesState(model.minigames.filterNotNull()))
         val minigames get() = _minigames.asStateFlow()
 
+        private val _connections = MutableStateFlow(model.connections.filterNotNull())
+        val connections get() = _connections.asStateFlow()
+
         // Derived:
 
         private val _overallRounds = MutableStateFlow(calcOverallRounds())
@@ -118,6 +121,7 @@ sealed class ModelState {
 
                             "challenges" -> updateChallenges()
                             "minigames" -> updateMinigames()
+                            "connections" -> updateConnections()
                             else -> logger.error("Cannot find reference: ${feature.name}")
                         }
                     }
@@ -176,6 +180,10 @@ sealed class ModelState {
 
         private fun updateMinigames() {
             _minigames.value = MinigamesState(model.minigames.filterNotNull())
+        }
+
+        private fun updateConnections() {
+            _connections.value = model.connections.filterNotNull()
         }
 
         private fun updateOverallRounds() {

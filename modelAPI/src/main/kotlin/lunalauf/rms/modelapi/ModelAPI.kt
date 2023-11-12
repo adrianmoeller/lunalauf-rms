@@ -20,7 +20,7 @@ class ModelAPI(
     modelState: ModelState.Loaded
 ) {
     companion object {
-        val DEFAULT_ROUND_POINTS = 1
+        const val DEFAULT_ROUND_POINTS = 1
 
         @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
         val modelContext = newSingleThreadContext("model")
@@ -34,6 +34,8 @@ class ModelAPI(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val model = modelState.model
+
+    val runTimer = RunTimer(this)
 
     var roundThreshold = 40
         private set

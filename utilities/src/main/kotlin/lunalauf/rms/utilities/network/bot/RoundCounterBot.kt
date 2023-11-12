@@ -2,6 +2,7 @@ package lunalauf.rms.utilities.network.bot
 
 import LunaLaufLanguage.Runner
 import LunaLaufLanguage.Team
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
@@ -160,11 +161,11 @@ class RoundCounterBot(
         }
     }
 
-    override suspend fun saveConnectionData() {
+    override fun saveConnectionData() {
         val constModelState = modelState.value
         if (constModelState is ModelState.Loaded) {
             val connectionId2Runner = getChatId2Runner()
-            withContext(ModelAPI.modelContext) {
+            runBlocking {
                 constModelState.modelAPI.storeConnections(connectionId2Runner)
             }
         } else {

@@ -2,9 +2,6 @@ package lunalauf.rms.centralapp.components.main
 
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import lunalauf.rms.centralapp.components.AbstractStatelessScreenModel
@@ -19,7 +16,6 @@ import lunalauf.rms.utilities.network.bot.BotManager
 import lunalauf.rms.utilities.network.server.NetworkManager
 import org.eclipse.emf.common.util.URI
 import java.time.LocalDate
-import kotlin.time.Duration
 
 class MainScreenModel : AbstractStatelessScreenModel() {
 
@@ -29,8 +25,6 @@ class MainScreenModel : AbstractStatelessScreenModel() {
     val networkManager = NetworkManager.initialize(modelState)
     val botManager = BotManager.initialize(modelState)
 
-    var remainingRunTime by mutableStateOf(Duration.ZERO)
-        private set
     val snackBarHostState = SnackbarHostState()
 
     fun newFile() {
@@ -98,6 +92,7 @@ class MainScreenModel : AbstractStatelessScreenModel() {
                 val result = modelResourceManager.save()
                 _modelState.value = when (result) {
                     is SaveResult.Success, SaveResult.NoFileOpen -> {
+                        modelResourceManager.close()
                         ModelState.Unloaded
                     }
 

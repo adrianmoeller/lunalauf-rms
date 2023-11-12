@@ -17,12 +17,13 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
 import lunalauf.rms.centralapp.components.commons.IconSize
+import lunalauf.rms.modelapi.RunTimer
 
 @Composable
 fun RunClock(
     modifier: Modifier = Modifier,
     remainingTime: String,
-    running: Boolean,
+    state: RunTimer.State,
     onStartStopClick: () -> Unit,
     onResetClick: () -> Unit,
     runDuration: Int,
@@ -62,12 +63,18 @@ fun RunClock(
             ) {
                 Icon(
                     modifier = Modifier.size(IconSize.small),
-                    imageVector = if (running) FontAwesomeIcons.Solid.Pause else FontAwesomeIcons.Solid.Play,
-                    contentDescription = if (running) "Pause run" else "Start run"
+                    imageVector = if (state == RunTimer.State.RUNNING) FontAwesomeIcons.Solid.Pause
+                    else FontAwesomeIcons.Solid.Play,
+                    contentDescription = when (state) {
+                        RunTimer.State.RUNNING -> "Pause run"
+                        RunTimer.State.PAUSED -> "Resume run"
+                        RunTimer.State.EXPIRED -> "Start run"
+                    }
                 )
             }
             IconButton(
-                onClick = onResetClick
+                onClick = onResetClick,
+                enabled = state == RunTimer.State.PAUSED
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Refresh,
