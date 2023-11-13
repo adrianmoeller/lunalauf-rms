@@ -143,7 +143,7 @@ fun NetworkSheetScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ConnectionTile(
+private fun ConnectionTile(
     modifier: Modifier = Modifier,
     connectionStatus: ConnectionStatus,
     ipAddress: String,
@@ -210,24 +210,24 @@ private fun convertStatus(status: Int): ConnectionStatus {
     }
 }
 
-enum class ConnectionStatus(
+private enum class ConnectionStatus(
     val icon: ImageVector,
     val color: Color,
     val description: String
 ) {
     CONNECTED(
-        EvaIcons.Outline.Wifi,
-        Color(0xFF21B14D),
-        "Connected"
+        icon = EvaIcons.Outline.Wifi,
+        color = Color(0xFF21B14D),
+        description = "Connected"
     ),
     WAITING(
-        EvaIcons.Outline.Loader,
-        Color(0xFFF08C2D),
-        "Waiting"
+        icon = EvaIcons.Outline.Loader,
+        color = Color(0xFFF08C2D),
+        description = "Waiting"
     ),
     DISCONNECTED(
-        EvaIcons.Outline.WifiOff,
-        Color(0xFFDA2955),
-        "Disconnected"
+        icon = EvaIcons.Outline.WifiOff,
+        color = Color(0xFFDA2955),
+        description = "Disconnected"
     )
 }

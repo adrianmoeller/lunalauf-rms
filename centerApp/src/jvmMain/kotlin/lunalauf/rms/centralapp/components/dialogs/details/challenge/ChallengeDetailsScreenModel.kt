@@ -4,6 +4,7 @@ import LunaLaufLanguage.Challenge
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.utils.InputValidator
 import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.modelapi.ResetChallengeStateResult
 import lunalauf.rms.modelapi.UpdateChallengeDurationResult
 import lunalauf.rms.modelapi.UpdateChallengeNameResult
 
@@ -65,6 +66,21 @@ class ChallengeDetailsScreenModel(
     fun updateReceiveImage(challenge: Challenge, receiveImage: Boolean) {
         launchInModelScope {
             modelAPI.updateChallengeReceiveImage(challenge, receiveImage)
+        }
+    }
+
+    fun start(challenge: Challenge) {
+        launchInModelScope {
+            // TODO
+        }
+    }
+
+    fun resetState(challenge: Challenge) {
+        launchInModelScope {
+           when ( modelAPI.resetChallengeState(challenge)) {
+               ResetChallengeStateResult.NotCompleted -> {}
+               ResetChallengeStateResult.Reset -> {}
+           }
         }
     }
 }

@@ -1,8 +1,10 @@
 package lunalauf.rms.centralapp.components.modelcontrols
 
 import LunaLaufLanguage.Challenge
+import LunaLaufLanguage.ChallengeState
 import LunaLaufLanguage.Minigame
 import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.*
@@ -18,13 +21,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import compose.icons.EvaIcons
 import compose.icons.FontAwesomeIcons
+import compose.icons.evaicons.Outline
+import compose.icons.evaicons.outline.DoneAll
+import compose.icons.evaicons.outline.MoreHorizontal
+import compose.icons.evaicons.outline.Power
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.ClipboardCheck
 import compose.icons.fontawesomeicons.solid.SlidersH
@@ -94,6 +104,7 @@ fun FunfactorsControlScreen(
                     ChallengeTile(
                         modifier = Modifier.fillMaxWidth(),
                         challengeName = challenge.name ?: "",
+                        challengeState = challenge.state,
                         onClick = { challengeDetailsStatus = ChallengeDetailsStatus.Open(challenge) }
                     )
                     if (index < challengesState.challenges.lastIndex)
@@ -260,6 +271,7 @@ private fun MinigameTile(
     ) {
         Text(
             modifier = Modifier
+                .weight(1f)
                 .padding(vertical = 10.dp)
                 .padding(start = 10.dp),
             text = "$minigameId: $minigameName"
@@ -283,9 +295,11 @@ private fun MinigameTile(
 private fun ChallengeTile(
     modifier: Modifier = Modifier,
     challengeName: String,
+    challengeState: ChallengeState,
     onClick: () -> Unit
 ) {
     var hovered by remember { mutableStateOf(false) }
+    val challengeUIState = challengeState.toUIState()
 
     Row(
         modifier = modifier
@@ -298,22 +312,63 @@ private fun ChallengeTile(
     ) {
         Text(
             modifier = Modifier
+                .weight(1f)
                 .padding(vertical = 10.dp)
                 .padding(start = 10.dp),
             text = challengeName
         )
-        if (hovered) {
-            Row {
+        Row {
+            if (hovered) {
                 Icon(
                     modifier = Modifier.size(IconSize.small - 2.dp),
                     imageVector = FontAwesomeIcons.Solid.SlidersH,
                     contentDescription = "Show challenge details",
                     tint = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(Modifier.width(10.dp))
+            } else {
+                Icon(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(challengeUIState.color)
+                        .padding(4.dp)
+                        .size(20.dp),
+                    imageVector = challengeUIState.icon,
+                    contentDescription = challengeUIState.description
+                )
             }
+            Spacer(Modifier.width(10.dp))
         }
     }
+}
+
+private fun ChallengeState.toUIState(): ChallengeUIState {
+    return when (this) {
+        ChallengeState.PENDING -> ChallengeUIState.PENDING
+        ChallengeState.STARTED -> ChallengeUIState.STARTED
+        ChallengeState.COMPLETED -> ChallengeUIState.COMPLETED
+    }
+}
+
+private enum class ChallengeUIState(
+    val icon: ImageVector,
+    val color: Color,
+    val description: String
+) {
+    PENDING(
+        icon = EvaIcons.Outline.Power,
+        color = Color.Transparent,
+        description = "Pending"
+    ),
+    STARTED(
+        icon = EvaIcons.Outline.MoreHorizontal,
+        color = Color(0xFF285D9D),
+        description = "Started"
+    ),
+    COMPLETED(
+        icon = EvaIcons.Outline.DoneAll,
+        color = Color(0xFF21B14D),
+        description = "Completed"
+    )
 }
 
 private sealed class ChallengeDetailsStatus {

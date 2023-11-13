@@ -65,6 +65,17 @@ sealed class UpdateChallengeDurationResult {
     data object Updated : UpdateChallengeDurationResult()
 }
 
+sealed class StartChallengeResult {
+    data object AlreadyStarted: StartChallengeResult()
+    data object SendMessageFailed: StartChallengeResult()
+    data object Started : StartChallengeResult()
+}
+
+sealed class ResetChallengeStateResult {
+    data object NotCompleted : ResetChallengeStateResult()
+    data object Reset : ResetChallengeStateResult()
+}
+
 sealed class LogRoundResult {
     data object RunDisabled : LogRoundResult()
     data object LastRoundAlreadyLogged : LogRoundResult()

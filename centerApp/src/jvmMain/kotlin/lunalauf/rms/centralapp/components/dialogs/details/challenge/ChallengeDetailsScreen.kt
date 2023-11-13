@@ -1,6 +1,7 @@
 package lunalauf.rms.centralapp.components.dialogs.details.challenge
 
 import LunaLaufLanguage.Challenge
+import LunaLaufLanguage.ChallengeState
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,6 +10,7 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -48,7 +50,7 @@ fun ChallengeDetailsScreen(
                         horizontal = 15.dp,
                         vertical = 10.dp
                     )
-                ){
+                ) {
                     Box {
                         val listState = rememberLazyListState()
                         LazyColumn(
@@ -151,17 +153,37 @@ fun ChallengeDetailsScreen(
                         Text("Delete challenge")
                     }
                 }
-                OutlinedButton(
-                    onClick = {
-                        // TODO
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.PlayArrow,
-                        contentDescription = null
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Start")
+                    IconButton(
+                        onClick = { screenModel.resetState(challenge) },
+                        enabled = challenge.state == ChallengeState.COMPLETED
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Refresh,
+                            contentDescription = "Reset challenge state"
+                        )
+                    }
+                    OutlinedButton(
+                        onClick = { screenModel.start(challenge) },
+                        enabled = challenge.state == ChallengeState.PENDING
+                    ) {
+                        when (challenge.state) {
+                            ChallengeState.PENDING -> {
+                                Icon(
+                                    imageVector = Icons.Rounded.PlayArrow,
+                                    contentDescription = null
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text("Start")
+                            }
+
+                            ChallengeState.STARTED -> Text("Started")
+                            ChallengeState.COMPLETED, null -> Text("Completed")
+                        }
+                    }
                 }
             }
         }

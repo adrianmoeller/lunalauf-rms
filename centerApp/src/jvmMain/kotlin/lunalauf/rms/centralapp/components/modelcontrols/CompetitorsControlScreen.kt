@@ -322,6 +322,7 @@ private fun TeamTile(
     ) {
         Text(
             modifier = Modifier
+                .weight(1f)
                 .padding(vertical = 10.dp)
                 .padding(start = 10.dp),
             text = teamName
@@ -360,6 +361,7 @@ private fun RunnerTile(
     ) {
         Text(
             modifier = Modifier
+                .weight(1f)
                 .padding(vertical = 10.dp)
                 .padding(start = 10.dp),
             text = runnerName

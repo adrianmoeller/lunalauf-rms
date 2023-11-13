@@ -36,6 +36,7 @@ class ModelAPI(
     private val model = modelState.model
 
     val runTimer = RunTimer(this)
+    private val challengeTimer = ChallengeTimer(mutex)
 
     var roundThreshold = 40
         private set
@@ -445,6 +446,52 @@ class ModelAPI(
     suspend fun updateChallengeReceiveImage(challenge: Challenge, receiveImage: Boolean) {
         mutex.withLock {
             challenge.isReceiveImages = receiveImage
+        }
+    }
+
+    suspend fun startChallenge(
+        challenge: Challenge,
+        onSendTeamGlobalMessage: (String) -> Boolean,
+        onStartAcceptImages: ((Team) -> Boolean) -> Unit,
+        onCompleted: () -> Unit
+    ): StartChallengeResult {
+        mutex.withLock {
+            if (challenge.state != ChallengeState.PENDING) {
+                logger.warn("Missing UI check if state is pending when starting challenge")
+                return StartChallengeResult.AlreadyStarted
+            }
+
+            val challengeHeader = "<b><u>Funfactor:</u> ${challenge.name}</b>"
+            val challengeStartText = "$challengeHeader\n${challenge.description}"
+
+            if (!onSendTeamGlobalMessage(challengeStartText))
+                return StartChallengeResult.SendMessageFailed
+
+            if (challenge.isExpires) {
+                challenge.state = ChallengeState.STARTED
+                challengeTimer.start(
+                    challenge = challenge,
+                    challengeHeader = challengeHeader,
+                    onSendTeamGlobalMessage = onSendTeamGlobalMessage,
+                    onStartAcceptImages = onStartAcceptImages,
+                    onCompleted = onCompleted
+                )
+            } else {
+                challenge.state = ChallengeState.COMPLETED
+            }
+            return StartChallengeResult.Started
+        }
+    }
+
+    suspend fun resetChallengeState(challenge: Challenge): ResetChallengeStateResult {
+        mutex.withLock {
+            if (challenge.state != ChallengeState.COMPLETED) {
+                logger.warn("Missing UI check if state is completed when resetting challenge state")
+                return ResetChallengeStateResult.NotCompleted
+            }
+
+            challenge.state = ChallengeState.PENDING
+            return ResetChallengeStateResult.Reset
         }
     }
 
