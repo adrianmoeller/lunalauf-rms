@@ -47,15 +47,18 @@ import lunalauf.rms.centralapp.components.dialogs.details.challenge.ChallengeDet
 import lunalauf.rms.centralapp.components.dialogs.details.minigame.MinigameDetailsScreen
 import lunalauf.rms.centralapp.components.dialogs.logfunfactorresults.LogFunfactorResultsScreen
 import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.utilities.network.bot.BotManager
 
 @Composable
 fun FunfactorsControlScreen(
     modifier: Modifier = Modifier,
+    botManager: BotManager,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
 ) {
     val minigamesState by modelState.minigames.collectAsState()
     val challengesState by modelState.challenges.collectAsState()
+    val competitorMessenger by botManager.competitorMessenger.collectAsState()
 
     var createMinigameOpen by remember { mutableStateOf(false) }
     var createChallengeOpen by remember { mutableStateOf(false) }
@@ -162,6 +165,7 @@ fun FunfactorsControlScreen(
         ChallengeDetailsScreen(
             challenge = remember(challengesState) { challenge },
             onDismissRequest = { challengeDetailsStatus = ChallengeDetailsStatus.Closed },
+            competitorMessenger = competitorMessenger,
             modelState = modelState,
             snackBarHostState = snackBarHostState
         )

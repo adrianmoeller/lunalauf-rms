@@ -20,7 +20,7 @@ class ChallengeTimer(
     fun start(
         challenge: Challenge,
         challengeHeader: String,
-        onSendTeamGlobalMessage: (String) -> Boolean,
+        onSendTeamMessage: (String) -> Boolean,
         onStartAcceptImages: ((Team) -> Boolean) -> Unit,
         onCompleted: () -> Unit
     ) {
@@ -32,7 +32,7 @@ class ChallengeTimer(
             delay(duration - 30.seconds)
 
             val message = "$challengeHeader\nNoch 30 Sekunden übrig!"
-            if (!onSendTeamGlobalMessage(message))
+            if (!onSendTeamMessage(message))
                 logger.error("Could not send '30 sec left'-message: {}", challenge)
         }
         scope.launch {
@@ -44,7 +44,7 @@ class ChallengeTimer(
                     challenge.state = ChallengeState.COMPLETED
                 }
             }
-            if (!onSendTeamGlobalMessage(message))
+            if (!onSendTeamMessage(message))
                 logger.error("Could not send 'completed'-message: {}", challenge)
         }
         scope.launch {

@@ -48,6 +48,7 @@ fun FileOpenScreen(
         )
     }
     val preferences by screenModel.preferences.collectAsState()
+    val competitorMessenger by botManager.competitorMessenger.collectAsState()
 
     var settingsOpen by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -162,6 +163,7 @@ fun FileOpenScreen(
 
         ModelControls(
             modifier = Modifier.padding(innerPadding),
+            botManager = botManager,
             modelState = modelState,
             snackBarHostState = snackBarHostState
         )

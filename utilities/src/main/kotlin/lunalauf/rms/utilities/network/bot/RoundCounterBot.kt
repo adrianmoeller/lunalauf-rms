@@ -28,6 +28,7 @@ import java.io.IOException
 import java.net.URI
 import java.nio.file.Paths
 import java.util.*
+import java.util.concurrent.atomic.AtomicReference
 
 class RoundCounterBot(
     token: String,
@@ -36,8 +37,8 @@ class RoundCounterBot(
     loadData: Boolean
 ) : AbstractBot(token, modelState, silentStart) {
     companion object {    /* COMMANDS */
-        private val CMD_START = "/start"
-        private val CMD_COUNT = "/count"
+        private const val CMD_START = "/start"
+        private const val CMD_COUNT = "/count"
 
         /* BOT ANSWERS */
         private val AWR_START = """
@@ -114,7 +115,7 @@ class RoundCounterBot(
     private val chatId2runner: MutableMap<Long, Runner> = HashMap()
     private val runner2chatId: MutableMap<Runner, Long> = HashMap()
 
-    var imageReceiveValidator: ImageReceiveValidator? = null
+    var imageReceiveValidator = AtomicReference<ImageReceiveValidator?>()
     private val _image = Channel<ImageViewData>()
     val image get() = _image.receiveAsFlow()
 
@@ -479,7 +480,7 @@ class RoundCounterBot(
     }
 
     @Throws(TelegramApiException::class)
-    private fun handlePhoto(chatId: Long, caption: String, photoSizes: List<PhotoSize>) {
+    private fun handlePhoto(chatId: Long, caption: String?, photoSizes: List<PhotoSize>) {
         val runner = chatId2runner[chatId]
         if (runner == null) {
             execute(send(chatId, AWR_NO_REG))
@@ -490,7 +491,7 @@ class RoundCounterBot(
             execute(send(chatId, AWR_ONLY_TEAM_PHOTO))
             return
         }
-        val validator = imageReceiveValidator
+        val validator = imageReceiveValidator.get()
         if (validator == null) {
             execute(send(chatId, AWR_NO_PHOTOS))
             return

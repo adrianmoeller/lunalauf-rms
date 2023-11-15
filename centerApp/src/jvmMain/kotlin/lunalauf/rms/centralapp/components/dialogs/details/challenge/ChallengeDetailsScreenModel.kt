@@ -3,10 +3,8 @@ package lunalauf.rms.centralapp.components.dialogs.details.challenge
 import LunaLaufLanguage.Challenge
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.utils.InputValidator
-import lunalauf.rms.modelapi.ModelState
-import lunalauf.rms.modelapi.ResetChallengeStateResult
-import lunalauf.rms.modelapi.UpdateChallengeDurationResult
-import lunalauf.rms.modelapi.UpdateChallengeNameResult
+import lunalauf.rms.modelapi.*
+import lunalauf.rms.utilities.network.communication.competitors.CompetitorMessenger
 
 class ChallengeDetailsScreenModel(
     modelState: ModelState.Loaded
@@ -69,18 +67,35 @@ class ChallengeDetailsScreenModel(
         }
     }
 
-    fun start(challenge: Challenge) {
+    fun start(challenge: Challenge, competitorMessenger: CompetitorMessenger.Available) {
         launchInModelScope {
-            // TODO
+            val result = modelAPI.startChallenge(
+                challenge = challenge,
+                onSendTeamMessage = {
+                    try {
+                        competitorMessenger.sendToTeams(it)
+                        true
+                    } catch (e: Throwable) {
+                        false
+                    }
+                },
+                onStartAcceptImages = competitorMessenger::startReceiveImagesFromTeams,
+                onCompleted = competitorMessenger::stopReceiveImagesFromTeams
+            )
+            when (result) {
+                StartChallengeResult.AlreadyStarted -> {}
+                StartChallengeResult.SendMessageFailed -> {}
+                StartChallengeResult.Started -> {}
+            }
         }
     }
 
     fun resetState(challenge: Challenge) {
         launchInModelScope {
-           when ( modelAPI.resetChallengeState(challenge)) {
-               ResetChallengeStateResult.NotCompleted -> {}
-               ResetChallengeStateResult.Reset -> {}
-           }
+            when (modelAPI.resetChallengeState(challenge)) {
+                ResetChallengeStateResult.NotCompleted -> {}
+                ResetChallengeStateResult.Reset -> {}
+            }
         }
     }
 }

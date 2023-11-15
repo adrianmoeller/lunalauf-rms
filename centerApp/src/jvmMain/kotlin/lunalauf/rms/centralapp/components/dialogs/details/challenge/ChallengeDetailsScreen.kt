@@ -19,12 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.*
 import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.utilities.network.communication.competitors.CompetitorMessenger
 
 @Composable
 fun ChallengeDetailsScreen(
     modifier: Modifier = Modifier,
     challenge: Challenge,
     onDismissRequest: () -> Unit,
+    competitorMessenger: CompetitorMessenger,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
 ) {
@@ -155,7 +157,7 @@ fun ChallengeDetailsScreen(
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     IconButton(
                         onClick = { screenModel.resetState(challenge) },
@@ -166,23 +168,31 @@ fun ChallengeDetailsScreen(
                             contentDescription = "Reset challenge state"
                         )
                     }
-                    OutlinedButton(
-                        onClick = { screenModel.start(challenge) },
-                        enabled = challenge.state == ChallengeState.PENDING
-                    ) {
-                        when (challenge.state) {
-                            ChallengeState.PENDING -> {
-                                Icon(
-                                    imageVector = Icons.Rounded.PlayArrow,
-                                    contentDescription = null
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text("Start")
-                            }
+                    if (competitorMessenger is CompetitorMessenger.Available) {
+                        OutlinedButton(
+                            onClick = { screenModel.start(challenge, competitorMessenger) },
+                            enabled = challenge.state == ChallengeState.PENDING
+                        ) {
+                            when (challenge.state) {
+                                ChallengeState.PENDING -> {
+                                    Icon(
+                                        imageVector = Icons.Rounded.PlayArrow,
+                                        contentDescription = null
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Start")
+                                }
 
-                            ChallengeState.STARTED -> Text("Started")
-                            ChallengeState.COMPLETED, null -> Text("Completed")
+                                ChallengeState.STARTED -> Text("Started")
+                                ChallengeState.COMPLETED, null -> Text("Completed")
+                            }
                         }
+                    } else {
+                        Text(
+                            text = "Competitor messenger not available",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
                     }
                 }
             }

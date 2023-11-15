@@ -1,13 +1,14 @@
 package lunalauf.rms.utilities.network.bot
 
+import LunaLaufLanguage.Team
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.utilities.bottokens.BotTokenContainer
+import lunalauf.rms.utilities.network.bot.util.ImageReceiveValidator
+import lunalauf.rms.utilities.network.communication.competitors.CompetitorMessenger
 import lunalauf.rms.utilities.persistence.PersistenceManager
 import org.slf4j.LoggerFactory
 import org.telegram.telegrambots.meta.TelegramBotsApi
@@ -26,7 +27,7 @@ sealed class BotManager {
                 val botTokens = persistenceManager.load(BotTokenContainer::class.java)
                 if (botTokens.roundCounter.isBlank() || botTokens.runnerInfo.isBlank()) {
                     InitializationError(
-                        message = "No bot tokens provided.\nPlease edit '${botTokens.fileName}'-file"
+                        message = "No bot tokens provided.\nPlease review '${botTokens.fileName}'-file"
                     )
                 } else {
                     Available(
@@ -43,6 +44,8 @@ sealed class BotManager {
         }
     }
 
+    abstract val competitorMessenger: StateFlow<CompetitorMessenger>
+
     class InitializationError internal constructor(
         val message: String,
         val exception: Exception? = null
@@ -53,6 +56,8 @@ sealed class BotManager {
             else
                 logger.error(message, exception)
         }
+
+        override val competitorMessenger = MutableStateFlow(CompetitorMessenger.Unavailable).asStateFlow()
     }
 
     class Available internal constructor(
@@ -71,15 +76,45 @@ sealed class BotManager {
 
         // Runner Info
         private var runnerInfoBotSession: BotSession? = null
-        private var runnerInfoBot: RunnerInfoBot? = null
+        internal var runnerInfoBot: RunnerInfoBot? = null
+            private set
         private val _runnerInfoBotState = MutableStateFlow(BotState.STOPPED)
         val runnerInfoBotState get() = _runnerInfoBotState.asStateFlow()
 
         // Round Counter
         private var roundCounterBotSession: BotSession? = null
-        private var roundCounterBot: RoundCounterBot? = null
+        internal var roundCounterBot: RoundCounterBot? = null
+            private set
         private val _roundCounterBotState = MutableStateFlow(BotState.STOPPED)
         val roundCounterBotState get() = _roundCounterBotState.asStateFlow()
+
+        override val competitorMessenger
+            get() = roundCounterBotState.map { state ->
+                if (state == BotState.RUNNING) {
+                    roundCounterBot?.let {
+                        return@map object : CompetitorMessenger.Available {
+                            override fun sendToAll(message: String) {
+                                it.sendGlobalMessage(message, false)
+                            }
+
+                            override fun sendToTeams(message: String) {
+                                it.sendGlobalMessage(message, true)
+                            }
+
+                            override fun startReceiveImagesFromTeams(validator: (Team) -> Boolean) {
+                                it.imageReceiveValidator.set(ImageReceiveValidator(validator))
+                            }
+
+                            override fun stopReceiveImagesFromTeams() {
+                                it.imageReceiveValidator.set(null)
+                            }
+                        }
+                    }
+                    CompetitorMessenger.Unavailable
+                } else {
+                    CompetitorMessenger.Unavailable
+                }
+            }.stateIn(scope, SharingStarted.Eagerly, CompetitorMessenger.Unavailable)
 
         fun silentStart(silentStart: Boolean) {
             _silentStart.value = silentStart

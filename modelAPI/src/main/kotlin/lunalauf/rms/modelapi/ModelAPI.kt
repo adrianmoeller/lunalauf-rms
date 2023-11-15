@@ -451,7 +451,7 @@ class ModelAPI(
 
     suspend fun startChallenge(
         challenge: Challenge,
-        onSendTeamGlobalMessage: (String) -> Boolean,
+        onSendTeamMessage: (String) -> Boolean,
         onStartAcceptImages: ((Team) -> Boolean) -> Unit,
         onCompleted: () -> Unit
     ): StartChallengeResult {
@@ -464,7 +464,7 @@ class ModelAPI(
             val challengeHeader = "<b><u>Funfactor:</u> ${challenge.name}</b>"
             val challengeStartText = "$challengeHeader\n${challenge.description}"
 
-            if (!onSendTeamGlobalMessage(challengeStartText))
+            if (!onSendTeamMessage(challengeStartText))
                 return StartChallengeResult.SendMessageFailed
 
             if (challenge.isExpires) {
@@ -472,7 +472,7 @@ class ModelAPI(
                 challengeTimer.start(
                     challenge = challenge,
                     challengeHeader = challengeHeader,
-                    onSendTeamGlobalMessage = onSendTeamGlobalMessage,
+                    onSendTeamMessage = onSendTeamMessage,
                     onStartAcceptImages = onStartAcceptImages,
                     onCompleted = onCompleted
                 )

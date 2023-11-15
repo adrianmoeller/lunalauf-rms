@@ -20,10 +20,13 @@ import compose.icons.fontawesomeicons.solid.ListAlt
 import compose.icons.fontawesomeicons.solid.Running
 import lunalauf.rms.centralapp.components.commons.TabNavigationBarItem
 import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.utilities.network.bot.BotManager
+import lunalauf.rms.utilities.network.communication.competitors.CompetitorMessenger
 
 @Composable
 fun ModelControls(
     modifier: Modifier = Modifier,
+    botManager: BotManager,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
 ) {
@@ -31,7 +34,7 @@ fun ModelControls(
         object {
             val run = RunControlTab(modelState, snackBarHostState)
             val competitors = CompetitorsControlTab(modelState, snackBarHostState)
-            val funfactors = FunfactorsControlTab(modelState, snackBarHostState)
+            val funfactors = FunfactorsControlTab(botManager, modelState, snackBarHostState)
         }
     }
 
@@ -121,6 +124,7 @@ private class CompetitorsControlTab(
 }
 
 private class FunfactorsControlTab(
+    private val botManager: BotManager,
     private val modelState: ModelState.Loaded,
     private val snackBarHostState: SnackbarHostState
 ) : Tab {
@@ -141,6 +145,7 @@ private class FunfactorsControlTab(
     override fun Content() {
         FunfactorsControlScreen(
             modifier = Modifier.fillMaxSize(),
+            botManager = botManager,
             modelState = modelState,
             snackBarHostState = snackBarHostState
         )
