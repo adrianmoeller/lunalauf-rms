@@ -1,6 +1,5 @@
-package lunalauf.rms.centralapp.components.commons
+package lunalauf.rms.centralapp.components.commons.tables
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,13 +28,17 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Sort
 import compose.icons.fontawesomeicons.solid.SortDown
 import compose.icons.fontawesomeicons.solid.SortUp
+import lunalauf.rms.centralapp.components.commons.ListItemDivider
+import lunalauf.rms.centralapp.components.commons.customScrollbarStyle
 
 @Composable
-fun Table(
+fun <T> ClickableTable(
     modifier: Modifier = Modifier,
     header: List<String>,
-    data: List<List<String>>,
+    data: List<Pair<List<String>, T>>,
     weights: List<Float>,
+    icon: @Composable () -> Unit,
+    onClick: (T) -> Unit,
     spacing: Dp = 10.dp
 ) {
     val state = rememberLazyListState()
@@ -44,12 +47,12 @@ fun Table(
 
     val sortedData = when (sortMode) {
         1 -> {
-            val comp = DynamicListComparator(sortIndex)
+            val comp = DynamicListValueComparator<T>(sortIndex)
             data.sortedWith(comp)
         }
 
         -1 -> {
-            val comp = DynamicListComparator(sortIndex, true)
+            val comp = DynamicListValueComparator<T>(sortIndex, true)
             data.sortedWith(comp)
         }
 
@@ -83,8 +86,10 @@ fun Table(
             ) {
                 itemsIndexed(sortedData) { index, item ->
                     DataTableRow(
-                        data = item,
+                        data = item.first,
                         weights = weights,
+                        onClick = { onClick(item.second) },
+                        icon = icon,
                         spacing = spacing
                     )
                     if (index < data.lastIndex)
@@ -190,28 +195,37 @@ private fun RowScope.HeaderTableCell(
 private fun DataTableRow(
     data: List<String>,
     weights: List<Float>,
+    onClick: () -> Unit,
+    icon: @Composable () -> Unit,
     spacing: Dp
 ) {
     var hovered by remember { mutableStateOf(false) }
 
-    Row(
+    Box(
         modifier = Modifier
             .onPointerEvent(PointerEventType.Enter) { hovered = true }
             .onPointerEvent(PointerEventType.Exit) { hovered = false }
-            .cond(hovered) {
-                background(
-                    color = listItemHoverColor,
-                    shape = MaterialTheme.shapes.medium
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(spacing)
+                .fillMaxWidth()
+        ) {
+            (data zip weights).forEach {
+                DataTableCell(
+                    text = it.first,
+                    weight = it.second
                 )
             }
-            .padding(spacing)
-            .fillMaxWidth()
-    ) {
-        (data zip weights).forEach {
-            DataTableCell(
-                text = it.first,
-                weight = it.second
-            )
+        }
+        if (hovered) {
+            Row {
+                icon()
+                Spacer(Modifier.width(spacing))
+            }
         }
     }
 }
@@ -231,53 +245,6 @@ private fun RowScope.DataTableCell(
             color = textColor,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-private class DynamicListComparator(
-    private val index: Int,
-    private val descending: Boolean = false
-) : Comparator<List<String>> {
-    override fun compare(l1: List<String>, l2: List<String>): Int {
-        val result = compareString(l1[index], l2[index])
-        return if (descending) -result else result
-    }
-
-    private fun compareString(o1: String, o2: String): Int {
-        val n1 = o1.toDoubleOrNull()
-        val n2 = o2.toDoubleOrNull()
-
-        return if (n1 != null && n2 != null)
-            n1.compareTo(n2)
-        else
-            o1.compareTo(o2)
-    }
-}
-
-@Preview
-@Composable
-fun PreviewTable() {
-    MaterialTheme {
-        Table(
-            header = listOf("Header1", "Header2", "Header3"),
-            data = listOf(
-                listOf("a1", "a2", "a3"),
-                listOf("a1", "a2", "a3"),
-                listOf("a1", "a2", "a3"),
-                listOf("c1", "c2", "c3"),
-                listOf("a1", "a2", "a3"),
-                listOf("f1", "a2", "a3"),
-                listOf("a1", "a2", "a3"),
-                listOf("a1", "a2", "d3"),
-                listOf("a1", "a2", "a3"),
-                listOf("b1", "r2", "b3"),
-                listOf("b1", "b2", "b3"),
-                listOf("a1", "a2", "a3"),
-                listOf("b1", "b2", "b3"),
-                listOf("b1", "b2", "b3")
-            ),
-            weights = listOf(2f, 1f, 1f)
         )
     }
 }

@@ -61,9 +61,12 @@ class RunnerDetailsScreenModel(
                         stats = calcStats(runner),
                         roundsData = modelAPI.rounds(runner)
                             .map {
-                                listOf(
-                                    Formats.dayTimeFormat.format(it.timestamp),
-                                    it.points.toString()
+                                Pair(
+                                    listOf(
+                                        Formats.dayTimeFormat.format(it.timestamp),
+                                        it.points.toString()
+                                    ),
+                                    it
                                 )
                             }
                     )

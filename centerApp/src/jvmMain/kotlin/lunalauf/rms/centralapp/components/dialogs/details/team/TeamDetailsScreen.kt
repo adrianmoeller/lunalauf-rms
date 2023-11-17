@@ -24,6 +24,7 @@ import compose.icons.fontawesomeicons.solid.Bolt
 import compose.icons.fontawesomeicons.solid.Running
 import compose.icons.fontawesomeicons.solid.ShoePrints
 import lunalauf.rms.centralapp.components.commons.*
+import lunalauf.rms.centralapp.components.commons.tables.Table
 import lunalauf.rms.centralapp.components.dialogs.details.EditableContributionTile
 import lunalauf.rms.centralapp.components.dialogs.details.StatTile
 import lunalauf.rms.modelapi.ModelState

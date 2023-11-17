@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberWindowState
-import lunalauf.rms.centralapp.components.commons.PublicViewTable
+import lunalauf.rms.centralapp.components.commons.tables.PublicViewTable
 import lunalauf.rms.centralapp.components.main.MainScreenModel
 import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
 import lunalauf.rms.centralapp.publicViewTypography
