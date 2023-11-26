@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import lunalauf.rms.centralapp.components.dialogs.preferences.PublicViewPrefSheet
 import lunalauf.rms.centralapp.components.features.BotSheetScreen
 import lunalauf.rms.centralapp.components.features.FeatureRail
+import lunalauf.rms.centralapp.components.features.LogSheetScreen
 import lunalauf.rms.centralapp.components.features.NetworkSheetScreen
 import lunalauf.rms.centralapp.components.main.MainScreenModel
 import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
@@ -62,7 +63,12 @@ fun ApplicationScope.MainWindow(
                             )
                         }
                         if (logOpen) {
-                            // TODO
+                            LogSheetScreen(
+                                modifier = Modifier.padding(
+                                    vertical = 10.dp,
+                                    horizontal = 5.dp
+                                )
+                            )
                         }
                     }
                 }

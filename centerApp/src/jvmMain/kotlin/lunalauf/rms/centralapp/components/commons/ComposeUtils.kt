@@ -42,6 +42,7 @@ fun ListItemDivider(
 }
 
 object IconSize {
+    val extraSmall = 15.dp
     val small = 20.dp
     val medium = 25.dp
     val large = 30.dp

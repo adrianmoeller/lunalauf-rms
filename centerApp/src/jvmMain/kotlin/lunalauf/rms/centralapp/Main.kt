@@ -20,9 +20,8 @@ import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
 import lunalauf.rms.centralapp.components.windows.MainWindow
 import lunalauf.rms.centralapp.components.windows.PublicViewWindow
 import lunalauf.rms.modelapi.ModelState
-import org.apache.log4j.BasicConfigurator
-import org.apache.log4j.Level
-import org.apache.log4j.LogManager
+import lunalauf.rms.utilities.logging.Logger
+import lunalauf.rms.utilities.logging.Lvl
 
 @Composable
 @Preview
@@ -47,12 +46,14 @@ fun ApplicationScope.App() {
                 onOpenClick = mainScreenModel::openFile,
                 snackBarHostState = mainScreenModel.snackBarHostState
             )
+
             is ModelState.Loading -> Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
             }
+
             is ModelState.Loaded -> FileOpenScreen(
                 modelResourceManager = mainScreenModel.modelResourceManager,
                 botManager = mainScreenModel.botManager,
@@ -75,8 +76,8 @@ fun ApplicationScope.App() {
 }
 
 fun main() {
-    BasicConfigurator.configure()
-    LogManager.getRootLogger().level = Level.INFO
+    Logger.configure()
+    Logger.setLevel(Lvl.INFO)
 
     application {
         App()
