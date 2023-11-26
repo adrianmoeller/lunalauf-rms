@@ -93,10 +93,13 @@ fun <T : EObject> DeleteElementDialog(
                     tint = MaterialTheme.colorScheme.error
                 )
                 Text("You are about to delete this element:")
-                Text(
-                    text = element.toString(),
-                    fontWeight = FontWeight.Bold
-                )
+                OutlinedCard {
+                    Text(
+                        modifier = Modifier.padding(15.dp),
+                        text = element.toString(),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
                 val constDeletionFailed = deletionFailed
                 if (constDeletionFailed != null) {
                     Card(

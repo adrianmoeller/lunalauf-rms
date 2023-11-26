@@ -39,28 +39,37 @@ class TeamDetailsScreenModel(
                         stats = calcStats(team),
                         membersData = modelAPI.members(team)
                             .map {
-                                listOf(
-                                    it.id.toString(),
-                                    it.name ?: "",
-                                    it.numOfRounds().toString()
+                                Pair(
+                                    listOf(
+                                        it.id.toString(),
+                                        it.name ?: "",
+                                        it.numOfRounds().toString()
+                                    ),
+                                    it
                                 )
                             },
                         funfactorResultsData = modelAPI.funfactorResults(team)
                             .map {
-                                listOf(
-                                    Formats.dayTimeFormat.format(it.timestamp),
-                                    it.type.print(),
-                                    it.points.toString()
+                                Pair(
+                                    listOf(
+                                        Formats.dayTimeFormat.format(it.timestamp),
+                                        it.type.print(),
+                                        it.points.toString()
+                                    ),
+                                    it
                                 )
                             },
                         roundsData = modelAPI.rounds(team)
                             .sortedBy { it.timestamp }
                             .map {
                                 val runnerName = it.runner.name
-                                listOf(
-                                    Formats.dayTimeFormat.format(it.timestamp),
-                                    if (runnerName.isNullOrBlank()) it.runner.id.toString() else runnerName,
-                                    it.points.toString()
+                                Pair(
+                                    listOf(
+                                        Formats.dayTimeFormat.format(it.timestamp),
+                                        if (runnerName.isNullOrBlank()) it.runner.id.toString() else runnerName,
+                                        it.points.toString()
+                                    ),
+                                    it
                                 )
                             }
                     )

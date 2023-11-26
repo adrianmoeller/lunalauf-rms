@@ -33,7 +33,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.SlidersH
 import kotlinx.coroutines.launch
 import lunalauf.rms.centralapp.components.commons.*
-import lunalauf.rms.centralapp.components.commons.tables.Table
+import lunalauf.rms.centralapp.components.commons.tables.ClickableTable
 import lunalauf.rms.centralapp.components.dialogs.create.runner.CreateRunnerScreen
 import lunalauf.rms.centralapp.components.dialogs.create.team.CreateTeamScreen
 import lunalauf.rms.centralapp.components.dialogs.details.runner.RunnerDetailsScreen
@@ -134,6 +134,7 @@ fun CompetitorsControlScreen(
     if (teamsTableOpen) {
         ExpandedTeamsTable(
             onDismissRequest = { teamsTableOpen = false },
+            onShowTeamDetailsRequest = { teamDetailsStatus = TeamDetailsStatus.Open(it) },
             screenModel = screenModel
         )
     }
@@ -141,6 +142,7 @@ fun CompetitorsControlScreen(
     if (runnersTableOpen) {
         ExpandedSingleRunnersTable(
             onDismissRequest = { runnersTableOpen = false },
+            onShowRunnerDetailsRequest = { runnerDetailsStatus = RunnerDetailsStatus.Open(it) },
             screenModel = screenModel
         )
     }
@@ -208,6 +210,7 @@ fun CompetitorsControlScreen(
                 knownTeam = it
                 createTeamOpen = true
             },
+            onShowRunnerDetailsRequest = { runnerDetailsStatus = RunnerDetailsStatus.Open(it) },
             modelState = modelState,
             snackBarHostState = snackBarHostState
         )
@@ -385,6 +388,7 @@ private fun RunnerTile(
 private fun ExpandedTeamsTable(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
+    onShowTeamDetailsRequest: (Team) -> Unit,
     screenModel: CompetitorsControlScreenModel
 ) {
     FullScreenDialog(
@@ -396,7 +400,7 @@ private fun ExpandedTeamsTable(
         val dataCalc by screenModel.calcTeamsData()
         if (dataCalc is CalcResult.Available) {
             val data = (dataCalc as CalcResult.Available).result
-            Table(
+            ClickableTable(
                 modifier = Modifier.padding(
                     top = 10.dp,
                     bottom = 20.dp,
@@ -405,7 +409,19 @@ private fun ExpandedTeamsTable(
                 ),
                 header = listOf("Name", "Members", "Rounds", "Funfactors", "Total rounds", "Total amount"),
                 data = data,
-                weights = listOf(3f, 1f, 1f, 1f, 1f, 1f)
+                weights = listOf(3f, 1f, 1f, 1f, 1f, 1f),
+                icon = {
+                    Icon(
+                        modifier = Modifier.size(IconSize.small - 2.dp),
+                        imageVector = FontAwesomeIcons.Solid.SlidersH,
+                        contentDescription = "Show team details",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                onClick = {
+                    onDismissRequest()
+                    onShowTeamDetailsRequest(it)
+                }
             )
         } else {
             Box(
@@ -422,6 +438,7 @@ private fun ExpandedTeamsTable(
 private fun ExpandedSingleRunnersTable(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
+    onShowRunnerDetailsRequest: (Runner) -> Unit,
     screenModel: CompetitorsControlScreenModel
 ) {
     FullScreenDialog(
@@ -433,7 +450,7 @@ private fun ExpandedSingleRunnersTable(
         val dataCalc by screenModel.calcRunnersData()
         if (dataCalc is CalcResult.Available) {
             val data = (dataCalc as CalcResult.Available).result
-            Table(
+            ClickableTable(
                 modifier = Modifier.padding(
                     top = 10.dp,
                     bottom = 20.dp,
@@ -442,7 +459,19 @@ private fun ExpandedSingleRunnersTable(
                 ),
                 header = listOf("ID", "Name", "Rounds", "Total Amount"),
                 data = data,
-                weights = listOf(1f, 2.8f, 1f, 1f)
+                weights = listOf(1f, 2.8f, 1f, 1f),
+                icon = {
+                    Icon(
+                        modifier = Modifier.size(IconSize.small - 2.dp),
+                        imageVector = FontAwesomeIcons.Solid.SlidersH,
+                        contentDescription = "Show runner details",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                onClick = {
+                    onDismissRequest()
+                    onShowRunnerDetailsRequest(it)
+                }
             )
         } else {
             Box(

@@ -1,5 +1,8 @@
 package lunalauf.rms.centralapp.components.dialogs.details.team
 
+import LunaLaufLanguage.FunfactorResult
+import LunaLaufLanguage.Round
+import LunaLaufLanguage.Runner
 import LunaLaufLanguage.Team
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
@@ -23,8 +26,9 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Bolt
 import compose.icons.fontawesomeicons.solid.Running
 import compose.icons.fontawesomeicons.solid.ShoePrints
+import compose.icons.fontawesomeicons.solid.SlidersH
 import lunalauf.rms.centralapp.components.commons.*
-import lunalauf.rms.centralapp.components.commons.tables.Table
+import lunalauf.rms.centralapp.components.commons.tables.ClickableTable
 import lunalauf.rms.centralapp.components.dialogs.details.EditableContributionTile
 import lunalauf.rms.centralapp.components.dialogs.details.StatTile
 import lunalauf.rms.modelapi.ModelState
@@ -35,6 +39,7 @@ fun TeamDetailsScreen(
     team: Team,
     onDismissRequest: () -> Unit,
     onAddRunnerRequest: (Team) -> Unit,
+    onShowRunnerDetailsRequest: (Runner) -> Unit,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
 ) {
@@ -50,6 +55,7 @@ fun TeamDetailsScreen(
 
         if (teamDetailsCalc is CalcResult.Available) {
             val teamDetails = (teamDetailsCalc as CalcResult.Available).result
+
             Row(
                 modifier = Modifier.padding(20.dp),
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
@@ -196,7 +202,15 @@ fun TeamDetailsScreen(
                     Box(
                         modifier = Modifier.weight(1f)
                     ) {
-                        currentTab.content(teamDetails)
+                        currentTab.content(
+                            modelState,
+                            teamDetails,
+                            {
+                                onDismissRequest()
+                                onShowRunnerDetailsRequest(it)
+                            },
+                            snackBarHostState
+                        )
                     }
                 }
             }
@@ -234,42 +248,106 @@ private fun RowScope.TabsNavigationBarItem(
 private enum class Tabs(
     val title: String,
     val icon: ImageVector,
-    val content: @Composable (TeamDetails) -> Unit
+    val content: @Composable (
+        ModelState.Loaded,
+        TeamDetails,
+        (Runner) -> Unit,
+        SnackbarHostState
+    ) -> Unit
 ) {
     Members(
         title = "Members",
         icon = FontAwesomeIcons.Solid.Running,
-        content = { details ->
+        content = { _, details, onShowRunnerDetailsRequest, _ ->
             val data = details.membersData
-            Table(
+            ClickableTable(
                 header = listOf("ID", "Name", "Points"),
                 data = data,
-                weights = listOf(3f, 5f, 2f)
+                weights = listOf(3f, 5f, 2f),
+                icon = {
+                    Icon(
+                        modifier = Modifier.size(IconSize.small - 2.dp),
+                        imageVector = FontAwesomeIcons.Solid.SlidersH,
+                        contentDescription = "Show runner details",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                onClick = onShowRunnerDetailsRequest
             )
         }
     ),
     Rounds(
         title = "Rounds",
         icon = FontAwesomeIcons.Solid.ShoePrints,
-        content = { details ->
+        content = { modelState, details, _, snackBarHostState ->
+            var deleteRoundState: DeleteRoundState by remember { mutableStateOf(DeleteRoundState.Closed) }
             val data = details.roundsData
-            Table(
+            ClickableTable(
                 header = listOf("Time", "Runner", "Points"),
                 data = data,
-                weights = listOf(3f, 5f, 2f)
+                weights = listOf(3f, 5f, 2f),
+                icon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Delete,
+                        contentDescription = "Delete round",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                onClick = { deleteRoundState = DeleteRoundState.Open(it) }
             )
+            val constDeleteRoundState = deleteRoundState
+            if (constDeleteRoundState is DeleteRoundState.Open) {
+                DeleteElementDialog(
+                    element = constDeleteRoundState.round,
+                    onClose = { deleteRoundState = DeleteRoundState.Closed },
+                    onDeleted = {},
+                    modelState = modelState,
+                    snackBarHostState = snackBarHostState
+                )
+            }
         }
     ),
     Funfactors(
         title = "Funfactor results",
         icon = FontAwesomeIcons.Solid.Bolt,
-        content = { details ->
+        content = { modelState, details, _, snackBarHostState ->
+            var deleteFunfactorResultState: DeleteFunfactorResultState by remember {
+                mutableStateOf(DeleteFunfactorResultState.Closed)
+            }
             val data = details.funfactorResultsData
-            Table(
+            ClickableTable(
                 header = listOf("Time", "Funfactor", "Points"),
                 data = data,
-                weights = listOf(2f, 5f, 1f)
+                weights = listOf(2f, 5f, 1f),
+                icon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Delete,
+                        contentDescription = "Delete round",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                onClick = { deleteFunfactorResultState = DeleteFunfactorResultState.Open(it) }
             )
+            val constDeleteFunfactorResultState = deleteFunfactorResultState
+            if (constDeleteFunfactorResultState is DeleteFunfactorResultState.Open) {
+                DeleteElementDialog(
+                    element = constDeleteFunfactorResultState.funfactorResult,
+                    onClose = { deleteFunfactorResultState = DeleteFunfactorResultState.Closed },
+                    onDeleted = {},
+                    modelState = modelState,
+                    snackBarHostState = snackBarHostState
+                )
+            }
         }
     )
+}
+
+private sealed class DeleteRoundState {
+    data object Closed : DeleteRoundState()
+    data class Open(val round: Round) : DeleteRoundState()
+}
+
+private sealed class DeleteFunfactorResultState {
+    data object Closed : DeleteFunfactorResultState()
+    data class Open(val funfactorResult: FunfactorResult) : DeleteFunfactorResultState()
 }

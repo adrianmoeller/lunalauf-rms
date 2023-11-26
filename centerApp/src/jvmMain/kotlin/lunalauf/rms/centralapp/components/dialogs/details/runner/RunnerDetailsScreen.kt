@@ -170,7 +170,6 @@ fun RunnerDetailsScreen(
                 val constDeleteRoundState = deleteRoundState
                 if (constDeleteRoundState is DeleteRoundState.Open) {
                     DeleteElementDialog(
-                        modifier = modifier,
                         element = constDeleteRoundState.round,
                         onClose = { deleteRoundState = DeleteRoundState.Closed },
                         onDeleted = {},
