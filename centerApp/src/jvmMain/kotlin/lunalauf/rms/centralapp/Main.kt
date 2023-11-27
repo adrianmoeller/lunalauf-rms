@@ -77,7 +77,6 @@ fun ApplicationScope.App() {
 
 fun main() {
     Logger.configure()
-    Logger.setLevel(Lvl.INFO)
 
     application {
         App()

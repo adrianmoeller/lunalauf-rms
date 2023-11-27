@@ -64,10 +64,7 @@ fun ApplicationScope.MainWindow(
                         }
                         if (logOpen) {
                             LogSheetScreen(
-                                modifier = Modifier.padding(
-                                    vertical = 10.dp,
-                                    horizontal = 5.dp
-                                )
+                                modifier = Modifier.padding(5.dp)
                             )
                         }
                     }
