@@ -5,10 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.ApplicationScope
@@ -39,7 +36,8 @@ fun ApplicationScope.App() {
         colorScheme = colorScheme,
         mainScreenModel = mainScreenModel,
         publicViewScreenModel = publicViewScreenModel,
-        publicViewAvailable = constModelState is ModelState.Loaded
+        publicViewAvailable = constModelState is ModelState.Loaded,
+        showCloseAppDialog = constModelState is ModelState.Loaded
     ) {
         when (constModelState) {
             is ModelState.Unloaded -> NoFileOpenScreen(

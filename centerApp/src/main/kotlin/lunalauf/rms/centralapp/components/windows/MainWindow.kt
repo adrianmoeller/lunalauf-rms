@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import kotlinx.coroutines.launch
+import lunalauf.rms.centralapp.components.dialogs.CloseAppDialog
 import lunalauf.rms.centralapp.components.dialogs.preferences.PublicViewPrefSheet
 import lunalauf.rms.centralapp.components.features.BotSheetScreen
 import lunalauf.rms.centralapp.components.features.FeatureRail
@@ -26,11 +28,21 @@ fun ApplicationScope.MainWindow(
     mainScreenModel: MainScreenModel,
     publicViewScreenModel: PublicViewScreenModel,
     publicViewAvailable: Boolean,
+    showCloseAppDialog: Boolean,
     content: @Composable () -> Unit
 ) {
+    val icon = painterResource("icons/icon.png")
+    var closeAppPromptOpen by remember { mutableStateOf(false) }
+
     Window(
-        onCloseRequest = ::exitApplication,
-        title = "Luna-Lauf"
+        onCloseRequest = {
+            if (showCloseAppDialog)
+                closeAppPromptOpen = true
+            else
+                exitApplication()
+        },
+        title = "Luna-Lauf",
+        icon = icon
     ) {
         window.background = Color.BLACK
 
@@ -108,6 +120,12 @@ fun ApplicationScope.MainWindow(
                 PublicViewPrefSheet(
                     screenModel = publicViewScreenModel,
                     onClose = { publicViewPrefOpen = false }
+                )
+            }
+
+            if (closeAppPromptOpen) {
+                CloseAppDialog(
+                    onDismissRequest = { closeAppPromptOpen = false }
                 )
             }
         }

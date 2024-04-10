@@ -18,6 +18,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -45,6 +46,8 @@ fun PublicViewWindow(
     publicViewScreenModel: PublicViewScreenModel,
     modelState: ModelState.Loaded
 ) {
+    val icon = painterResource("icons/icon.png")
+
     if (publicViewScreenModel.open) {
         val pref = publicViewScreenModel.prefState
         val borderWidth = 4.dp
@@ -61,6 +64,7 @@ fun PublicViewWindow(
         Window(
             onCloseRequest = { publicViewScreenModel.updateOpen(false) },
             title = "Luna-Lauf - Public View",
+            icon = icon,
             state = windowState,
             onKeyEvent = {
                 if (it.key == Key.F && it.type == KeyEventType.KeyDown) {

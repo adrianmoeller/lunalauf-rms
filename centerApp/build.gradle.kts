@@ -50,6 +50,16 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe)
             packageName = "lunalauf-rms-center"
             packageVersion = "1.0.0"
+            windows {
+                iconFile.set(project.file("src/main/resources/icons/icon.ico"))
+                menuGroup = "lunalauf-rms"
+                perUserInstall = true
+                upgradeUuid = "05880f6b-06f0-4d1f-bd2f-5451ad02358c".uppercase()
+            }
+            linux {
+                iconFile.set(project.file("src/main/resources/icons/icon.png"))
+                menuGroup = "lunalauf-rms"
+            }
         }
     }
 }
