@@ -21,7 +21,8 @@ import lunalauf.rms.centralapp.components.windows.MainWindow
 import lunalauf.rms.centralapp.components.windows.PublicViewWindow
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.utilities.logging.Logger
-import lunalauf.rms.utilities.logging.Lvl
+import org.slf4j.LoggerFactory
+import java.awt.*
 
 @Composable
 @Preview
@@ -76,6 +77,24 @@ fun ApplicationScope.App() {
 }
 
 fun main() {
+    Thread.setDefaultUncaughtExceptionHandler { _, e ->
+        LoggerFactory.getLogger("Main").error("Fatal error", e)
+
+        Dialog(Frame(), e.message ?: "Error").apply {
+            layout = FlowLayout()
+            val exceptionLabel = Label(e.toString())
+            add(exceptionLabel)
+            val seeLogLabel = Label("See log.ll")
+            add(seeLogLabel)
+            val button = Button("OK").apply {
+                addActionListener { dispose() }
+            }
+            add(button)
+            setSize(300, 200)
+            isVisible = true
+        }
+    }
+
     Logger.configure()
 
     application {

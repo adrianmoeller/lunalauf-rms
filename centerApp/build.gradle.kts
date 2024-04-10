@@ -2,8 +2,9 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("multiplatform")
+    kotlin("jvm")
     id("org.jetbrains.compose")
+    id ("lunalauf.rms.kotlin-application-conventions")
 }
 
 group = "com.example"
@@ -22,44 +23,31 @@ tasks.withType(KotlinCompile::class).configureEach {
     }
 }
 
-@OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-kotlin {
-    jvm {
-        jvmToolchain(jdkVersion = 17)
-        withJava()
-    }
-    sourceSets {
-        val jvmMain by getting {
-            apply(plugin = "lunalauf.rms.kotlin-application-conventions")
+dependencies {
+    implementation(compose.desktop.currentOs)
+    implementation(compose.material3)
 
-            dependencies {
-                implementation(compose.desktop.currentOs)
-                implementation(compose.material3)
+    val composeIconsVersion = "1.1.0"
+    implementation("br.com.devsrsouza.compose.icons:font-awesome:$composeIconsVersion")
+    implementation("br.com.devsrsouza.compose.icons:eva-icons:$composeIconsVersion")
 
-                val composeIconsVersion = "1.1.0"
-                implementation("br.com.devsrsouza.compose.icons:font-awesome:$composeIconsVersion")
-                implementation("br.com.devsrsouza.compose.icons:eva-icons:$composeIconsVersion")
+    val voyagerVersion = "1.0.0-rc07"
+    implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
 
-                val voyagerVersion = "1.0.0-rc07"
-                implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
-                implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:$voyagerVersion")
-                implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
-                implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
-
-                implementation("LunaLaufLanguage:LunaLaufLanguage:1.0.2")
-                implementation(project(":modelAPI"))
-                implementation(project(":utilities"))
-            }
-        }
-        val jvmTest by getting
-    }
+    implementation("LunaLaufLanguage:LunaLaufLanguage:1.0.3")
+    implementation(project(":modelAPI"))
+    implementation(project(":utilities"))
 }
 
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "lunalauf.rms.centralapp.MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            modules("java.sql")
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe)
             packageName = "lunalauf-rms-center"
             packageVersion = "1.0.0"
         }

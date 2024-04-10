@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation("LunaLaufLanguage:LunaLaufLanguage:1.0.2")
+    implementation("LunaLaufLanguage:LunaLaufLanguage:1.0.3")
 
     implementation("org.eclipse.emf:org.eclipse.emf.ecore:2.33.0")
     implementation("org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.18.0")
