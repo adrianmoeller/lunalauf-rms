@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.ApplicationScope
@@ -18,8 +21,7 @@ import lunalauf.rms.centralapp.components.windows.MainWindow
 import lunalauf.rms.centralapp.components.windows.PublicViewWindow
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.utilities.logging.Logger
-import org.slf4j.LoggerFactory
-import java.awt.*
+import lunalauf.rms.utilities.logging.configureStartUpErrorLogging
 
 @Composable
 @Preview
@@ -75,24 +77,7 @@ fun ApplicationScope.App() {
 }
 
 fun main() {
-    Thread.setDefaultUncaughtExceptionHandler { _, e ->
-        LoggerFactory.getLogger("Main").error("Fatal error", e)
-
-        Dialog(Frame(), e.message ?: "Error").apply {
-            layout = FlowLayout()
-            val exceptionLabel = Label(e.toString())
-            add(exceptionLabel)
-            val seeLogLabel = Label("See log.ll")
-            add(seeLogLabel)
-            val button = Button("OK").apply {
-                addActionListener { dispose() }
-            }
-            add(button)
-            setSize(300, 200)
-            isVisible = true
-        }
-    }
-
+    configureStartUpErrorLogging()
     Logger.configure()
 
     application {

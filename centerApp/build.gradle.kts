@@ -7,7 +7,7 @@ plugins {
     id ("lunalauf.rms.kotlin-application-conventions")
 }
 
-group = "com.example"
+group = "de.lunalauf-rms"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -45,9 +45,10 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "lunalauf.rms.centralapp.MainKt"
+
         nativeDistributions {
             modules("java.sql")
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "lunalauf-rms-center"
             packageVersion = "1.0.0"
             windows {
