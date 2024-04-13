@@ -10,10 +10,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
+import androidx.compose.ui.window.*
 import lunalauf.rms.counterapp.components.*
 import lunalauf.rms.utilities.logging.Logger
 import lunalauf.rms.utilities.logging.configureStartUpErrorLogging
@@ -25,10 +27,28 @@ fun ApplicationScope.App() {
     val colorScheme = darkColorScheme()
     val icon = painterResource("icons/icon.png")
 
+    val screenModel = remember { MainScreenModel() }
+    val connectionStatus by screenModel.connectionStatus.collectAsState()
+
+    val startWindowState = rememberWindowState()
+    val connectedWindowState = rememberWindowState()
+
     Window(
         onCloseRequest = ::exitApplication,
         title = "Luna-Lauf",
-        icon = icon
+        icon = icon,
+        state = if (connectionStatus == MainConnectionStatus.Disconnected) startWindowState
+            else connectedWindowState,
+        onKeyEvent = {
+            if (connectionStatus != MainConnectionStatus.Disconnected && it.key == Key.F && it.type == KeyEventType.KeyDown) {
+                if (connectedWindowState.placement != WindowPlacement.Fullscreen)
+                    connectedWindowState.placement = WindowPlacement.Fullscreen
+                else
+                    connectedWindowState.placement = WindowPlacement.Floating
+                return@Window true
+            }
+            return@Window false
+        }
     ) {
         window.background = Color.BLACK
 
@@ -38,29 +58,34 @@ fun ApplicationScope.App() {
             Surface(
                 modifier = Modifier.fillMaxSize(),
             ) {
-                val screenModel = remember { MainScreenModel() }
-                val connectionStatus by screenModel.connectionStatus.collectAsState()
-
                 when (val constConnStatus = connectionStatus) {
-                    ConnectionStatus.Disconnected -> {
+                    MainConnectionStatus.Disconnected -> {
                         StartScreen(
                             modifier = Modifier.fillMaxSize(),
                             screenModel = screenModel
                         )
                     }
 
-                    is ConnectionStatus.ConnectedRC -> {
-                        RoundCounterScreen(
-                            modifier = Modifier.fillMaxSize(),
-                            roundCounter = constConnStatus.roundCounter
-                        )
+                    is MainConnectionStatus.ConnectedRC -> {
+                        ConnectedScreenFrame(
+                            screenModel = screenModel,
+                            client = constConnStatus.roundCounter.client,
+                        ) {
+                            RoundCounterScreen(
+                                roundCounter = constConnStatus.roundCounter
+                            )
+                        }
                     }
 
-                    is ConnectionStatus.ConnectedID -> {
-                        InfoDisplayScreen(
-                            modifier = Modifier.fillMaxSize(),
-                            infoDisplay = constConnStatus.infoDisplay
-                        )
+                    is MainConnectionStatus.ConnectedID -> {
+                        ConnectedScreenFrame(
+                            screenModel = screenModel,
+                            client = constConnStatus.infoDisplay.client
+                        ) {
+                            InfoDisplayScreen(
+                                infoDisplay = constConnStatus.infoDisplay
+                            )
+                        }
                     }
                 }
             }

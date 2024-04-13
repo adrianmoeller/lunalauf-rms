@@ -37,6 +37,7 @@ fun StartScreen(
                 modifier = Modifier.width(IntrinsicSize.Max),
                 selected = counterType == CounterType.RoundCounter,
                 onClick = { screenModel.updateCounterType(CounterType.RoundCounter) },
+                enabled = connectorState == Service.State.Idling,
                 label = { Text("Scan rounds") },
                 shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
             )
@@ -44,6 +45,7 @@ fun StartScreen(
                 modifier = Modifier.width(IntrinsicSize.Max),
                 selected = counterType == CounterType.InfoDisplay,
                 onClick = { screenModel.updateCounterType(CounterType.InfoDisplay) },
+                enabled = connectorState == Service.State.Idling,
                 label = { Text("Show info") },
                 shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
             )
@@ -55,11 +57,13 @@ fun StartScreen(
             OutlinedTextField(
                 value = screenModel.port,
                 onValueChange = screenModel::updatePort,
+                enabled = connectorState == Service.State.Idling,
                 label = { Text("Port") },
             )
             OutlinedTextField(
                 value = screenModel.host,
                 onValueChange = screenModel::updateHost,
+                enabled = connectorState == Service.State.Idling,
                 label = { Text("Host") },
             )
             Spacer(Modifier.height(10.dp))

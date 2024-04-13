@@ -2,6 +2,9 @@ package lunalauf.rms.counterapp.components
 
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedCard
@@ -25,39 +28,39 @@ fun ScanChipField(
     val focusRequester = remember { FocusRequester() }
     var readyForScanning by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        OutlinedCard(
-            modifier = Modifier
-                .onPreviewKeyEvent {
-                    if (it.type == KeyEventType.KeyUp) {
-                        return@onPreviewKeyEvent when (it.key) {
-                            Key.Enter -> {
-                                onEnterKeyEvent()
-                                true
-                            }
+    OutlinedCard(
+        modifier = modifier
+            .onPreviewKeyEvent {
+                if (it.type == KeyEventType.KeyUp) {
+                    return@onPreviewKeyEvent when (it.key) {
+                        Key.Enter -> {
+                            onEnterKeyEvent()
+                            true
+                        }
 
-                            else -> {
-                                val parsedKey = parseNumberKey(it.key)
-                                if (parsedKey == null) {
-                                    false
-                                } else {
-                                    onNumberKeyEvent(parsedKey)
-                                    true
-                                }
+                        else -> {
+                            val parsedKey = parseNumberKey(it.key)
+                            if (parsedKey == null) {
+                                false
+                            } else {
+                                onNumberKeyEvent(parsedKey)
+                                true
                             }
                         }
                     }
-                    return@onPreviewKeyEvent false
                 }
-                .onFocusChanged { readyForScanning = it.isCaptured }
-                .focusRequester(focusRequester)
-                .focusable(true),
-            colors = CardDefaults.outlinedCardColors(
-                containerColor = Color.Transparent
-            ),
+                return@onPreviewKeyEvent false
+            }
+            .onFocusChanged { readyForScanning = it.isCaptured }
+            .focusRequester(focusRequester)
+            .focusable(true),
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = Color.Transparent
+        ),
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter
         ) {
             if (readyForScanning)
                 content()

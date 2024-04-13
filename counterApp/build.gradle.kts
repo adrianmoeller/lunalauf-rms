@@ -27,6 +27,10 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
 
+    val composeIconsVersion = "1.1.0"
+    implementation("br.com.devsrsouza.compose.icons:font-awesome:$composeIconsVersion")
+    implementation("br.com.devsrsouza.compose.icons:eva-icons:$composeIconsVersion")
+
     implementation(project(":utilities"))
 }
 

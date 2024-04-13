@@ -11,7 +11,7 @@ import lunalauf.rms.utilities.network.util.FixedQueue
 import lunalauf.rms.utilities.network.util.RepetitionHandler
 
 class RoundCounter(
-    private val client: Client
+    val client: Client
 ) {
     private val requestSubmitter: RequestSubmitter
     private val requestFactory: RequestFactory

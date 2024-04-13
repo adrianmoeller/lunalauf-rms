@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import lunalauf.rms.utilities.network.client.Client
 import lunalauf.rms.utilities.network.client.Connector
 import lunalauf.rms.utilities.network.client.InfoDisplay
 import lunalauf.rms.utilities.network.client.RoundCounter
@@ -22,8 +23,12 @@ class MainScreenModel : AbstractScreenModel() {
     private val connector = Connector()
     val connectorState get() = connector.state
 
-    private val _connectionStatus: MutableStateFlow<ConnectionStatus> = MutableStateFlow(ConnectionStatus.Disconnected)
+    private val _connectionStatus: MutableStateFlow<MainConnectionStatus> =
+        MutableStateFlow(MainConnectionStatus.Disconnected)
     val connectionStatus = _connectionStatus.asStateFlow()
+
+    var reconnecting by mutableStateOf(false)
+        private set
 
     fun updateCounterType(value: CounterType) {
         _counterType.value = value
@@ -48,32 +53,58 @@ class MainScreenModel : AbstractScreenModel() {
             ),
             onResultAvailable = {
                 when (it) {
-                    Connector.Result.Aborted -> {}
                     is Connector.Result.Connected -> {
-                        when (_counterType.value) {
-                            CounterType.RoundCounter -> {
-                                val roundCounter = RoundCounter(it.client).apply {
-                                    setActions(
-                                        accepted = { TODO() },
-                                        rejected = { TODO() },
-                                        failed = { TODO() }
-                                    )
-                                    setOnConnectionLost { TODO() }
-                                }
-                                _connectionStatus.value = ConnectionStatus.ConnectedRC(roundCounter)
-                            }
-                            CounterType.InfoDisplay -> {
-                                val infoDisplay = InfoDisplay(it.client).apply {
-                                    setActions(
-                                        succeeded = { TODO() },
-                                        failed = { TODO() }
-                                    )
-                                    setOnConnectionLost { TODO() }
-                                }
-                                _connectionStatus.value = ConnectionStatus.ConnectedID(infoDisplay)
-                            }
-                        }
+                        connected(it.client)
                     }
+
+                    Connector.Result.Aborted -> {}
+
+                    is Connector.Result.Failed -> {
+                        // TODO show snack bar with error
+                    }
+                }
+            }
+        )
+    }
+
+    private fun connected(client: Client) {
+        when (_counterType.value) {
+            CounterType.RoundCounter -> {
+                val roundCounter = RoundCounter(client).apply {
+                    setOnConnectionLost { tryReconnect() }
+                }
+                _connectionStatus.value = MainConnectionStatus.ConnectedRC(roundCounter)
+            }
+
+            CounterType.InfoDisplay -> {
+                val infoDisplay = InfoDisplay(client).apply {
+                    setActions(
+                        succeeded = { TODO() },
+                        failed = { TODO() }
+                    )
+                    setOnConnectionLost { tryReconnect() }
+                }
+                _connectionStatus.value = MainConnectionStatus.ConnectedID(infoDisplay)
+            }
+        }
+    }
+
+    private fun tryReconnect() {
+        reconnecting = true
+        connector.start(
+            input = Connector.Input(
+                host = host,
+                port = 0
+            ),
+            onResultAvailable = {
+                reconnecting = false
+                when (it) {
+                    is Connector.Result.Connected -> {
+                        connected(it.client)
+                    }
+
+                    Connector.Result.Aborted -> {}
+
                     is Connector.Result.Failed -> {
                         // TODO show snack bar with error
                     }
@@ -85,12 +116,17 @@ class MainScreenModel : AbstractScreenModel() {
     fun stopConnector() {
         connector.stop()
     }
+
+    fun disconnect() {
+        connector.stop()
+        _connectionStatus.value = MainConnectionStatus.Disconnected
+    }
 }
 
-sealed class ConnectionStatus {
-    data object Disconnected : ConnectionStatus()
-    data class ConnectedRC(val roundCounter: RoundCounter) : ConnectionStatus()
-    data class ConnectedID(val infoDisplay: InfoDisplay) : ConnectionStatus()
+sealed class MainConnectionStatus {
+    data object Disconnected : MainConnectionStatus()
+    data class ConnectedRC(val roundCounter: RoundCounter) : MainConnectionStatus()
+    data class ConnectedID(val infoDisplay: InfoDisplay) : MainConnectionStatus()
 }
 
 enum class CounterType {
