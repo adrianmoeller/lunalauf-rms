@@ -3,7 +3,6 @@ package lunalauf.rms.modelapi.resource
 import LunaLaufLanguage.LunaLauf
 import LunaLaufLanguage.LunaLaufLanguagePackage
 import LunaLaufLanguage.impl.LunaLaufLanguageFactoryImpl
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import lunalauf.rms.modelapi.ModelState

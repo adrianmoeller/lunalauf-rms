@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "de.lunalauf-rms"
-version = "1.0-SNAPSHOT"
+version = "2.0.0"
 
 repositories {
     google()
@@ -31,8 +31,9 @@ dependencies {
     implementation("br.com.devsrsouza.compose.icons:font-awesome:$composeIconsVersion")
     implementation("br.com.devsrsouza.compose.icons:eva-icons:$composeIconsVersion")
 
-    val voyagerVersion = "1.0.0-rc07"
+    val voyagerVersion = "1.0.0"
     implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
     implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:$voyagerVersion")
     implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
     implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
@@ -50,7 +51,7 @@ compose.desktop {
             modules("java.sql")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "lunalauf-rms-center"
-            packageVersion = "1.0.0"
+            packageVersion = "2.0.0"
             windows {
                 iconFile.set(project.file("src/main/resources/icons/icon.ico"))
                 menuGroup = "lunalauf-rms"

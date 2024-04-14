@@ -21,7 +21,6 @@ import compose.icons.fontawesomeicons.solid.Running
 import lunalauf.rms.centralapp.components.commons.TabNavigationBarItem
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.utilities.network.bot.BotManager
-import lunalauf.rms.utilities.network.communication.competitors.CompetitorMessenger
 
 @Composable
 fun ModelControls(

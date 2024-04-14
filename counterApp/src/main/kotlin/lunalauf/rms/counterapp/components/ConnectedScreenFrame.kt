@@ -25,7 +25,6 @@ import compose.icons.evaicons.outline.Wifi
 import compose.icons.evaicons.outline.WifiOff
 import lunalauf.rms.counterapp.components.commons.cond
 import lunalauf.rms.utilities.network.client.Client
-import lunalauf.rms.utilities.network.util.Service
 import java.awt.Cursor
 import java.awt.Point
 import java.awt.Toolkit

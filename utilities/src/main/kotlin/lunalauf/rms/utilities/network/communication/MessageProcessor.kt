@@ -9,7 +9,6 @@ import lunalauf.rms.utilities.network.communication.message.response.*
 import lunalauf.rms.utilities.network.communication.message.type.MessageType
 import lunalauf.rms.utilities.network.communication.message.type.RequestType
 import lunalauf.rms.utilities.network.communication.message.type.ResponseType
-import java.lang.IllegalArgumentException
 import java.lang.reflect.Type
 
 object MessageProcessor {

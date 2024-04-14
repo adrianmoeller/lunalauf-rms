@@ -158,7 +158,7 @@ class ModelAPI(
                 ContrType.FIXED -> runner.amountFix
                 ContrType.PERROUND -> runner.amountPerRound * internalNumOfRounds(runner)
                 ContrType.BOTH -> runner.amountFix + runner.amountPerRound * internalNumOfRounds(runner)
-                ContrType.NONE, null -> 0.0;
+                ContrType.NONE, null -> 0.0
             }
         }
     }

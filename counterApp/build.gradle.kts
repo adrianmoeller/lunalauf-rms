@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "de.lunalauf-rms"
-version = "1.0-SNAPSHOT"
+version = "2.0.0"
 
 repositories {
     google()
@@ -39,9 +39,20 @@ compose.desktop {
         mainClass = "lunalauf.rms.counterapp.MainKt"
 
         nativeDistributions {
+            modules("java.sql")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "lunalauf-rms-counter"
-            packageVersion = "1.0.0"
+            packageVersion = "2.0.0"
+            windows {
+                iconFile.set(project.file("src/main/resources/icons/icon.ico"))
+                menuGroup = "lunalauf-rms"
+                perUserInstall = true
+                upgradeUuid = "f8e5e131-d5d4-49a5-b3b4-fb0fb4eeb4c5".uppercase()
+            }
+            linux {
+                iconFile.set(project.file("src/main/resources/icons/icon.png"))
+                menuGroup = "lunalauf-rms"
+            }
         }
     }
 }

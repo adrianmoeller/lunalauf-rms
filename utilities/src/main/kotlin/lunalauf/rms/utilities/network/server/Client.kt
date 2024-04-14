@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import lunalauf.rms.modelapi.ModelState
 import org.slf4j.LoggerFactory
@@ -16,7 +15,6 @@ import java.io.PrintWriter
 import java.net.Socket
 import java.net.SocketException
 import java.util.*
-import java.util.concurrent.ExecutorService
 
 class Client(
     private val socket: Socket
