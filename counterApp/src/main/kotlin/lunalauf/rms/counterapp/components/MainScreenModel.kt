@@ -78,10 +78,6 @@ class MainScreenModel : AbstractScreenModel() {
 
             CounterType.InfoDisplay -> {
                 val infoDisplay = InfoDisplay(client).apply {
-                    setActions(
-                        succeeded = { TODO() },
-                        failed = { TODO() }
-                    )
                     setOnConnectionLost { tryReconnect() }
                 }
                 _connectionStatus.value = MainConnectionStatus.ConnectedID(infoDisplay)

@@ -77,7 +77,7 @@ class ResponseFactory {
         response.numRunnerRounds = numRunnerRounds
         response.teamName = teamName
         response.numTeamRounds = numTeamRounds
-        response.teamMinigamePoints = teamFunfactorPoints
+        response.teamFunfactorPoints = teamFunfactorPoints
         return response
     }
 }

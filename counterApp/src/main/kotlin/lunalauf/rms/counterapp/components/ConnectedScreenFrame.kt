@@ -16,6 +16,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import compose.icons.EvaIcons
 import compose.icons.evaicons.Outline
@@ -34,6 +35,7 @@ import java.awt.image.BufferedImage
 @Composable
 fun ConnectedScreenFrame(
     modifier: Modifier = Modifier,
+    title: String,
     screenModel: MainScreenModel,
     client: Client,
     content: @Composable () -> Unit
@@ -80,7 +82,7 @@ fun ConnectedScreenFrame(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            if (screenModel.reconnecting)
+            if (screenModel.reconnecting) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -88,6 +90,12 @@ fun ConnectedScreenFrame(
                     Text("Reconnecting")
                     LinearProgressIndicator()
                 }
+            } else {
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.Bold
+                )
+            }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)

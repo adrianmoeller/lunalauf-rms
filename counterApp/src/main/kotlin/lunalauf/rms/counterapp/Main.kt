@@ -68,6 +68,7 @@ fun ApplicationScope.App() {
 
                     is MainConnectionStatus.ConnectedRC -> {
                         ConnectedScreenFrame(
+                            title = "Scan rounds:",
                             screenModel = screenModel,
                             client = constConnStatus.roundCounter.client,
                         ) {
@@ -79,6 +80,7 @@ fun ApplicationScope.App() {
 
                     is MainConnectionStatus.ConnectedID -> {
                         ConnectedScreenFrame(
+                            title = "Show info:",
                             screenModel = screenModel,
                             client = constConnStatus.infoDisplay.client
                         ) {

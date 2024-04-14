@@ -10,6 +10,6 @@ class TeamRunnerInfoResponse : RunnerInfoResponse(ResponseType.TEAMRUNNER_INFO) 
     @SerializedName("team-rounds")
     var numTeamRounds = 0
 
-    @SerializedName("minigame")
-    var teamMinigamePoints = 0
+    @SerializedName("funfactors")
+    var teamFunfactorPoints = 0
 }

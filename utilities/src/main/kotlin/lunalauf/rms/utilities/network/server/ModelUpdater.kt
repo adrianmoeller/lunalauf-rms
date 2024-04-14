@@ -71,17 +71,17 @@ class ModelUpdater(
 
             response = when (modelAPI.logRound(runner)) {
                 LogRoundResult.RunDisabled -> responseFactory.createRoundCountRejectedResponse(
-                    requestId = request.messageId, runner.name,
+                    requestId = request.messageId, runner.name ?: "",
                     causeMessage = "Runden können nur innerhalb der Laufzeit gezählt werden!"
                 )
 
                 LogRoundResult.ValidationFailed -> responseFactory.createRoundCountRejectedResponse(
-                    requestId = request.messageId, runner.name,
+                    requestId = request.messageId, runner.name ?: "",
                     causeMessage = "Lichtgeschwindigkeit nicht erlaubt!"
                 )
 
                 LogRoundResult.LastRoundAlreadyLogged -> responseFactory.createRoundCountRejectedResponse(
-                    requestId = request.messageId, runner.name,
+                    requestId = request.messageId, runner.name ?: "",
                     causeMessage = "Deine/Eure letzte Runde wurde bereits gezählt."
                 )
 

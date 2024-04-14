@@ -35,40 +35,28 @@ fun RoundCounterScreen(
     var containerHeight by remember { mutableStateOf(0.sp) }
 
     val scanChipScreenModel = remember { ScanChipScreenModel() }
-
-    var responseStatus by remember { mutableStateOf(ResponseStatus.Failed) }
-    var acceptedName by remember { mutableStateOf("") }
-    var acceptedRound by remember { mutableStateOf("") }
-    var rejectedMessage by remember { mutableStateOf("") }
-    var failedMessage by remember { mutableStateOf("") }
+    val roundCounterState by roundCounter.state.collectAsState()
 
     val scope = rememberCoroutineScope()
     val alphaAnimation = remember { Animatable(0f) }
-
-    LaunchedEffect(roundCounter) {
-        alphaAnimation.snapTo(0f)
-        roundCounter.setActions(
-            accepted = {
-                acceptedName = it.name
-                acceptedRound = it.newNumRounds.toString()
-                responseStatus = ResponseStatus.Accepted
+    LaunchedEffect(roundCounterState) {
+        when (val constRCState = roundCounterState) {
+            is RoundCounter.State.ResponseAccepted -> {
                 animateResponseStatus(
                     scope = scope,
                     alphaAnimation = alphaAnimation
                 )
-            },
-            rejected = {
-                rejectedMessage = it.causeMessage ?: ""
-                responseStatus = ResponseStatus.Rejected
+            }
+
+            is RoundCounter.State.ResponseRejected -> {
                 animateLongResponseStatus(
                     scope = scope,
                     alphaAnimation = alphaAnimation
                 )
-            },
-            failed = {
-                failedMessage = it.message
-                responseStatus = ResponseStatus.Failed
-                if (it == ErrorType.UNKNOWN_ID) {
+            }
+
+            is RoundCounter.State.Error -> {
+                if (constRCState.error == ErrorType.UNKNOWN_ID) {
                     animateLongResponseStatus(
                         scope = scope,
                         alphaAnimation = alphaAnimation
@@ -80,7 +68,11 @@ fun RoundCounterScreen(
                     )
                 }
             }
-        )
+
+            RoundCounter.State.None -> {
+                alphaAnimation.snapTo(0f)
+            }
+        }
     }
 
     ScanChipField(
@@ -95,12 +87,7 @@ fun RoundCounterScreen(
             if (chipId != null) {
                 roundCounter.processInput(chipId)
             } else {
-                failedMessage = "Scan-Fehler"
-                responseStatus = ResponseStatus.Failed
-                animateResponseStatus(
-                    scope = scope,
-                    alphaAnimation = alphaAnimation
-                )
+                // TODO show snack bar with error
             }
         }
     ) {
@@ -110,8 +97,8 @@ fun RoundCounterScreen(
                 .alpha(alphaAnimation.value),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            when (responseStatus) {
-                ResponseStatus.Accepted -> {
+            when (val constRCState = roundCounterState) {
+                is RoundCounter.State.ResponseAccepted -> {
                     Image(
                         modifier = Modifier.weight(1f),
                         painter = painterResource("signals/signal_logo_green.png"),
@@ -119,7 +106,7 @@ fun RoundCounterScreen(
                         contentScale = ContentScale.FillHeight
                     )
                     Text(
-                        text = acceptedName,
+                        text = constRCState.response.name,
                         style = ralewayTextStyle,
                         fontWeight = FontWeight.Bold,
                         fontSize = containerHeight * 0.06
@@ -134,7 +121,7 @@ fun RoundCounterScreen(
                             fontSize = containerHeight * 0.08
                         )
                         Text(
-                            text = acceptedRound,
+                            text = constRCState.response.newNumRounds.toString(),
                             style = ralewayTextStyle,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = containerHeight * 0.12
@@ -142,7 +129,7 @@ fun RoundCounterScreen(
                     }
                 }
 
-                ResponseStatus.Rejected -> {
+                is RoundCounter.State.ResponseRejected -> {
                     Image(
                         modifier = Modifier.weight(1f),
                         painter = painterResource("signals/signal_logo_orange.png"),
@@ -150,7 +137,7 @@ fun RoundCounterScreen(
                         contentScale = ContentScale.FillHeight
                     )
                     Text(
-                        text = rejectedMessage,
+                        text = constRCState.response.causeMessage ?: "",
                         style = ralewayTextStyle,
                         fontWeight = FontWeight.Bold,
                         fontSize = containerHeight * 0.06,
@@ -158,7 +145,7 @@ fun RoundCounterScreen(
                     )
                 }
 
-                ResponseStatus.Failed -> {
+                is RoundCounter.State.Error -> {
                     Image(
                         modifier = Modifier.weight(1f),
                         painter = painterResource("signals/signal_logo_red.png"),
@@ -166,21 +153,19 @@ fun RoundCounterScreen(
                         contentScale = ContentScale.FillHeight
                     )
                     Text(
-                        text = failedMessage,
+                        text = constRCState.error.message,
                         style = ralewayTextStyle,
                         fontWeight = FontWeight.Bold,
                         fontSize = containerHeight * 0.06,
                         textAlign = TextAlign.Center
                     )
                 }
+
+                RoundCounter.State.None -> {}
             }
         }
     }
 
-}
-
-private enum class ResponseStatus {
-    Accepted, Rejected, Failed
 }
 
 private fun animateResponseStatus(
@@ -215,6 +200,6 @@ private fun animateErrorResponseStatus(
         alphaAnimation.snapTo(.7f)
         alphaAnimation.animateTo(1f, tween(100))
         delay(1500)
-        alphaAnimation.animateTo(.8f, tween(1600))
+        alphaAnimation.animateTo(.7f, tween(1600))
     }
 }

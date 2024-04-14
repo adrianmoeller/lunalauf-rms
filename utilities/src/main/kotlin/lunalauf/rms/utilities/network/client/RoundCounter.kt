@@ -1,5 +1,7 @@
 package lunalauf.rms.utilities.network.client
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import lunalauf.rms.utilities.network.communication.ErrorType
 import lunalauf.rms.utilities.network.communication.RequestSubmitter
 import lunalauf.rms.utilities.network.communication.message.request.RequestFactory
@@ -16,11 +18,11 @@ class RoundCounter(
     private val requestSubmitter: RequestSubmitter
     private val requestFactory: RequestFactory
     private val repetitionHandler: RepetitionHandler
-    val successQueue: FixedQueue<RoundCountAcceptedResponse>
-    private var acceptedAction: (RoundCountAcceptedResponse) -> Unit = {}
-    private var rejectedAction: (RoundCountRejectedResponse) -> Unit = {}
-    private var failedAction: (ErrorType) -> Unit = {}
     private var onConnectionLost: () -> Unit = {}
+
+    val successQueue: FixedQueue<RoundCountAcceptedResponse>
+    private val _state: MutableStateFlow<State> = MutableStateFlow(State.None)
+    val state = _state.asStateFlow()
 
     init {
         requestSubmitter = RequestSubmitter(
@@ -34,19 +36,27 @@ class RoundCounter(
 
     private fun handleResponse(response: Response) {
         when (response) {
-            is RoundCountRejectedResponse -> rejectedAction(response)
-            is ErrorResponse -> failedAction(response.error)
-            is RoundCountAcceptedResponse -> {
-                successQueue.push(response)
-                acceptedAction(response)
+            is RoundCountRejectedResponse -> {
+                _state.value = State.ResponseRejected(response)
             }
 
-            else -> failedAction(ErrorType.UNEXPECTED_SERVER_MESSAGE)
+            is ErrorResponse -> {
+                _state.value = State.Error(response.error)
+            }
+
+            is RoundCountAcceptedResponse -> {
+                successQueue.push(response)
+                _state.value = State.ResponseAccepted(response)
+            }
+
+            else -> {
+                _state.value = State.Error(ErrorType.UNEXPECTED_SERVER_MESSAGE)
+            }
         }
     }
 
     private fun handleError(error: ErrorType) {
-        failedAction(error)
+        _state.value = State.Error(error)
         if (error == ErrorType.DISCONNECTED) onConnectionLost()
     }
 
@@ -56,21 +66,18 @@ class RoundCounter(
         requestSubmitter.submit(requestFactory.createRoundCountRequest(runnerId), client)
     }
 
-    fun setActions(
-        accepted: (RoundCountAcceptedResponse) -> Unit,
-        rejected: (RoundCountRejectedResponse) -> Unit,
-        failed: (ErrorType) -> Unit
-    ) {
-        acceptedAction = accepted
-        rejectedAction = rejected
-        failedAction = failed
-    }
-
     fun setOnConnectionLost(onConnectionLost: () -> Unit) {
         this.onConnectionLost = onConnectionLost
     }
 
     fun shutdown() {
         requestSubmitter.shutdown()
+    }
+
+    sealed class State {
+        data object None : State()
+        class ResponseAccepted(val response: RoundCountAcceptedResponse) : State()
+        class ResponseRejected(val response: RoundCountRejectedResponse) : State()
+        class Error(val error: ErrorType) : State()
     }
 }
