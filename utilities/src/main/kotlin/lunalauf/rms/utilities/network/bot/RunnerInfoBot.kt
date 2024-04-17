@@ -20,17 +20,17 @@ class RunnerInfoBot(
 ) : AbstractBot(token, modelState, silentStart) {
     companion object {
         /* COMMANDS */
-        private val CMD_START = "/start"
-        private val CMD_SETCHIPID = "/setchipid"
-        private val CMD_STATS = "/stats"
-        private val CMD_ROUNDS = "/rounds"
+        private const val CMD_START = "/start"
+        private const val CMD_SETCHIPID = "/setchipid"
+        private const val CMD_STATS = "/stats"
+        private const val CMD_ROUNDS = "/rounds"
 
         /* BOT ANSWERS */
         private val AWR_START = """
             *Herzlich Willkommen beim Luna-Lauf!*🏃‍♀️🏃‍♂️🌙
             Bitte gib deine Chip-ID ein (hinten auf den Chip gepresst):
             """.trimIndent()
-        private val AWR_SETCHIPID = "Bitte gib deine Chip-ID ein:"
+        private const val AWR_SETCHIPID = "Bitte gib deine Chip-ID ein:"
         private val AWR_NAN = """
             Die Chip-Id muss eine Nummer sein!
             Bitte gib sie erneut ein:
@@ -59,7 +59,7 @@ class RunnerInfoBot(
             Wir benötigen zuerst deine Chip-ID.
             Bitte gib sie hier ein:
             """.trimIndent()
-        private val AWR_ROUNDS = "Deine gelaufenen Runden: "
+        private const val AWR_ROUNDS = "Deine gelaufenen Runden: "
     }
 
     private val chatId2runner: MutableMap<Long, Runner> = HashMap()
@@ -75,7 +75,7 @@ class RunnerInfoBot(
         try {
             if (!update.hasMessage()) return
             val msg = update.message
-            if (msg.isCommand()) {
+            if (msg.isCommand) {
                 handleCommand(msg)
             } else {
                 handleCommandReply(msg)

@@ -7,11 +7,7 @@ import lunalauf.rms.utilities.network.communication.message.type.ResponseType
 
 open class Response(responseType: ResponseType) : Message(MessageType.RESPONSE) {
     @SerializedName("res-type")
-    val responseType: String
-
-    init {
-        this.responseType = responseType.name
-    }
+    val responseType: String = responseType.name
 
     override fun toString(): String {
         return super.toString()

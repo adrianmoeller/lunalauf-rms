@@ -8,13 +8,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.ApplicationScope
 import lunalauf.rms.centralapp.components.commons.IconSize
 
 @Composable
-fun ApplicationScope.CloseAppDialog(
+fun CloseAppDialog(
     modifier: Modifier = Modifier,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    onCloseRequest: () -> Unit
 ) {
     var confirmedDiscard by remember { mutableStateOf(false) }
 
@@ -49,7 +49,7 @@ fun ApplicationScope.CloseAppDialog(
         },
         confirmButton = {
             FilledTonalButton(
-                onClick = ::exitApplication,
+                onClick = onCloseRequest,
                 enabled = confirmedDiscard,
                 colors = ButtonDefaults.filledTonalButtonColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer,

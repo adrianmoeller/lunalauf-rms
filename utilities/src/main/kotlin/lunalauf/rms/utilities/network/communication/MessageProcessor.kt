@@ -28,7 +28,7 @@ object MessageProcessor {
     private class MessageDeserializer : JsonDeserializer<Message> {
         @Throws(JsonParseException::class)
         override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Message {
-            val jsonObject = json.getAsJsonObject()
+            val jsonObject = json.asJsonObject
             val type = jsonObject["type"].asString
 
             val messageType = try {

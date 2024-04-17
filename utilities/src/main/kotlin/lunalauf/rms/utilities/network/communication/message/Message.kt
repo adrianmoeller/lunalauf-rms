@@ -7,15 +7,11 @@ abstract class Message(
     type: MessageType
 ) {
     @SerializedName("type")
-    val type: String
+    val type: String = type.name
 
     @JvmField
     @SerializedName("id")
     var messageId: Long = 0
-
-    init {
-        this.type = type.name
-    }
 
     override fun toString(): String {
         return "$type (id: $messageId)"

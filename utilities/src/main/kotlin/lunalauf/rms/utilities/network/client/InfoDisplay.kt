@@ -2,7 +2,6 @@ package lunalauf.rms.utilities.network.client
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import lunalauf.rms.utilities.network.client.RoundCounter.State
 import lunalauf.rms.utilities.network.communication.ErrorType
 import lunalauf.rms.utilities.network.communication.RequestSubmitter
 import lunalauf.rms.utilities.network.communication.message.request.RequestFactory

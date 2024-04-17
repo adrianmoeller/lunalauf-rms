@@ -36,10 +36,12 @@ fun ApplicationScope.MainWindow(
 
     Window(
         onCloseRequest = {
-            if (showCloseAppDialog)
+            if (showCloseAppDialog) {
                 closeAppPromptOpen = true
-            else
+            } else {
+                mainScreenModel.onCloseApplication()
                 exitApplication()
+            }
         },
         title = "Luna-Lauf",
         icon = icon
@@ -125,7 +127,11 @@ fun ApplicationScope.MainWindow(
 
             if (closeAppPromptOpen) {
                 CloseAppDialog(
-                    onDismissRequest = { closeAppPromptOpen = false }
+                    onDismissRequest = { closeAppPromptOpen = false },
+                    onCloseRequest = {
+                        mainScreenModel.onCloseApplication()
+                        exitApplication()
+                    }
                 )
             }
         }

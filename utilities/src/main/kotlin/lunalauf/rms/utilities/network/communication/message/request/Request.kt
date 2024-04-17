@@ -7,11 +7,7 @@ import lunalauf.rms.utilities.network.communication.message.type.RequestType
 
 abstract class Request(requestType: RequestType) : Message(MessageType.REQUEST) {
     @SerializedName("req-type")
-    val requestType: String
-
-    init {
-        this.requestType = requestType.name
-    }
+    val requestType: String = requestType.name
 
     override fun toString(): String {
         return super.toString()

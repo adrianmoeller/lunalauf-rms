@@ -8,6 +8,7 @@ import lunalauf.rms.centralapp.components.AbstractStatelessScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
 import lunalauf.rms.centralapp.utils.showNewFileChooser
 import lunalauf.rms.centralapp.utils.showOpenFileChooser
+import lunalauf.rms.modelapi.ModelAPI
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.resource.ModelResourceManager
 import lunalauf.rms.modelapi.resource.ModelResult
@@ -134,5 +135,13 @@ class MainScreenModel : AbstractStatelessScreenModel() {
                 }
             }
         }
+    }
+
+    fun onCloseApplication() {
+        if (networkManager is NetworkManager.Available)
+            networkManager.shutdown()
+        if (botManager is BotManager.Available)
+            botManager.shutdown()
+        ModelAPI.freeResources()
     }
 }

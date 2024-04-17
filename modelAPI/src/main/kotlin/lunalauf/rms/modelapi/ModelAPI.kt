@@ -27,7 +27,6 @@ class ModelAPI(
 
         fun freeResources() {
             modelContext.close()
-            // TODO call this
         }
     }
 

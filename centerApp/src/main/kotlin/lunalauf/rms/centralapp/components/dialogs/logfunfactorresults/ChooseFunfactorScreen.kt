@@ -4,7 +4,7 @@ import LunaLaufLanguage.Funfactor
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -128,7 +128,7 @@ private fun FunfactorTile(
         if (hovered) {
             Row {
                 Icon(
-                    imageVector = Icons.Rounded.ArrowForward,
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
                     contentDescription = "Select ${funfactor.name}",
                     tint = MaterialTheme.colorScheme.onSurface
                 )

@@ -51,7 +51,7 @@ class RoundCounterBot(
             Unsere Software ist noch nicht bereit...
             Versuche es später noch einmal oder wende dich an das Orga-Team.
             """.trimIndent()
-        private val AWR_INVALID = "Ungültige Eingabe!"
+        private const val AWR_INVALID = "Ungültige Eingabe!"
         private val AWR_NAN = """
             Der Registrierungscode muss eine Nummer sein!
             Bitte gib ihn erneut ein:
@@ -90,19 +90,19 @@ class RoundCounterBot(
             <b>Dieses Gerät ist noch nicht registriert!</b>
             Gib bitte zuerst den Registrierungscode ein:
             """.trimIndent()
-        private val AWR_ONLY_TEAM_PHOTO = "Nur Laufteams können Fotos senden."
-        private val AWR_NO_PHOTOS = "Im Moment werden von unserem Bot keine Fotos empfangen."
+        private const val AWR_ONLY_TEAM_PHOTO = "Nur Laufteams können Fotos senden."
+        private const val AWR_NO_PHOTOS = "Im Moment werden von unserem Bot keine Fotos empfangen."
         private val AWR_ALREADY_SENT = """
             <b>Du kannst kein weiteres Foto für den aktuellen Funfactor senden!</b>
             Falls es bei dem vorherigen Senden Probleme gab, wende dich bitte an das Orga-Team.
             """.trimIndent()
-        private val AWR_PHOTO_RECEIVED = "Wir haben euer Foto empfangen😊"
+        private const val AWR_PHOTO_RECEIVED = "Wir haben euer Foto empfangen😊"
         private val AWR_TOOFAST = """
             <b>War das nicht ein bisschen schnell...?</b>🤔
             Schummeln gilt nicht!🤭
             """.trimIndent()
-        private val AWR_NOT_IN_TIME = "<b>Runden können nur innerhalb der Laufzeit gezählt werden!</b>"
-        private val LAST_ROUND_LOGGED = "<b>Deine/Eure letzte Runde wurde bereits gezählt.</b>"
+        private const val AWR_NOT_IN_TIME = "<b>Runden können nur innerhalb der Laufzeit gezählt werden!</b>"
+        private const val LAST_ROUND_LOGGED = "<b>Deine/Eure letzte Runde wurde bereits gezählt.</b>"
     }
 
     /* KEYBOARDS */
@@ -202,7 +202,7 @@ class RoundCounterBot(
 
             val msg = update.message
             when {
-                msg.isCommand() -> handleCommand(msg.chatId, msg.text)
+                msg.isCommand -> handleCommand(msg.chatId, msg.text)
                 msg.hasPhoto() -> handlePhoto(msg.chatId, msg.caption, msg.photo)
                 else -> handleCommandReply(msg)
             }
