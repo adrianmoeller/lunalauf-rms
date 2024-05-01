@@ -323,9 +323,11 @@ private fun CommonPanel(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
+                    val poolBarLevel = if (commonState.sponsorPoolAmount == 0.0) 0.0
+                    else currentSponsorPoolAmount / commonState.sponsorPoolAmount
                     VerticalPoolBar(
                         modifier = Modifier.fillMaxWidth(.25f),
-                        level = (currentSponsorPoolAmount / commonState.sponsorPoolAmount).toFloat(),
+                        level = poolBarLevel.toFloat(),
                         contentColor = Color.Red,
                         backgroundColor = borderColor
                     )

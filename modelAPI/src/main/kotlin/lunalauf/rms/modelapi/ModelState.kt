@@ -215,6 +215,7 @@ sealed class ModelState {
             sponsorPoolRounds: Int
         ): Double {
             return if (overallRounds > sponsorPoolRounds) sponsorPoolAmount
+            else if (sponsorPoolRounds == 0) 0.0
             else sponsorPoolAmount / sponsorPoolRounds * overallRounds
         }
     }
