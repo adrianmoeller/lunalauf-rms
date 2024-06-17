@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "de.lunalauf-rms"
-version = "2.0.2"
+version = "2.0.3"
 
 repositories {
     google()
@@ -42,7 +42,7 @@ compose.desktop {
             modules("java.sql")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "lunalauf-rms-counter"
-            packageVersion = "2.0.2"
+            packageVersion = "2.0.3"
             windows {
                 iconFile.set(project.file("src/main/resources/icons/icon.ico"))
                 menuGroup = "lunalauf-rms"
