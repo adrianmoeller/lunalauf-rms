@@ -329,6 +329,7 @@ private fun ChallengeTile(
                     contentDescription = "Show challenge details",
                     tint = MaterialTheme.colorScheme.onSurface
                 )
+                Spacer(Modifier.width(2.dp))
             } else {
                 Icon(
                     modifier = Modifier
