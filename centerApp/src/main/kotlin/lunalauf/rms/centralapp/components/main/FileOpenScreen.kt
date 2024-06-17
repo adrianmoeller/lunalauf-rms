@@ -106,7 +106,7 @@ fun FileOpenScreen(
                                 },
                                 onClick = onMenuOpenFile
                             )
-                            Divider()
+                            HorizontalDivider()
                             DropdownMenuItem(
                                 text = { Text("Save") },
                                 leadingIcon = {

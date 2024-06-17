@@ -8,6 +8,7 @@ import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.components.commons.CalcResult
 import lunalauf.rms.centralapp.utils.Formats
 import lunalauf.rms.centralapp.utils.InputValidator
+import lunalauf.rms.modelapi.LogRoundResult
 import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.UpdateRunnerIdResult
 import kotlin.time.Duration.Companion.milliseconds
@@ -47,6 +48,17 @@ class RunnerDetailsScreenModel(
     fun updateContribution(runner: Runner, type: ContrType, amountFixed: Double, amountPerRound: Double) {
         launchInModelScope {
             modelAPI.updateContribution(runner, type, amountFixed, amountPerRound)
+        }
+    }
+
+    fun manuallyLogPoints(runner: Runner, points: Int) {
+        launchInModelScope {
+            when (modelAPI.logRound(runner, points, true)) {
+                LogRoundResult.LastRoundAlreadyLogged -> {}
+                is LogRoundResult.Logged -> {}
+                LogRoundResult.RunDisabled -> {}
+                LogRoundResult.ValidationFailed -> {}
+            }
         }
     }
 

@@ -328,7 +328,7 @@ private fun CommonPanel(
                     VerticalPoolBar(
                         modifier = Modifier.fillMaxWidth(.25f),
                         level = poolBarLevel.toFloat(),
-                        contentColor = Color.Red,
+                        contentColor = Color(156, 17, 51),
                         backgroundColor = borderColor
                     )
                 }

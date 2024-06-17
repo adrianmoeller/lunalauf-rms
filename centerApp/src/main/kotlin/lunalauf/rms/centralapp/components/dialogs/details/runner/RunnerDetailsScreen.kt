@@ -9,11 +9,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.*
@@ -42,6 +45,7 @@ fun RunnerDetailsScreen(
         if (runnerDetailsCalc is CalcResult.Available) {
             val runnerDetails = (runnerDetailsCalc as CalcResult.Available).result
             var deleteRoundState: DeleteRoundState by remember { mutableStateOf(DeleteRoundState.Closed) }
+            var logPointsOpen by remember { mutableStateOf(false) }
 
             Row(
                 modifier = Modifier.padding(20.dp),
@@ -131,25 +135,43 @@ fun RunnerDetailsScreen(
                             }
                         }
                     }
-                    DeleteElementDialog(
-                        element = runner,
-                        onDeleted = onDismissRequest,
-                        modelState = modelState,
-                        snackBarHostState = snackBarHostState
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        FilledTonalButton(
-                            onClick = it,
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.error
-                            )
+                        DeleteElementDialog(
+                            element = runner,
+                            onDeleted = onDismissRequest,
+                            modelState = modelState,
+                            snackBarHostState = snackBarHostState
+                        ) {
+                            FilledTonalButton(
+                                onClick = it,
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.error
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Delete,
+                                    contentDescription = null
+                                )
+                                Spacer(Modifier.width(10.dp))
+                                Text("Delete runner")
+                            }
+                        }
+                        OutlinedButton(
+                            onClick = {
+                                logPointsOpen = true
+                            }
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.Delete,
+                                imageVector = Icons.Rounded.Add,
                                 contentDescription = null
                             )
-                            Spacer(Modifier.width(10.dp))
-                            Text("Delete runner")
+                            Spacer(Modifier.width(8.dp))
+                            Text("Log points")
                         }
                     }
                 }
@@ -177,6 +199,21 @@ fun RunnerDetailsScreen(
                         snackBarHostState = snackBarHostState
                     )
                 }
+                var newPointsValue by remember { mutableStateOf(TextFieldValue("1", selection = TextRange(0,1))) }
+                EditDialog(
+                    editTitle = "Manually log points",
+                    editDialogOpen = logPointsOpen,
+                    onClose = {
+                        logPointsOpen = false
+                        newPointsValue = TextFieldValue("1", selection = TextRange(0,1))
+                    },
+                    onValueChange = { screenModel.manuallyLogPoints(runner, it) },
+                    valueName = "Points",
+                    newValue = newPointsValue,
+                    onNewValueChange = { newPointsValue = it },
+                    parser = { it.toIntOrNull() },
+                    default = 0
+                )
             }
         } else {
             Box(
