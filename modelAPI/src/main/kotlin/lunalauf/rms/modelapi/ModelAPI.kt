@@ -165,10 +165,13 @@ class ModelAPI(
     suspend fun roundDurations(runner: Runner): List<Long> {
         mutex.withLock {
             return runner.rounds
+                .asSequence()
                 .filterNotNull()
+                .filter { !it.isManualLogged }
                 .map { it.timestamp.time }
                 .sorted()
                 .zipWithNext { a, b -> b - a }
+                .toList()
         }
     }
 
