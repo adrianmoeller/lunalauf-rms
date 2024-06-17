@@ -35,7 +35,7 @@ fun ListItemDivider(
     modifier: Modifier = Modifier,
     spacing: Dp
 ) {
-    Divider(
+    HorizontalDivider(
         modifier = modifier.padding(horizontal = spacing),
         color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.09f)
     )

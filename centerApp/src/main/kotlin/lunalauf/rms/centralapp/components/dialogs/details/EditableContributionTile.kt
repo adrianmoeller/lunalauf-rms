@@ -70,7 +70,7 @@ fun EditableContributionTile(
                             title = "Fixed",
                             value = amountFixed
                         )
-                        Divider()
+                        HorizontalDivider()
                         ContributionRow(
                             title = "Per round",
                             value = amountPerRound
