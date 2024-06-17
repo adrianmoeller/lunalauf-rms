@@ -208,6 +208,6 @@ fun <V> EditDialog(
             onDismissRequest = onClose
         )
 
-        focusRequester.requestFocus()
+        focusRequester.tryRequestFocus()
     }
 }

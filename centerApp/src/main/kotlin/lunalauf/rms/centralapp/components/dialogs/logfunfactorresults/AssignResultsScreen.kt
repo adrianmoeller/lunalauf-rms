@@ -262,7 +262,7 @@ private fun AllTeamsTile(
             onDismissRequest = { setPointsOpen = false }
         )
 
-        focusRequester.requestFocus()
+        focusRequester.tryRequestFocus()
     }
 }
 
