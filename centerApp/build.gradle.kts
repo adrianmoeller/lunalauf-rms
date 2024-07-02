@@ -4,7 +4,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm")
     id("org.jetbrains.compose")
-    id ("lunalauf.rms.kotlin-application-conventions")
+    id("lunalauf.rms.kotlin-application-conventions")
+    id("lunalauf.rms.kotlin-model-conventions")
 }
 
 group = "de.lunalauf-rms"
@@ -14,7 +15,6 @@ repositories {
     google()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    mavenLocal()
 }
 
 tasks.withType(KotlinCompile::class).configureEach {
@@ -38,7 +38,6 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
     implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
 
-    implementation("LunaLaufLanguage:LunaLaufLanguage:1.0.3")
     implementation(project(":modelAPI"))
     implementation(project(":utilities"))
 }
