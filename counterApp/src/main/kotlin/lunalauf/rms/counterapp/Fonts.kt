@@ -12,6 +12,11 @@ object FontFamilies {
         Font("fonts/Raleway/Raleway-Bold.ttf", FontWeight.Bold, FontStyle.Normal),
         Font("fonts/Raleway/Raleway-ExtraBold.ttf", FontWeight.ExtraBold, FontStyle.Normal)
     )
+
+    val Nunito = FontFamily(
+        Font("fonts/Nunito/NunitoSans_7pt-Black.ttf", FontWeight.Black, FontStyle.Normal)
+    )
 }
 
 val ralewayTextStyle = TextStyle(fontFamily = FontFamilies.Raleway)
+val nunitoTextStyle = TextStyle(fontFamily = FontFamilies.Nunito)

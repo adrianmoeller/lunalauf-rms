@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,10 +19,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import lunalauf.rms.counterapp.nunitoTextStyle
 import lunalauf.rms.counterapp.ralewayTextStyle
 import lunalauf.rms.utilities.network.client.RoundCounter
 import lunalauf.rms.utilities.network.communication.ErrorType
@@ -32,7 +36,8 @@ fun RoundCounterScreen(
     roundCounter: RoundCounter
 ) {
     val density = LocalDensity.current
-    var containerHeight by remember { mutableStateOf(0.sp) }
+    var containerHeightSp by remember { mutableStateOf(0.sp) }
+    var containerHeightDp by remember { mutableStateOf(0.dp) }
 
     val scanChipScreenModel = remember { ScanChipScreenModel() }
     val roundCounterState by roundCounter.state.collectAsState()
@@ -77,8 +82,11 @@ fun RoundCounterScreen(
 
     ScanChipField(
         modifier = modifier.onGloballyPositioned {
-            containerHeight = with(density) {
+            containerHeightSp = with(density) {
                 it.size.height.toSp()
+            }
+            containerHeightDp = with(density) {
+                it.size.height.toDp()
             }
         },
         onNumberKeyEvent = scanChipScreenModel::toIdBuffer,
@@ -109,7 +117,7 @@ fun RoundCounterScreen(
                         text = constRCState.response.name,
                         style = ralewayTextStyle,
                         fontWeight = FontWeight.Bold,
-                        fontSize = containerHeight * 0.06
+                        fontSize = containerHeightSp * 0.06
                     )
                     Row(
                         verticalAlignment = Alignment.Bottom
@@ -118,13 +126,14 @@ fun RoundCounterScreen(
                             text = "Runde ",
                             style = ralewayTextStyle,
                             fontWeight = FontWeight.Normal,
-                            fontSize = containerHeight * 0.08
+                            fontSize = containerHeightSp * 0.08
                         )
                         Text(
+                            modifier = Modifier.offset(y = 0.031 * containerHeightDp),
                             text = constRCState.response.newNumRounds.toString(),
-                            style = ralewayTextStyle,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = containerHeight * 0.12
+                            style = nunitoTextStyle,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = containerHeightSp * 0.12
                         )
                     }
                 }
@@ -140,7 +149,7 @@ fun RoundCounterScreen(
                         text = constRCState.response.causeMessage ?: "",
                         style = ralewayTextStyle,
                         fontWeight = FontWeight.Bold,
-                        fontSize = containerHeight * 0.06,
+                        fontSize = containerHeightSp * 0.06,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -156,7 +165,7 @@ fun RoundCounterScreen(
                         text = constRCState.error.message,
                         style = ralewayTextStyle,
                         fontWeight = FontWeight.Bold,
-                        fontSize = containerHeight * 0.06,
+                        fontSize = containerHeightSp * 0.06,
                         textAlign = TextAlign.Center
                     )
                 }
