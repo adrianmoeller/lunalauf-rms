@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.DpOffset
@@ -43,7 +42,8 @@ fun FeatureRail(
 ) {
     NavigationRail(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.secondaryContainer
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
     ) {
         Box(
             modifier = Modifier.fillMaxHeight(),
@@ -167,11 +167,12 @@ fun PublicViewControls(
                 )
             OutlinedCard(
                 border = if (expanded)
-                    BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface) else CardDefaults.outlinedCardBorder(),
+                    BorderStroke(1.5.dp, MaterialTheme.colorScheme.secondary)
+                else BorderStroke(1.5.dp, MaterialTheme.colorScheme.onPrimary),
                 colors = if (publicViewOpen)
                     CardDefaults.outlinedCardColors(
-                        containerColor = Color(0xFF9AC0AD),
-                        contentColor = MaterialTheme.colorScheme.onSurface
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 else CardDefaults.outlinedCardColors()
             ) {

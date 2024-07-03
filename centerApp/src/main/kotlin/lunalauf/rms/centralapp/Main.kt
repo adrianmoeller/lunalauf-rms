@@ -4,7 +4,6 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,16 +25,13 @@ import lunalauf.rms.utilities.logging.configureStartUpErrorLogging
 @Composable
 @Preview
 fun ApplicationScope.App() {
-    val colorScheme = darkColorScheme()
-//    val colorScheme = lightColorScheme()
-
     val mainScreenModel = remember { MainScreenModel() }
     val publicViewScreenModel = remember { PublicViewScreenModel(mainScreenModel.snackBarHostState) }
     val modelState by mainScreenModel.modelState.collectAsState()
 
     val constModelState = modelState
     MainWindow(
-        colorScheme = colorScheme,
+        useDarkTheme = true,
         mainScreenModel = mainScreenModel,
         publicViewScreenModel = publicViewScreenModel,
         publicViewAvailable = constModelState is ModelState.Loaded,

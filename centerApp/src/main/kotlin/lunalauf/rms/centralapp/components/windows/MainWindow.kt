@@ -19,12 +19,13 @@ import lunalauf.rms.centralapp.components.features.LogSheetScreen
 import lunalauf.rms.centralapp.components.features.NetworkSheetScreen
 import lunalauf.rms.centralapp.components.main.MainScreenModel
 import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
+import lunalauf.rms.centralapp.theme.AppTheme
 import java.awt.Color
 
 @Composable
 fun ApplicationScope.MainWindow(
     modifier: Modifier = Modifier,
-    colorScheme: ColorScheme,
+    useDarkTheme: Boolean,
     mainScreenModel: MainScreenModel,
     publicViewScreenModel: PublicViewScreenModel,
     publicViewAvailable: Boolean,
@@ -48,8 +49,8 @@ fun ApplicationScope.MainWindow(
     ) {
         window.background = Color.BLACK
 
-        MaterialTheme(
-            colorScheme = colorScheme
+        AppTheme(
+            darkTheme = useDarkTheme
         ) {
             val scope = rememberCoroutineScope()
             val drawerState = rememberDrawerState(DrawerValue.Closed)
