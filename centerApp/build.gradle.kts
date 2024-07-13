@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "de.lunalauf-rms"
-version = "2.0.3"
+version = "2.0.4"
 
 repositories {
     google()
@@ -50,7 +50,7 @@ compose.desktop {
             modules("java.sql")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "lunalauf-rms-center"
-            packageVersion = "2.0.3"
+            packageVersion = "2.0.4"
             windows {
                 iconFile.set(project.file("src/main/resources/icons/icon.ico"))
                 menuGroup = "lunalauf-rms"
