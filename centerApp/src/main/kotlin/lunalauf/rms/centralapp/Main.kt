@@ -4,10 +4,7 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.ApplicationScope
@@ -28,10 +25,11 @@ fun ApplicationScope.App() {
     val mainScreenModel = remember { MainScreenModel() }
     val publicViewScreenModel = remember { PublicViewScreenModel(mainScreenModel.snackBarHostState) }
     val modelState by mainScreenModel.modelState.collectAsState()
+    var useDarkTheme by remember { mutableStateOf(true) }
 
     val constModelState = modelState
     MainWindow(
-        useDarkTheme = true,
+        useDarkTheme = useDarkTheme,
         mainScreenModel = mainScreenModel,
         publicViewScreenModel = publicViewScreenModel,
         publicViewAvailable = constModelState is ModelState.Loaded,
@@ -59,6 +57,8 @@ fun ApplicationScope.App() {
                 onMenuOpenFile = mainScreenModel::openFile,
                 onMenuSaveFile = mainScreenModel::saveFile,
                 onMenuCloseFile = mainScreenModel::closeFile,
+                onSwitchTheme = { useDarkTheme = !useDarkTheme },
+                useDarkTheme = useDarkTheme,
                 snackBarHostState = mainScreenModel.snackBarHostState
             )
         }
