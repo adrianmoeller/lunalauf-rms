@@ -12,7 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import compose.icons.EvaIcons
 import compose.icons.FontAwesomeIcons
+import compose.icons.evaicons.Fill
+import compose.icons.evaicons.fill.Moon
+import compose.icons.evaicons.fill.Sun
 import compose.icons.fontawesomeicons.Regular
 import compose.icons.fontawesomeicons.regular.File
 import compose.icons.fontawesomeicons.regular.FolderOpen
@@ -37,6 +41,8 @@ fun FileOpenScreen(
     onMenuOpenFile: () -> Unit,
     onMenuSaveFile: () -> Unit,
     onMenuCloseFile: () -> Unit,
+    onSwitchTheme: () -> Unit,
+    useDarkTheme: Boolean,
     snackBarHostState: SnackbarHostState
 ) {
     val screenModel = remember {
@@ -59,7 +65,10 @@ fun FileOpenScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer
                 ),
                 title = {
                     Text(
@@ -133,6 +142,14 @@ fun FileOpenScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = onSwitchTheme
+                    ) {
+                        Icon(
+                            imageVector = if (useDarkTheme) EvaIcons.Fill.Moon else EvaIcons.Fill.Sun,
+                            contentDescription = "Theme"
+                        )
+                    }
                     IconButton(
                         onClick = { settingsOpen = true }
                     ) {

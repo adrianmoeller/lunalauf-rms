@@ -40,6 +40,13 @@ fun FeatureRail(
     onLogClick: () -> Unit,
     logOpen: Boolean
 ) {
+    val navRailItemColors = NavigationRailItemDefaults.colors(
+        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        unselectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        unselectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer
+    )
+
     NavigationRail(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -90,6 +97,7 @@ fun FeatureRail(
                     }
                 }
                 NavigationRailItem(
+                    colors = navRailItemColors,
                     icon = {
                         Icon(
                             modifier = Modifier.size(IconSize.medium),
@@ -104,6 +112,7 @@ fun FeatureRail(
                     onClick = onNetworkClick
                 )
                 NavigationRailItem(
+                    colors = navRailItemColors,
                     icon = {
                         Icon(
                             modifier = Modifier.size(IconSize.medium),
@@ -118,6 +127,7 @@ fun FeatureRail(
                     onClick = onBotsClick
                 )
                 NavigationRailItem(
+                    colors = navRailItemColors,
                     icon = {
                         Icon(
                             modifier = Modifier.size(IconSize.medium),
