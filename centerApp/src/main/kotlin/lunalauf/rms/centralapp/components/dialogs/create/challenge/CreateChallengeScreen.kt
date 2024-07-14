@@ -130,7 +130,7 @@ fun CreateChallengeScreen(
                     FilledTonalButton(
                         modifier = Modifier.align(Alignment.End),
                         onClick = { screenModel.createChallenge(onDismissRequest) },
-                        enabled = screenModel.nameValid && screenModel.durationValid && !screenModel.processing
+                        enabled = screenModel.nameValid && (!screenModel.expires || screenModel.durationValid) && !screenModel.processing
                     ) {
                         Text("Create")
                     }
