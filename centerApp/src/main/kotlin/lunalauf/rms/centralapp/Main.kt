@@ -65,7 +65,6 @@ fun ApplicationScope.App() {
     }
     if (constModelState is ModelState.Loaded) {
         PublicViewWindow(
-            mainScreenModel = mainScreenModel,
             publicViewScreenModel = publicViewScreenModel,
             modelState = constModelState
         )

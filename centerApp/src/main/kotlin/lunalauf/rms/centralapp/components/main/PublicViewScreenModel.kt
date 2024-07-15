@@ -5,6 +5,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.WindowState
 import lunalauf.rms.centralapp.components.AbstractStatelessScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
 import lunalauf.rms.utilities.persistence.PersistenceManager
@@ -20,6 +22,8 @@ class PublicViewScreenModel(
     var prefState by mutableStateOf(loadPrefState())
         private set
     var open by mutableStateOf(false)
+        private set
+    var presentMode by mutableStateOf(false)
         private set
 
     private fun loadPrefState(): PublicViewPrefState {
@@ -56,5 +60,13 @@ class PublicViewScreenModel(
         launchInIOScope {
             persistenceManager.save(prefState.toPersistenceContainer())
         }
+    }
+
+    fun switchPresentMode(windowState: WindowState) {
+        presentMode = !presentMode
+        if (presentMode)
+            windowState.placement = WindowPlacement.Maximized
+        else
+            windowState.placement = WindowPlacement.Floating
     }
 }
