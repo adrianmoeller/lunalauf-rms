@@ -30,64 +30,78 @@ fun ApplicationScope.App() {
     val screenModel = remember { MainScreenModel() }
     val connectionStatus by screenModel.connectionStatus.collectAsState()
 
-    val startWindowState = rememberWindowState()
-    val connectedWindowState = rememberWindowState()
-
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "Luna-Lauf",
-        icon = icon,
-        state = if (connectionStatus == MainConnectionStatus.Disconnected) startWindowState
-            else connectedWindowState,
-        onKeyEvent = {
-            if (connectionStatus != MainConnectionStatus.Disconnected && it.key == Key.F && it.type == KeyEventType.KeyDown) {
-                if (connectedWindowState.placement != WindowPlacement.Fullscreen)
-                    connectedWindowState.placement = WindowPlacement.Fullscreen
-                else
-                    connectedWindowState.placement = WindowPlacement.Floating
-                return@Window true
-            }
-            return@Window false
-        }
-    ) {
-        window.background = Color.BLACK
-
-        MaterialTheme(
-            colorScheme = colorScheme
+    val constConnStatus = connectionStatus
+    if (constConnStatus == MainConnectionStatus.Disconnected) {
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = "Luna-Lauf",
+            icon = icon
         ) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
+            MaterialTheme(
+                colorScheme = colorScheme
             ) {
-                when (val constConnStatus = connectionStatus) {
-                    MainConnectionStatus.Disconnected -> {
-                        StartScreen(
-                            modifier = Modifier.fillMaxSize(),
-                            screenModel = screenModel
-                        )
-                    }
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    StartScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        screenModel = screenModel
+                    )
+                }
+            }
+        }
+    } else {
+        val connectedWindowState = rememberWindowState(WindowPlacement.Maximized)
 
-                    is MainConnectionStatus.ConnectedRC -> {
-                        ConnectedScreenFrame(
-                            title = "Scan rounds:",
-                            screenModel = screenModel,
-                            client = constConnStatus.roundCounter.client,
-                        ) {
-                            RoundCounterScreen(
-                                roundCounter = constConnStatus.roundCounter
-                            )
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = "Luna-Lauf",
+            icon = icon,
+            state = connectedWindowState,
+            undecorated = true,
+            onKeyEvent = {
+                if (it.key == Key.F && it.type == KeyEventType.KeyDown) {
+                    if (connectedWindowState.placement != WindowPlacement.Maximized)
+                        connectedWindowState.placement = WindowPlacement.Maximized
+                    else
+                        connectedWindowState.placement = WindowPlacement.Floating
+                    return@Window true
+                }
+                return@Window false
+            }
+        ) {
+            MaterialTheme(
+                colorScheme = colorScheme
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    when (constConnStatus) {
+                        is MainConnectionStatus.ConnectedRC -> {
+                            ConnectedScreenFrame(
+                                title = "Scan rounds:",
+                                screenModel = screenModel,
+                                client = constConnStatus.roundCounter.client,
+                            ) {
+                                RoundCounterScreen(
+                                    roundCounter = constConnStatus.roundCounter
+                                )
+                            }
                         }
-                    }
 
-                    is MainConnectionStatus.ConnectedID -> {
-                        ConnectedScreenFrame(
-                            title = "Show info:",
-                            screenModel = screenModel,
-                            client = constConnStatus.infoDisplay.client
-                        ) {
-                            InfoDisplayScreen(
-                                infoDisplay = constConnStatus.infoDisplay
-                            )
+                        is MainConnectionStatus.ConnectedID -> {
+                            ConnectedScreenFrame(
+                                title = "Show info:",
+                                screenModel = screenModel,
+                                client = constConnStatus.infoDisplay.client
+                            ) {
+                                InfoDisplayScreen(
+                                    infoDisplay = constConnStatus.infoDisplay
+                                )
+                            }
                         }
+
+                        else -> {}
                     }
                 }
             }
