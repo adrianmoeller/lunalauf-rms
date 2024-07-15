@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,10 +27,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberWindowState
 import lunalauf.rms.centralapp.components.commons.tables.PublicViewTable
-import lunalauf.rms.centralapp.components.main.MainScreenModel
 import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
 import lunalauf.rms.centralapp.publicViewTypography
 import lunalauf.rms.centralapp.utils.Formats
@@ -42,7 +41,6 @@ import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun PublicViewWindow(
-    mainScreenModel: MainScreenModel,
     publicViewScreenModel: PublicViewScreenModel,
     modelState: ModelState.Loaded
 ) {
@@ -66,70 +64,69 @@ fun PublicViewWindow(
             title = "Luna-Lauf - Public View",
             icon = icon,
             state = windowState,
+            undecorated = true,
             onKeyEvent = {
                 if (it.key == Key.F && it.type == KeyEventType.KeyDown) {
-                    if (windowState.placement != WindowPlacement.Fullscreen)
-                        windowState.placement = WindowPlacement.Fullscreen
-                    else
-                        windowState.placement = WindowPlacement.Floating
+                    publicViewScreenModel.switchPresentMode(windowState)
                     return@Window true
                 }
                 return@Window false
             }
         ) {
-            MaterialTheme(
-                colorScheme = lightColorScheme(),
-                typography = publicViewTypography
-            ) {
-                Surface(
-                    modifier = Modifier.onGloballyPositioned {
-                        screenWidth = with(density) {
-                            it.size.width.toSp()
-                        }
-                    },
-                    color = borderColor
+            WindowDraggableArea {
+                MaterialTheme(
+                    colorScheme = lightColorScheme(),
+                    typography = publicViewTypography
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(2.dp),
-                        horizontalArrangement = Arrangement.spacedBy(borderWidth)
+                    Surface(
+                        modifier = Modifier.onGloballyPositioned {
+                            screenWidth = with(density) {
+                                it.size.width.toSp()
+                            }
+                        },
+                        color = borderColor
                     ) {
-                        Column(
+                        Row(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .weight(1f - pref.cmn_poolSponsorWidth),
-                            verticalArrangement = Arrangement.spacedBy(borderWidth)
+                                .padding(2.dp),
+                            horizontalArrangement = Arrangement.spacedBy(borderWidth)
                         ) {
-                            val teamsState by modelState.teams.collectAsState()
-                            TeamPanel(
+                            Column(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .weight(pref.cmn_teamsHeight),
-                                teamsState = teamsState,
-                                baseFontSize = (screenWidth / 45) * pref.tms_fontScale,
-                                pref = pref
-                            )
-                            val runnersState by modelState.runners.collectAsState()
-                            RunnerPanel(
+                                    .weight(1f - pref.cmn_poolSponsorWidth),
+                                verticalArrangement = Arrangement.spacedBy(borderWidth)
+                            ) {
+                                val teamsState by modelState.teams.collectAsState()
+                                TeamPanel(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .weight(pref.cmn_teamsHeight),
+                                    teamsState = teamsState,
+                                    baseFontSize = (screenWidth / 45) * pref.tms_fontScale,
+                                    pref = pref
+                                )
+                                val runnersState by modelState.runners.collectAsState()
+                                RunnerPanel(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .weight(1f - pref.cmn_teamsHeight),
+                                    runnersState = runnersState,
+                                    baseFontSize = (screenWidth / 55) * pref.rns_fontScale,
+                                    pref = pref
+                                )
+                            }
+                            CommonPanel(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .weight(1f - pref.cmn_teamsHeight),
-                                runnersState = runnersState,
-                                baseFontSize = (screenWidth / 55) * pref.rns_fontScale,
-                                pref = pref
+                                    .weight(pref.cmn_poolSponsorWidth),
+                                modelState = modelState,
+                                padding = screenWidth.value.dp / 170,
+                                baseFontSize = (screenWidth / 50) * pref.ps_fontScale,
+                                borderColor = borderColor
                             )
                         }
-                        CommonPanel(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .weight(pref.cmn_poolSponsorWidth),
-                            mainScreenModel = mainScreenModel,
-                            modelState = modelState,
-                            padding = screenWidth.value.dp / 170,
-                            baseFontSize = (screenWidth / 50) * pref.ps_fontScale,
-                            borderColor = borderColor
-                        )
                     }
                 }
             }
@@ -257,7 +254,6 @@ private fun <T> split(list: List<T>, subListSize: Int): List<List<T>> {
 @Composable
 private fun CommonPanel(
     modifier: Modifier = Modifier,
-    mainScreenModel: MainScreenModel,
     modelState: ModelState.Loaded,
     baseFontSize: TextUnit,
     padding: Dp,
