@@ -4,7 +4,13 @@ plugins {
 }
 
 dependencies {
-    implementation("com.google.code.gson:gson:2.11.0")
-    implementation("org.telegram:telegrambots:6.9.0")
+    implementation(libs.slf4j)
+    implementation(libs.slf4jReload)
+
+    implementation(libs.kotlinCoroutines)
+
+    implementation(libs.gsonLib)
+    implementation(libs.telegramBots)
+
     implementation(project(":modelAPI"))
 }

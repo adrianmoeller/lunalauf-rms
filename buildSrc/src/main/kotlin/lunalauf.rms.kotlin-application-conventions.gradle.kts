@@ -1,8 +1,22 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     `java-library`
+
+    kotlin("jvm")
 }
 
-dependencies {
-    implementation("org.slf4j:slf4j-api:2.0.13")
-    implementation("org.slf4j:slf4j-reload4j:2.0.13")
+group = "de.lunalauf-rms"
+version = "2.0.5"
+
+repositories {
+    google()
+    mavenCentral()
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+}
+
+tasks.withType(KotlinCompile::class).configureEach {
+    kotlinOptions {
+        freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+    }
 }
