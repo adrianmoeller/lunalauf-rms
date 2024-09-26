@@ -151,7 +151,7 @@ private fun TeamPanel(
                 numOfRounds.toString(),
                 numOfFunfactorPoints.toString(),
                 (numOfRounds + numOfFunfactorPoints).toString(),
-                Formats.germanEuroFormat(it.totalAmount())
+                Formats.germanEuroFormat(it.totalAmount(), true)
             )
         }
     PublicViewTable(
@@ -207,7 +207,7 @@ private fun RunnerPanel(
                 listOf(
                     it.name ?: it.id.toString(),
                     it.numOfRounds().toString(),
-                    Formats.germanEuroFormat(it.totalAmount())
+                    Formats.germanEuroFormat(it.totalAmount(), true)
                 )
             }
             if (index == splitRunners.lastIndex && data.size < pref.rns_numOfRows) {

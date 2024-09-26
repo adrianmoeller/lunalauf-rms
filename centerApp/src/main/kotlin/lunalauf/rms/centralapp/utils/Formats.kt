@@ -16,7 +16,10 @@ object Formats {
         return "$minutes:${seconds.toString().padStart(2, '0')} min"
     }
 
-    fun germanEuroFormat(value: Double): String {
+    fun germanEuroFormat(value: Double, omitIfZero: Boolean = false): String {
+        if (omitIfZero && value == 0.0)
+            return ""
+
         return try {
             val string = value.toString()
             val split = string.split(".")
