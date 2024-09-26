@@ -68,11 +68,15 @@ sealed class ModelState {
         private val _overallRounds = MutableStateFlow(calcOverallRounds())
         val overallRounds get() = _overallRounds.asStateFlow()
 
-        private val _overallContribution = MutableStateFlow(calcOverallContribution())
-        val overallContribution get() = _overallContribution.asStateFlow()
+        private val _runnersContribution = MutableStateFlow(calcRunnersContribution())
+        val runnersContribution get() = _runnersContribution.asStateFlow()
 
         val currentSponsorPoolAmount = overallRounds.combine(common) { rounds, commonState ->
             calcCurrentSponsorPoolAmount(rounds, commonState.sponsorPoolAmount, commonState.sponsorPoolRounds)
+        }.stateIn(coroutineScope, SharingStarted.Eagerly, 0.0)
+
+        val overallContribution get() = runnersContribution.combine(currentSponsorPoolAmount) { runnersContr, poolAmount ->
+            runnersContr + poolAmount
         }.stateIn(coroutineScope, SharingStarted.Eagerly, 0.0)
 
         init {
@@ -110,13 +114,13 @@ sealed class ModelState {
                             "rounds" -> {
                                 updateRounds()
                                 updateOverallRounds()
-                                updateOverallContribution()
+                                updateRunnersContribution()
                             }
 
                             "funfactorResults" -> {
                                 updateFunfactorResults()
                                 updateOverallRounds()
-                                updateOverallContribution()
+                                updateRunnersContribution()
                             }
 
                             "challenges" -> updateChallenges()
@@ -132,7 +136,7 @@ sealed class ModelState {
                         is Runner -> updateRunners(feature is EAttribute && feature.name == "id")
                         is Team -> updateTeams()
                     }
-                    updateOverallContribution()
+                    updateRunnersContribution()
                 }
 
                 is LogEntry -> {
@@ -142,7 +146,7 @@ sealed class ModelState {
                     }
                     updateLog()
                     updateOverallRounds()
-                    updateOverallContribution()
+                    updateRunnersContribution()
                 }
 
                 is Challenge -> updateChallenges()
@@ -190,8 +194,8 @@ sealed class ModelState {
             _overallRounds.value = calcOverallRounds()
         }
 
-        private fun updateOverallContribution() {
-            _overallContribution.value = calcOverallContribution()
+        private fun updateRunnersContribution() {
+            _runnersContribution.value = calcRunnersContribution()
         }
 
         private fun calcOverallRounds(): Int {
@@ -201,7 +205,7 @@ sealed class ModelState {
             return rounds
         }
 
-        private fun calcOverallContribution(): Double {
+        private fun calcRunnersContribution(): Double {
             var contribution = 0.0
             for (team in model.teams) contribution += team.totalAmount()
             for (runner in model.runners) if (runner.team == null) contribution += runner.totalAmount()

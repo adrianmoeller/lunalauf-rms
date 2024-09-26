@@ -344,7 +344,7 @@ private fun CommonPanel(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Gesamt",
+                    text = "Gesamt:",
                     style = TextStyle(fontSize = baseFontSize * .8).merge(CommonPanelTextStyles.all)
                 )
                 Text(
