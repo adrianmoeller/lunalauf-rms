@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags:
+    - 'v*.*.*'
+
+env:
+  VersionNumber: 
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Extract version number
+        run: |
+          $tag = "${{ github.ref }}"
+          if ($tag -match "refs/tags/v(.*)") {
+            $version = $matches[1]
+            echo "VERSION=$version" >> $env:GITHUB_ENV
+          }
+        shell: pwsh
+      
+      - name: Checkout sources
+      - uses: actions/checkout@v4
+
+      - name: Setup Gradle 
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Package center app with Gradle
+        run: ./gradlew.bat :centerApp:packageMsi
+
+      - name: Package counter app with Gradle
+        run: ./gradlew.bat :counterApp:packageMsi
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload release asset center app
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./centerApp/build/compose/binaries/main/msi/lunalauf-rms-center-${{ env.VERSION }}.msi
+          asset_name: lunalauf-rms-center-${{ env.VERSION }}.msi
+          asset_content_type: application/msi
+
+      - name: Upload release asset counter app
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./counterApp/build/compose/binaries/main/msi/lunalauf-rms-counter-${{ env.VERSION }}.msi
+          asset_name: lunalauf-rms-counter-${{ env.VERSION }}.msi
+          asset_content_type: application/msi
