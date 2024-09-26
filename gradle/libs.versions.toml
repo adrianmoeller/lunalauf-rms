@@ -1,0 +1,23 @@
+[versions]
+composeIcons = "1.1.0"
+voyager = "1.0.0"
+slf4j = "2.0.13"
+coroutines = "1.8.1"
+gson = "2.11.0"
+telegram = "6.9.0"
+
+[libraries]
+fontAwsome = { group = "br.com.devsrsouza.compose.icons", name = "font-awesome", version.ref = "composeIcons" }
+evaIcons = { group = "br.com.devsrsouza.compose.icons", name = "eva-icons", version.ref = "composeIcons" }
+voyagerNavigator = { group = "cafe.adriel.voyager", name = "voyager-navigator", version.ref = "voyager" }
+voyagerScreenmodel = { group = "cafe.adriel.voyager", name = "voyager-screenmodel", version.ref = "voyager" }
+voyagerBottomSheetNavigator = { group = "cafe.adriel.voyager", name = "voyager-bottom-sheet-navigator", version.ref = "voyager" }
+voyagerTabNavigator = { group = "cafe.adriel.voyager", name = "voyager-tab-navigator", version.ref = "voyager" }
+voyagerTransitions = { group = "cafe.adriel.voyager", name = "voyager-transitions", version.ref = "voyager" }
+slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+slf4jReload = { group = "org.slf4j", name = "slf4j-reload4j", version.ref = "slf4j" }
+kotlinCoroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+gsonLib = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+telegramBots = { group = "org.telegram", name = "telegrambots", version.ref = "telegram" }
+
+[plugins]

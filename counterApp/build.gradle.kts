@@ -1,34 +1,20 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm")
     id("org.jetbrains.compose")
+
     id ("lunalauf.rms.kotlin-application-conventions")
-}
-
-group = "de.lunalauf-rms"
-version = "2.0.5"
-
-repositories {
-    google()
-    mavenCentral()
-    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-}
-
-tasks.withType(KotlinCompile::class).configureEach {
-    kotlinOptions {
-        freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
-    }
 }
 
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
 
-    val composeIconsVersion = "1.1.0"
-    implementation("br.com.devsrsouza.compose.icons:font-awesome:$composeIconsVersion")
-    implementation("br.com.devsrsouza.compose.icons:eva-icons:$composeIconsVersion")
+    implementation(libs.slf4j)
+    implementation(libs.slf4jReload)
+
+    implementation(libs.fontAwsome)
+    implementation(libs.evaIcons)
 
     implementation(project(":utilities"))
 }
