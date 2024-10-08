@@ -49,7 +49,7 @@ class ClientAcceptService(
     }
 
     override fun CoroutineScope.run(input: Unit) {
-        logger.info("Client catcher started")
+        logger.info("Accepting clients started")
         var it = 0
         while (isActive && it < MAX_ITERATIONS) {
             try {
@@ -61,6 +61,6 @@ class ClientAcceptService(
                 it++
             }
         }
-        logger.info("Client catcher stopped")
+        logger.info("Accepting clients stopped")
     }
 }
