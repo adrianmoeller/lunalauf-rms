@@ -2,7 +2,7 @@ package lunalauf.rms.utilities.network.communication.message.response
 
 import lunalauf.rms.utilities.network.communication.ErrorType
 
-class ResponseFactory {
+object ResponseFactory {
     fun createErrorResponse(requestId: Long, error: ErrorType): ErrorResponse {
         val response = ErrorResponse()
         response.messageId = requestId

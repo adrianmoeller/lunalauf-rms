@@ -17,8 +17,7 @@ import org.slf4j.LoggerFactory
 
 class ModelUpdater(
     private val modelState: ModelState.Loaded,
-    private val request: Request,
-    private val responseFactory: ResponseFactory
+    private val request: Request
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -38,7 +37,7 @@ class ModelUpdater(
 
     suspend fun run(): Response {
         handleRequest(request)
-        return response ?: responseFactory.createErrorResponse(request.messageId, ErrorType.BAD_SERVER_STATE)
+        return response ?: ResponseFactory.createErrorResponse(request.messageId, ErrorType.BAD_SERVER_STATE)
     }
 
     private suspend fun handleRequest(request: Request) {
@@ -47,7 +46,7 @@ class ModelUpdater(
             is MinigameRecordRequest -> handleMinigameRecordRequest(request)
             is RunnerInfoRequest -> handleRunnerInfoRequest(request)
             else -> {
-                response = responseFactory.createErrorResponse(
+                response = ResponseFactory.createErrorResponse(
                     requestId = request.messageId,
                     error = ErrorType.UNEXPECTED_CLIENT_MESSAGE
                 )
@@ -61,7 +60,7 @@ class ModelUpdater(
         withModelContext {
             val runner = modelState.runners.value.getRunner(request.runnerId)
             if (runner == null) {
-                response = responseFactory.createErrorResponse(
+                response = ResponseFactory.createErrorResponse(
                     requestId = request.messageId,
                     error = ErrorType.UNKNOWN_ID
                 )
@@ -70,17 +69,17 @@ class ModelUpdater(
             }
 
             response = when (modelAPI.logRound(runner)) {
-                LogRoundResult.RunDisabled -> responseFactory.createRoundCountRejectedResponse(
+                LogRoundResult.RunDisabled -> ResponseFactory.createRoundCountRejectedResponse(
                     requestId = request.messageId, runner.name ?: "",
                     causeMessage = "Runden können nur innerhalb der Laufzeit gezählt werden!"
                 )
 
-                LogRoundResult.ValidationFailed -> responseFactory.createRoundCountRejectedResponse(
+                LogRoundResult.ValidationFailed -> ResponseFactory.createRoundCountRejectedResponse(
                     requestId = request.messageId, runner.name ?: "",
                     causeMessage = "Lichtgeschwindigkeit nicht erlaubt!"
                 )
 
-                LogRoundResult.LastRoundAlreadyLogged -> responseFactory.createRoundCountRejectedResponse(
+                LogRoundResult.LastRoundAlreadyLogged -> ResponseFactory.createRoundCountRejectedResponse(
                     requestId = request.messageId, runner.name ?: "",
                     causeMessage = "Deine/Eure letzte Runde wurde bereits gezählt."
                 )
@@ -96,7 +95,7 @@ class ModelUpdater(
                         name = if (runner.name.isNullOrBlank()) runner.id.toString() else runner.name
                         rounds = modelAPI.numOfRounds(runner)
                     }
-                    responseFactory.createRoundCountAcceptedResponse(
+                    ResponseFactory.createRoundCountAcceptedResponse(
                         requestId = request.messageId,
                         name,
                         rounds
@@ -110,7 +109,7 @@ class ModelUpdater(
         withModelContext {
             val runner = modelState.runners.value.getRunner(request.runnerId)
             if (runner == null) {
-                response = responseFactory.createMinigameRecordFailedResponse(
+                response = ResponseFactory.createMinigameRecordFailedResponse(
                     requestId = request.messageId,
                     causeMessage = "Chip nicht registriert"
                 )
@@ -120,7 +119,7 @@ class ModelUpdater(
 
             val team = runner.team
             if (team == null) {
-                response = responseFactory.createMinigameRecordFailedResponse(
+                response = ResponseFactory.createMinigameRecordFailedResponse(
                     requestId = request.messageId,
                     causeMessage = "Kein Mitglied eines Teams"
                 )
@@ -129,12 +128,12 @@ class ModelUpdater(
             }
 
             response = when (modelAPI.logMinigameResult(team, request.minigameId, request.points)) {
-                LogMinigameResultResult.NoMinigameWithId -> responseFactory.createMinigameRecordFailedResponse(
+                LogMinigameResultResult.NoMinigameWithId -> ResponseFactory.createMinigameRecordFailedResponse(
                     requestId = request.messageId,
                     causeMessage = "Ergebnis konnte nicht eingetragen werden!"
                 )
 
-                is LogMinigameResultResult.Logged -> responseFactory.createMinigameRecordDoneResponse(
+                is LogMinigameResultResult.Logged -> ResponseFactory.createMinigameRecordDoneResponse(
                     requestId = request.messageId
                 )
             }
@@ -145,7 +144,7 @@ class ModelUpdater(
         withModelContext {
             val runner = modelState.runners.value.getRunner(request.runnerId)
             if (runner == null) {
-                response = responseFactory.createErrorResponse(
+                response = ResponseFactory.createErrorResponse(
                     requestId = request.messageId,
                     error = ErrorType.UNKNOWN_ID
                 )
@@ -155,14 +154,14 @@ class ModelUpdater(
 
             val team = runner.team
             response = if (team == null) {
-                responseFactory.createRunnerInfoResponse(
+                ResponseFactory.createRunnerInfoResponse(
                     requestId = request.messageId,
                     runnerName = runner.name ?: "-",
                     runnerId = request.runnerId,
                     numRunnerRounds = modelAPI.numOfRounds(runner)
                 )
             } else {
-                responseFactory.createTeamRunnerInfoResponse(
+                ResponseFactory.createTeamRunnerInfoResponse(
                     requestId = request.messageId,
                     runnerName = runner.name ?: "-",
                     runnerId = request.runnerId,
