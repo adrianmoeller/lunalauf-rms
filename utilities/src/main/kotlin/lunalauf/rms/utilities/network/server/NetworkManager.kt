@@ -5,7 +5,7 @@ import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.utilities.network.communication.ErrorType
 import lunalauf.rms.utilities.network.communication.message.request.Request
 import lunalauf.rms.utilities.network.communication.message.response.ResponseFactory
-import lunalauf.rms.utilities.network.server.javasocket.JavaSocketClientController
+import lunalauf.rms.utilities.network.server.javasocket.JavaSocketServer
 import org.slf4j.LoggerFactory
 
 
@@ -37,12 +37,12 @@ sealed class NetworkManager {
     class Available internal constructor(
         modelState: StateFlow<ModelState>
     ) : NetworkManager() {
-        val clientController: ClientController = JavaSocketClientController()
+        val server: Server = JavaSocketServer()
 
-        val port get() = clientController.port
+        val port get() = server.port
 
         init {
-            clientController.setOnMessageReceived { client, message ->
+            server.setOnMessageReceived { client, message ->
                 if (message is Request) {
                     val constModelState = modelState.value
                     if (constModelState is ModelState.Loaded) {
@@ -65,7 +65,7 @@ sealed class NetworkManager {
         }
 
         fun shutdown() {
-            clientController.shutdown()
+            server.shutdown()
         }
     }
 }

@@ -61,8 +61,7 @@ class RoundCounter(
     }
 
     fun processInput(runnerId: Long) {
-        if (repetitionHandler.isUnwantedRepetition(runnerId))
-            return
+        if (repetitionHandler.isUnwantedRepetition(runnerId)) return
         requestSubmitter.submit(requestFactory.createRoundCountRequest(runnerId), client)
     }
 

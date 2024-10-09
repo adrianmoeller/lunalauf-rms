@@ -2,9 +2,9 @@ package lunalauf.rms.utilities.network.server
 
 import kotlinx.coroutines.flow.StateFlow
 
-interface Client {
+interface Connection {
     /**
-     * Connection status of this client.
+     * Status of this connection.
      *
      * -1: disconnected<br></br>
      * 0: connected, not listening<br></br>

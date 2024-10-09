@@ -9,7 +9,7 @@ import lunalauf.rms.utilities.network.communication.ErrorType
 import lunalauf.rms.utilities.network.communication.MessageProcessor
 import lunalauf.rms.utilities.network.communication.message.Message
 import lunalauf.rms.utilities.network.communication.message.response.ResponseFactory
-import lunalauf.rms.utilities.network.server.Client
+import lunalauf.rms.utilities.network.server.Connection
 import lunalauf.rms.utilities.network.util.ConnectionInitiationHelper
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
@@ -19,9 +19,9 @@ import java.io.PrintWriter
 import java.net.Socket
 import java.net.SocketException
 
-class JavaSocketClient(
+class JavaSocketConnection(
     private val socket: Socket
-): Client {
+): Connection {
     companion object {
         private const val TIMEOUT_COMMUNICATION_TEST = 2000 // ms
         private val logger = LoggerFactory.getLogger(this::class.java)

@@ -11,8 +11,8 @@ import java.net.ServerSocket
 import java.net.SocketException
 import java.net.SocketTimeoutException
 
-class ClientAcceptService(
-    private val onClientAccepted: (JavaSocketClient) -> Unit
+class ConnectionAcceptService(
+    private val onConnectionAccepted: (JavaSocketConnection) -> Unit
 ) : Service<Unit, Unit>(Dispatchers.IO) {
     companion object {
         private const val TIMEOUT = 1000 // ms
@@ -49,18 +49,18 @@ class ClientAcceptService(
     }
 
     override fun CoroutineScope.run(input: Unit) {
-        logger.info("Accepting clients started")
+        logger.info("Accepting connections started")
         var it = 0
         while (isActive && it < MAX_ITERATIONS) {
             try {
                 val socket = serverSocket.accept()
-                val client = JavaSocketClient(socket)
+                val client = JavaSocketConnection(socket)
                 logger.info("Client accepted: {}", client.address)
-                scope.launch { onClientAccepted(client) }
+                scope.launch { onConnectionAccepted(client) }
             } catch (_: SocketTimeoutException) {
                 it++
             }
         }
-        logger.info("Accepting clients stopped")
+        logger.info("Accepting connections stopped")
     }
 }

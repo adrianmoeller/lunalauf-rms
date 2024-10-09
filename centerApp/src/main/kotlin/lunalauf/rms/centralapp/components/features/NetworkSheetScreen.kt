@@ -44,8 +44,8 @@ fun NetworkSheetScreen(
     networkManager: NetworkManager
 ) {
     if (networkManager is NetworkManager.Available) {
-        val connections by networkManager.clientController.clients.collectAsState()
-        val clientAcceptState by networkManager.clientController.acceptingClientsState.collectAsState()
+        val connections by networkManager.server.connections.collectAsState()
+        val clientAcceptState by networkManager.server.acceptingConnectionsState.collectAsState()
 
         Column(
             modifier = modifier.fillMaxHeight(),
@@ -76,7 +76,7 @@ fun NetworkSheetScreen(
                         ConnectionTile(
                             connectionStatus = convertStatus(status),
                             ipAddress = client.address,
-                            onRemove = {networkManager.clientController.removeClient(client)}
+                            onRemove = {networkManager.server.removeConnection(client)}
                         )
                         if (index < connections.lastIndex)
                             ListItemDivider(spacing = 10.dp)
@@ -91,8 +91,8 @@ fun NetworkSheetScreen(
                 OutlinedButton(
                     onClick = {
                         when (clientAcceptState) {
-                            Service.State.Running -> networkManager.clientController.stopAcceptingClients()
-                            Service.State.Idling -> networkManager.clientController.startAcceptingClients()
+                            Service.State.Running -> networkManager.server.stopAcceptingConnections()
+                            Service.State.Idling -> networkManager.server.startAcceptingConnections()
                             Service.State.Transitioning -> {}
                         }
                     },
