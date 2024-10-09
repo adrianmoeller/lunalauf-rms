@@ -6,9 +6,10 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import lunalauf.rms.utilities.network.client.Client
-import lunalauf.rms.utilities.network.client.Connector
+import lunalauf.rms.utilities.network.client.Connection
 import lunalauf.rms.utilities.network.client.InfoDisplay
 import lunalauf.rms.utilities.network.client.RoundCounter
+import lunalauf.rms.utilities.network.client.javasocket.JavaSocketClient
 
 class MainScreenModel : AbstractScreenModel() {
     private var _counterType = MutableStateFlow(CounterType.RoundCounter)
@@ -20,12 +21,13 @@ class MainScreenModel : AbstractScreenModel() {
     var host by mutableStateOf("127.0.0.1")
         private set
 
-    private val connector = Connector()
-    val connectorState get() = connector.state
+    private val client: Client<JavaSocketClient.Input> = JavaSocketClient()
 
     private val _connectionStatus: MutableStateFlow<MainConnectionStatus> =
         MutableStateFlow(MainConnectionStatus.Disconnected)
     val connectionStatus = _connectionStatus.asStateFlow()
+
+    val connectState get() = client.connectState
 
     var reconnecting by mutableStateOf(false)
         private set
@@ -45,21 +47,21 @@ class MainScreenModel : AbstractScreenModel() {
         host = value
     }
 
-    fun startConnector() {
-        connector.start(
-            input = Connector.Input(
+    fun startConnecting() {
+        client.connect(
+            input = JavaSocketClient.Input(
                 host = host,
                 port = port.toIntOrNull() ?: 0
             ),
             onResultAvailable = {
                 when (it) {
-                    is Connector.Result.Connected -> {
-                        connected(it.client)
+                    is Client.ConnectResult.Successful -> {
+                        connected(it.connection)
                     }
 
-                    Connector.Result.Aborted -> {}
+                    Client.ConnectResult.Aborted -> {}
 
-                    is Connector.Result.Failed -> {
+                    is Client.ConnectResult.Failed -> {
                         // TODO show snack bar with error
                     }
                 }
@@ -67,17 +69,17 @@ class MainScreenModel : AbstractScreenModel() {
         )
     }
 
-    private fun connected(client: Client) {
+    private fun connected(connection: Connection) {
         when (_counterType.value) {
             CounterType.RoundCounter -> {
-                val roundCounter = RoundCounter(client).apply {
+                val roundCounter = RoundCounter(connection).apply {
                     setOnConnectionLost { tryReconnect() }
                 }
                 _connectionStatus.value = MainConnectionStatus.ConnectedRC(roundCounter)
             }
 
             CounterType.InfoDisplay -> {
-                val infoDisplay = InfoDisplay(client).apply {
+                val infoDisplay = InfoDisplay(connection).apply {
                     setOnConnectionLost { tryReconnect() }
                 }
                 _connectionStatus.value = MainConnectionStatus.ConnectedID(infoDisplay)
@@ -87,21 +89,21 @@ class MainScreenModel : AbstractScreenModel() {
 
     private fun tryReconnect() {
         reconnecting = true
-        connector.start(
-            input = Connector.Input(
+        client.connect(
+            input = JavaSocketClient.Input(
                 host = host,
                 port = 0
             ),
             onResultAvailable = {
                 reconnecting = false
                 when (it) {
-                    is Connector.Result.Connected -> {
-                        connected(it.client)
+                    is Client.ConnectResult.Successful -> {
+                        connected(it.connection)
                     }
 
-                    Connector.Result.Aborted -> {}
+                    Client.ConnectResult.Aborted -> {}
 
-                    is Connector.Result.Failed -> {
+                    is Client.ConnectResult.Failed -> {
                         // TODO show snack bar with error
                     }
                 }
@@ -109,13 +111,13 @@ class MainScreenModel : AbstractScreenModel() {
         )
     }
 
-    fun stopConnector() {
-        connector.stop()
+    fun stopConnecting() {
+        client.abort()
     }
 
-    fun disconnect() {
-        connector.stop()
-        _connectionStatus.value = MainConnectionStatus.Disconnected
+    fun disconnect(connection: Connection) {
+        connection.close()
+        client.abort()
     }
 }
 

@@ -19,7 +19,6 @@ import androidx.compose.ui.window.*
 import lunalauf.rms.counterapp.components.*
 import lunalauf.rms.utilities.logging.Logger
 import lunalauf.rms.utilities.logging.configureStartUpErrorLogging
-import java.awt.Color
 
 @Composable
 @Preview
@@ -81,7 +80,7 @@ fun ApplicationScope.App() {
                             ConnectedScreenFrame(
                                 title = "Scan rounds:",
                                 screenModel = screenModel,
-                                client = constConnStatus.roundCounter.client,
+                                connection = constConnStatus.roundCounter.connection,
                             ) {
                                 RoundCounterScreen(
                                     roundCounter = constConnStatus.roundCounter
@@ -93,7 +92,7 @@ fun ApplicationScope.App() {
                             ConnectedScreenFrame(
                                 title = "Show info:",
                                 screenModel = screenModel,
-                                client = constConnStatus.infoDisplay.client
+                                connection = constConnStatus.infoDisplay.connection
                             ) {
                                 InfoDisplayScreen(
                                     infoDisplay = constConnStatus.infoDisplay
