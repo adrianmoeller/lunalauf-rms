@@ -44,8 +44,8 @@ fun NetworkSheetScreen(
     networkManager: NetworkManager
 ) {
     if (networkManager is NetworkManager.Available) {
-        val connections by networkManager.clientHandler.clients.collectAsState()
-        val catcherState by networkManager.clientCatcher.state.collectAsState()
+        val connections by networkManager.server.connections.collectAsState()
+        val clientAcceptState by networkManager.server.acceptingConnectionsState.collectAsState()
 
         Column(
             modifier = modifier.fillMaxHeight(),
@@ -75,8 +75,8 @@ fun NetworkSheetScreen(
                         val status by client.status.collectAsState()
                         ConnectionTile(
                             connectionStatus = convertStatus(status),
-                            ipAddress = client.remoteAddress,
-                            onRemove = {networkManager.clientHandler.removeClient(client)}
+                            ipAddress = client.address,
+                            onRemove = {networkManager.server.removeConnection(client)}
                         )
                         if (index < connections.lastIndex)
                             ListItemDivider(spacing = 10.dp)
@@ -90,27 +90,27 @@ fun NetworkSheetScreen(
             ) {
                 OutlinedButton(
                     onClick = {
-                        when (catcherState) {
-                            Service.State.Running -> networkManager.clientCatcher.stop()
-                            Service.State.Idling -> networkManager.clientCatcher.start(Unit)
+                        when (clientAcceptState) {
+                            Service.State.Running -> networkManager.server.stopAcceptingConnections()
+                            Service.State.Idling -> networkManager.server.startAcceptingConnections()
                             Service.State.Transitioning -> {}
                         }
                     },
-                    enabled = catcherState != Service.State.Transitioning
+                    enabled = clientAcceptState != Service.State.Transitioning
                 ) {
                     Icon(
                         modifier = Modifier.size(15.dp),
-                        imageVector = if (catcherState == Service.State.Running) FontAwesomeIcons.Solid.Stop
+                        imageVector = if (clientAcceptState == Service.State.Running) FontAwesomeIcons.Solid.Stop
                         else FontAwesomeIcons.Solid.Search,
                         contentDescription = null
                     )
                     Spacer(Modifier.width(10.dp))
-                    Text(text = if (catcherState == Service.State.Running) "Stop searching" else "Search for clients")
+                    Text(text = if (clientAcceptState == Service.State.Running) "Stop searching" else "Search for clients")
                 }
                 LinearProgressIndicator(
                     modifier = Modifier
                         .padding(vertical = 5.dp)
-                        .cond(catcherState == Service.State.Idling) {
+                        .cond(clientAcceptState == Service.State.Idling) {
                             alpha(0f)
                         }
                 )

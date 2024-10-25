@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import lunalauf.rms.counterapp.ralewayTextStyle
+import lunalauf.rms.utilities.network.client.AbstractOperator
 import lunalauf.rms.utilities.network.client.InfoDisplay
 import lunalauf.rms.utilities.network.communication.ErrorType
 import lunalauf.rms.utilities.network.communication.message.response.TeamRunnerInfoResponse
@@ -42,13 +43,13 @@ fun InfoDisplayScreen(
     val alphaAnimation = remember { Animatable(0f) }
     LaunchedEffect(infoDisplayState) {
         when (val constIDState = infoDisplayState) {
-            is InfoDisplay.State.Response -> {
+            is InfoDisplay.Responded -> {
                 animateResponseStatus(
                     scope = scope,
                     alphaAnimation = alphaAnimation
                 )
             }
-            is InfoDisplay.State.Error -> {
+            is AbstractOperator.State.Error -> {
                 if (constIDState.error == ErrorType.UNKNOWN_ID) {
                     animateLongResponseStatus(
                         scope = scope,
@@ -61,7 +62,7 @@ fun InfoDisplayScreen(
                     )
                 }
             }
-            InfoDisplay.State.None -> {
+            AbstractOperator.State.None -> {
                 alphaAnimation.snapTo(0f)
             }
         }
@@ -97,7 +98,7 @@ fun InfoDisplayScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 when (val constIDState = infoDisplayState) {
-                    is InfoDisplay.State.Response -> {
+                    is InfoDisplay.Responded -> {
                         val response = constIDState.response
                         if (response is TeamRunnerInfoResponse) {
                             TitleLine(
@@ -158,7 +159,7 @@ fun InfoDisplayScreen(
                         )
                     }
 
-                    is InfoDisplay.State.Error -> {
+                    is AbstractOperator.State.Error -> {
                         Text(
                             text = constIDState.error.message,
                             style = ralewayTextStyle,
@@ -168,7 +169,7 @@ fun InfoDisplayScreen(
                         )
                     }
 
-                    InfoDisplay.State.None -> {}
+                    AbstractOperator.State.None -> {}
                 }
             }
         }

@@ -2,10 +2,11 @@ package lunalauf.rms.utilities.network.server
 
 import kotlinx.coroutines.flow.StateFlow
 import lunalauf.rms.modelapi.ModelState
-import lunalauf.rms.utilities.network.util.PortProvider.getPreferredPorts
+import lunalauf.rms.utilities.network.communication.ErrorType
+import lunalauf.rms.utilities.network.communication.message.request.Request
+import lunalauf.rms.utilities.network.communication.message.response.ResponseFactory
+import lunalauf.rms.utilities.network.server.javasocket.JavaSocketServer
 import org.slf4j.LoggerFactory
-import java.io.IOException
-import java.net.ServerSocket
 
 
 private val logger = LoggerFactory.getLogger(NetworkManager::class.java)
@@ -36,31 +37,35 @@ sealed class NetworkManager {
     class Available internal constructor(
         modelState: StateFlow<ModelState>
     ) : NetworkManager() {
-        private var serverSocket = createServerSocket()
-        val clientHandler = ClientHandler(modelState)
-        val clientCatcher = ClientCatcher(clientHandler, serverSocket)
+        val server: Server = JavaSocketServer()
 
-        val port get() = serverSocket.localPort
-        val localAddress get() = serverSocket.inetAddress?.hostAddress ?: "None"
+        val port get() = server.port
 
-        @Throws(IOException::class)
-        private fun createServerSocket(): ServerSocket {
-            for (port in getPreferredPorts()) {
-                try {
-                    val socket = ServerSocket(port)
-                    logger.info("Created server socket. Bound to port {}", socket.localPort)
-                    return socket
-                } catch (_: IOException) {
+        init {
+            server.setOnMessageReceived { client, message ->
+                if (message is Request) {
+                    val constModelState = modelState.value
+                    if (constModelState is ModelState.Loaded) {
+                        val modelUpdater = ModelUpdater(constModelState, message)
+                        try {
+                            modelUpdater.run()
+                        } catch (e: Exception) {
+                            logger.error("Exception occurred while updating the model", e)
+                            ResponseFactory.createErrorResponse(message.messageId, ErrorType.BAD_SERVER_STATE)
+                        }
+                    } else {
+                        logger.warn("Request handler needs available model!")
+                        ResponseFactory.createErrorResponse(message.messageId, ErrorType.NO_MODEL_STATE)
+                    }
+                } else {
+                    logger.warn("Received unexpected client message: {} from: {}", message, client.address)
+                    ResponseFactory.createErrorResponse(message.messageId, ErrorType.UNEXPECTED_CLIENT_MESSAGE)
                 }
             }
-            val socket = ServerSocket(0)
-            logger.info("Created server socket. Bound to port {}", socket.localPort)
-            return socket
         }
 
         fun shutdown() {
-            clientCatcher.stop()
-            clientHandler.clients.value.forEach { it.stopListening() }
+            server.shutdown()
         }
     }
 }

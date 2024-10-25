@@ -19,7 +19,7 @@ fun StartScreen(
     modifier: Modifier = Modifier,
     screenModel: MainScreenModel
 ) {
-    val connectorState by screenModel.connectorState.collectAsState()
+    val connectState by screenModel.connectState.collectAsState()
     val counterType by screenModel.counterType.collectAsState()
 
     Column(
@@ -37,7 +37,7 @@ fun StartScreen(
                 modifier = Modifier.width(IntrinsicSize.Max),
                 selected = counterType == CounterType.RoundCounter,
                 onClick = { screenModel.updateCounterType(CounterType.RoundCounter) },
-                enabled = connectorState == Service.State.Idling,
+                enabled = connectState == Service.State.Idling,
                 label = { Text("Scan rounds") },
                 shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
             )
@@ -45,7 +45,7 @@ fun StartScreen(
                 modifier = Modifier.width(IntrinsicSize.Max),
                 selected = counterType == CounterType.InfoDisplay,
                 onClick = { screenModel.updateCounterType(CounterType.InfoDisplay) },
-                enabled = connectorState == Service.State.Idling,
+                enabled = connectState == Service.State.Idling,
                 label = { Text("Show info") },
                 shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
             )
@@ -57,28 +57,28 @@ fun StartScreen(
             OutlinedTextField(
                 value = screenModel.port,
                 onValueChange = screenModel::updatePort,
-                enabled = connectorState == Service.State.Idling,
+                enabled = connectState == Service.State.Idling,
                 label = { Text("Port") },
             )
             OutlinedTextField(
                 value = screenModel.host,
                 onValueChange = screenModel::updateHost,
-                enabled = connectorState == Service.State.Idling,
+                enabled = connectState == Service.State.Idling,
                 label = { Text("Host") },
             )
             Spacer(Modifier.height(10.dp))
             FilledTonalButton(
                 onClick = {
-                    when (connectorState) {
-                        Service.State.Idling -> screenModel.startConnector()
-                        Service.State.Running -> screenModel.stopConnector()
+                    when (connectState) {
+                        Service.State.Idling -> screenModel.startConnecting()
+                        Service.State.Running -> screenModel.stopConnecting()
                         else -> {}
                     }
                 },
-                enabled = connectorState != Service.State.Transitioning
+                enabled = connectState != Service.State.Transitioning
             ) {
                 Text(
-                    when (connectorState) {
+                    when (connectState) {
                         Service.State.Idling -> "Connect to server"
                         Service.State.Running, Service.State.Transitioning -> "Cancel"
                     }
@@ -87,7 +87,7 @@ fun StartScreen(
             LinearProgressIndicator(
                 modifier = Modifier
                     .padding(vertical = 5.dp)
-                    .cond(connectorState == Service.State.Idling) {
+                    .cond(connectState == Service.State.Idling) {
                         alpha(0f)
                     }
             )

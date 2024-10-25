@@ -24,7 +24,7 @@ import compose.icons.evaicons.outline.Loader
 import compose.icons.evaicons.outline.Wifi
 import compose.icons.evaicons.outline.WifiOff
 import lunalauf.rms.counterapp.components.commons.cond
-import lunalauf.rms.utilities.network.client.Client
+import lunalauf.rms.utilities.network.client.Connection
 import java.awt.Cursor
 import java.awt.Point
 import java.awt.Toolkit
@@ -36,11 +36,11 @@ fun ConnectedScreenFrame(
     modifier: Modifier = Modifier,
     title: String,
     screenModel: MainScreenModel,
-    client: Client,
+    connection: Connection,
     content: @Composable () -> Unit
 ) {
-    val clientStatus by client.connectionStatus.collectAsState()
-    val ping by client.ping.collectAsState()
+    val clientStatus by connection.status.collectAsState()
+    val ping by connection.ping.collectAsState()
     val connectionStatus = convertStatus(clientStatus)
     var showToolBar by remember { mutableStateOf(false) }
 
@@ -71,10 +71,7 @@ fun ConnectedScreenFrame(
                         alpha(0f)
                     },
                 enabled = showToolBar,
-                onClick = {
-                    client.close()
-                    screenModel.disconnect()
-                },
+                onClick = { screenModel.disconnect() },
             ) {
                 Text(
                     text = "Disconnect",

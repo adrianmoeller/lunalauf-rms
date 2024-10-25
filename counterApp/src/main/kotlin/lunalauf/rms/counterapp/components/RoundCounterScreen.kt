@@ -27,6 +27,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import lunalauf.rms.counterapp.nunitoTextStyle
 import lunalauf.rms.counterapp.ralewayTextStyle
+import lunalauf.rms.utilities.network.client.AbstractOperator
 import lunalauf.rms.utilities.network.client.RoundCounter
 import lunalauf.rms.utilities.network.communication.ErrorType
 
@@ -46,21 +47,21 @@ fun RoundCounterScreen(
     val alphaAnimation = remember { Animatable(0f) }
     LaunchedEffect(roundCounterState) {
         when (val constRCState = roundCounterState) {
-            is RoundCounter.State.ResponseAccepted -> {
+            is RoundCounter.RespondedAccepted -> {
                 animateResponseStatus(
                     scope = scope,
                     alphaAnimation = alphaAnimation
                 )
             }
 
-            is RoundCounter.State.ResponseRejected -> {
+            is RoundCounter.RespondedRejected -> {
                 animateLongResponseStatus(
                     scope = scope,
                     alphaAnimation = alphaAnimation
                 )
             }
 
-            is RoundCounter.State.Error -> {
+            is AbstractOperator.State.Error -> {
                 if (constRCState.error == ErrorType.UNKNOWN_ID) {
                     animateLongResponseStatus(
                         scope = scope,
@@ -74,7 +75,7 @@ fun RoundCounterScreen(
                 }
             }
 
-            RoundCounter.State.None -> {
+            AbstractOperator.State.None -> {
                 alphaAnimation.snapTo(0f)
             }
         }
@@ -106,7 +107,7 @@ fun RoundCounterScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             when (val constRCState = roundCounterState) {
-                is RoundCounter.State.ResponseAccepted -> {
+                is RoundCounter.RespondedAccepted -> {
                     Image(
                         modifier = Modifier.weight(1f),
                         painter = painterResource("signals/signal_logo_green.png"),
@@ -138,7 +139,7 @@ fun RoundCounterScreen(
                     }
                 }
 
-                is RoundCounter.State.ResponseRejected -> {
+                is RoundCounter.RespondedRejected -> {
                     Image(
                         modifier = Modifier.weight(1f),
                         painter = painterResource("signals/signal_logo_orange.png"),
@@ -154,7 +155,7 @@ fun RoundCounterScreen(
                     )
                 }
 
-                is RoundCounter.State.Error -> {
+                is AbstractOperator.State.Error -> {
                     Image(
                         modifier = Modifier.weight(1f),
                         painter = painterResource("signals/signal_logo_red.png"),
@@ -170,7 +171,7 @@ fun RoundCounterScreen(
                     )
                 }
 
-                RoundCounter.State.None -> {}
+                AbstractOperator.State.None -> {}
             }
         }
     }

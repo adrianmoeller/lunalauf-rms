@@ -19,7 +19,8 @@ import androidx.compose.ui.window.*
 import lunalauf.rms.counterapp.components.*
 import lunalauf.rms.utilities.logging.Logger
 import lunalauf.rms.utilities.logging.configureStartUpErrorLogging
-import java.awt.Color
+import lunalauf.rms.utilities.network.client.InfoDisplay
+import lunalauf.rms.utilities.network.client.RoundCounter
 
 @Composable
 @Preview
@@ -28,80 +29,83 @@ fun ApplicationScope.App() {
     val icon = painterResource("icons/icon.png")
 
     val screenModel = remember { MainScreenModel() }
-    val connectionStatus by screenModel.connectionStatus.collectAsState()
+    val mainState by screenModel.mainState.collectAsState()
 
-    val constConnStatus = connectionStatus
-    if (constConnStatus == MainConnectionStatus.Disconnected) {
-        Window(
-            onCloseRequest = ::exitApplication,
-            title = "Luna-Lauf",
-            icon = icon
-        ) {
-            MaterialTheme(
-                colorScheme = colorScheme
+    when (val constMainState = mainState) {
+        MainState.Start -> {
+            Window(
+                onCloseRequest = ::exitApplication,
+                title = "Luna-Lauf",
+                icon = icon
             ) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
+                MaterialTheme(
+                    colorScheme = colorScheme
                 ) {
-                    StartScreen(
+                    Surface(
                         modifier = Modifier.fillMaxSize(),
-                        screenModel = screenModel
-                    )
+                    ) {
+                        StartScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            screenModel = screenModel
+                        )
+                    }
                 }
             }
         }
-    } else {
-        val connectedWindowState = rememberWindowState(WindowPlacement.Maximized)
 
-        Window(
-            onCloseRequest = ::exitApplication,
-            title = "Luna-Lauf",
-            icon = icon,
-            state = connectedWindowState,
-            undecorated = true,
-            onKeyEvent = {
-                if (it.key == Key.F && it.type == KeyEventType.KeyDown) {
-                    if (connectedWindowState.placement != WindowPlacement.Maximized)
-                        connectedWindowState.placement = WindowPlacement.Maximized
-                    else
-                        connectedWindowState.placement = WindowPlacement.Floating
-                    return@Window true
+        is MainState.Operating -> {
+            val connectedWindowState = rememberWindowState(WindowPlacement.Maximized)
+
+            Window(
+                onCloseRequest = ::exitApplication,
+                title = "Luna-Lauf",
+                icon = icon,
+                state = connectedWindowState,
+                undecorated = true,
+                onKeyEvent = {
+                    if (it.key == Key.F && it.type == KeyEventType.KeyDown) {
+                        if (connectedWindowState.placement != WindowPlacement.Maximized)
+                            connectedWindowState.placement = WindowPlacement.Maximized
+                        else
+                            connectedWindowState.placement = WindowPlacement.Floating
+                        return@Window true
+                    }
+                    return@Window false
                 }
-                return@Window false
-            }
-        ) {
-            MaterialTheme(
-                colorScheme = colorScheme
             ) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
+                MaterialTheme(
+                    colorScheme = colorScheme
                 ) {
-                    when (constConnStatus) {
-                        is MainConnectionStatus.ConnectedRC -> {
-                            ConnectedScreenFrame(
-                                title = "Scan rounds:",
-                                screenModel = screenModel,
-                                client = constConnStatus.roundCounter.client,
-                            ) {
-                                RoundCounterScreen(
-                                    roundCounter = constConnStatus.roundCounter
-                                )
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        when (constMainState.operator) {
+                            is RoundCounter -> {
+                                ConnectedScreenFrame(
+                                    title = "Scan rounds:",
+                                    screenModel = screenModel,
+                                    connection = constMainState.operator.connection,
+                                ) {
+                                    RoundCounterScreen(
+                                        roundCounter = constMainState.operator
+                                    )
+                                }
                             }
-                        }
 
-                        is MainConnectionStatus.ConnectedID -> {
-                            ConnectedScreenFrame(
-                                title = "Show info:",
-                                screenModel = screenModel,
-                                client = constConnStatus.infoDisplay.client
-                            ) {
-                                InfoDisplayScreen(
-                                    infoDisplay = constConnStatus.infoDisplay
-                                )
+                            is InfoDisplay -> {
+                                ConnectedScreenFrame(
+                                    title = "Show info:",
+                                    screenModel = screenModel,
+                                    connection = constMainState.operator.connection
+                                ) {
+                                    InfoDisplayScreen(
+                                        infoDisplay = constMainState.operator
+                                    )
+                                }
                             }
-                        }
 
-                        else -> {}
+                            else -> {}
+                        }
                     }
                 }
             }
