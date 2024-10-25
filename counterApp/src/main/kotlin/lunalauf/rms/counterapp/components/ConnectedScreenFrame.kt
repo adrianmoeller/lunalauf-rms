@@ -71,7 +71,7 @@ fun ConnectedScreenFrame(
                         alpha(0f)
                     },
                 enabled = showToolBar,
-                onClick = { screenModel.disconnect(connection) },
+                onClick = { screenModel.disconnect() },
             ) {
                 Text(
                     text = "Disconnect",

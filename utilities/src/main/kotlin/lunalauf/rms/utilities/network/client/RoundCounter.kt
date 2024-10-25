@@ -8,44 +8,35 @@ import lunalauf.rms.utilities.network.communication.message.response.RoundCountR
 import lunalauf.rms.utilities.network.util.FixedQueue
 
 class RoundCounter(
-    val connection: Connection
-) : CounterOperationMode() {
-    private var onConnectionLost: () -> Unit = {}
+    connection: Connection,
+    onConnectionLost: () -> Unit
+) : AbstractOperator(connection, onConnectionLost) {
     val successQueue: FixedQueue<RoundCountAcceptedResponse> = FixedQueue(4)
 
     override fun handleResponse(response: Response) {
         when (response) {
             is RoundCountRejectedResponse -> {
-                _state.value = RespondedRejected(response)
+                mutableState.value = RespondedRejected(response)
             }
 
             is ErrorResponse -> {
-                _state.value = State.Error(response.error)
+                mutableState.value = State.Error(response.error)
             }
 
             is RoundCountAcceptedResponse -> {
                 successQueue.push(response)
-                _state.value = RespondedAccepted(response)
+                mutableState.value = RespondedAccepted(response)
             }
 
             else -> {
-                _state.value = State.Error(ErrorType.UNEXPECTED_SERVER_MESSAGE)
+                mutableState.value = State.Error(ErrorType.UNEXPECTED_SERVER_MESSAGE)
             }
         }
-    }
-
-    override fun handleError(error: ErrorType) {
-        _state.value = State.Error(error)
-        if (error == ErrorType.DISCONNECTED) onConnectionLost()
     }
 
     fun processInput(runnerId: Long) {
         if (repetitionHandler.isUnwantedRepetition(runnerId)) return
         requestSubmitter.submit(requestFactory.createRoundCountRequest(runnerId), connection)
-    }
-
-    fun setOnConnectionLost(onConnectionLost: () -> Unit) {
-        this.onConnectionLost = onConnectionLost
     }
 
     class RespondedAccepted(val response: RoundCountAcceptedResponse) : State()

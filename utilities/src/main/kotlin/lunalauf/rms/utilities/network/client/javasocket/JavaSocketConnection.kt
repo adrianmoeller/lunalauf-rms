@@ -134,5 +134,6 @@ class JavaSocketConnection(
     @Throws(IOException::class)
     override fun close() {
         socket.close()
+        logger.info("Connection closed")
     }
 }

@@ -59,7 +59,7 @@ class JavaSocketClient : Client<JavaSocketClient.Input> {
         }
     }
 
-    private var _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+    private var _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Unavailable)
 
     override val connectionState: StateFlow<ConnectionState>
         get() = _connectionState.asStateFlow()
@@ -72,7 +72,7 @@ class JavaSocketClient : Client<JavaSocketClient.Input> {
 
     override fun abort() {
         connectService.stop()
-        _connectionState.value = ConnectionState.Disconnected
+        _connectionState.value = ConnectionState.Unavailable
     }
 
     data class Input(

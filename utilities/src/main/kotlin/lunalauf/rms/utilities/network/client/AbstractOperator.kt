@@ -8,19 +8,24 @@ import lunalauf.rms.utilities.network.communication.message.request.RequestFacto
 import lunalauf.rms.utilities.network.communication.message.response.Response
 import lunalauf.rms.utilities.network.util.RepetitionHandler
 
-abstract class CounterOperationMode {
+abstract class AbstractOperator(
+    val connection: Connection,
+    private val onConnectionLost: () -> Unit
+) {
     protected val requestSubmitter = RequestSubmitter(
         responseHandler = { handleResponse(it) },
-        errorHandler = { handleError(it) }
+        errorHandler = {
+            mutableState.value = State.Error(it)
+            if (it == ErrorType.DISCONNECTED) onConnectionLost()
+        }
     )
     protected val requestFactory = RequestFactory()
     protected val repetitionHandler = RepetitionHandler(3000)
 
-    protected val _state: MutableStateFlow<State> = MutableStateFlow(State.None)
-    val state = _state.asStateFlow()
+    protected val mutableState: MutableStateFlow<State> = MutableStateFlow(State.None)
+    val state = mutableState.asStateFlow()
 
     protected abstract fun handleResponse(response: Response)
-    protected abstract fun handleError(error: ErrorType)
 
     fun shutdown() {
         requestSubmitter.shutdown()

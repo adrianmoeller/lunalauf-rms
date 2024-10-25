@@ -27,7 +27,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import lunalauf.rms.counterapp.nunitoTextStyle
 import lunalauf.rms.counterapp.ralewayTextStyle
-import lunalauf.rms.utilities.network.client.CounterOperationMode
+import lunalauf.rms.utilities.network.client.AbstractOperator
 import lunalauf.rms.utilities.network.client.RoundCounter
 import lunalauf.rms.utilities.network.communication.ErrorType
 
@@ -61,7 +61,7 @@ fun RoundCounterScreen(
                 )
             }
 
-            is CounterOperationMode.State.Error -> {
+            is AbstractOperator.State.Error -> {
                 if (constRCState.error == ErrorType.UNKNOWN_ID) {
                     animateLongResponseStatus(
                         scope = scope,
@@ -75,7 +75,7 @@ fun RoundCounterScreen(
                 }
             }
 
-            CounterOperationMode.State.None -> {
+            AbstractOperator.State.None -> {
                 alphaAnimation.snapTo(0f)
             }
         }
@@ -155,7 +155,7 @@ fun RoundCounterScreen(
                     )
                 }
 
-                is CounterOperationMode.State.Error -> {
+                is AbstractOperator.State.Error -> {
                     Image(
                         modifier = Modifier.weight(1f),
                         painter = painterResource("signals/signal_logo_red.png"),
@@ -171,7 +171,7 @@ fun RoundCounterScreen(
                     )
                 }
 
-                CounterOperationMode.State.None -> {}
+                AbstractOperator.State.None -> {}
             }
         }
     }

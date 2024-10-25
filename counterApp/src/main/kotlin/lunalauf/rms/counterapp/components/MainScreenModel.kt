@@ -5,10 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import lunalauf.rms.utilities.network.client.Client
-import lunalauf.rms.utilities.network.client.Connection
-import lunalauf.rms.utilities.network.client.InfoDisplay
-import lunalauf.rms.utilities.network.client.RoundCounter
+import lunalauf.rms.utilities.network.client.*
 import lunalauf.rms.utilities.network.client.javasocket.JavaSocketClient
 
 class MainScreenModel : AbstractScreenModel() {
@@ -23,9 +20,8 @@ class MainScreenModel : AbstractScreenModel() {
 
     private val client: Client<JavaSocketClient.Input> = JavaSocketClient()
 
-    private val _connectionStatus: MutableStateFlow<MainConnectionStatus> =
-        MutableStateFlow(MainConnectionStatus.Disconnected)
-    val connectionStatus = _connectionStatus.asStateFlow()
+    private val _mainState: MutableStateFlow<MainState> = MutableStateFlow(MainState.Start)
+    val mainState = _mainState.asStateFlow()
 
     val connectState get() = client.connectState
 
@@ -70,21 +66,11 @@ class MainScreenModel : AbstractScreenModel() {
     }
 
     private fun connected(connection: Connection) {
-        when (_counterType.value) {
-            CounterType.RoundCounter -> {
-                val roundCounter = RoundCounter(connection).apply {
-                    setOnConnectionLost { tryReconnect() }
-                }
-                _connectionStatus.value = MainConnectionStatus.ConnectedRC(roundCounter)
-            }
-
-            CounterType.InfoDisplay -> {
-                val infoDisplay = InfoDisplay(connection).apply {
-                    setOnConnectionLost { tryReconnect() }
-                }
-                _connectionStatus.value = MainConnectionStatus.ConnectedID(infoDisplay)
-            }
+        val operator = when (_counterType.value) {
+            CounterType.RoundCounter -> RoundCounter(connection) { tryReconnect() }
+            CounterType.InfoDisplay -> InfoDisplay(connection) { tryReconnect() }
         }
+        _mainState.value = MainState.Operating(operator)
     }
 
     private fun tryReconnect() {
@@ -115,16 +101,20 @@ class MainScreenModel : AbstractScreenModel() {
         client.abort()
     }
 
-    fun disconnect(connection: Connection) {
-        connection.close()
+    fun disconnect() {
+        val constMainState = mainState.value
+        if (constMainState is MainState.Operating) {
+            constMainState.operator.shutdown()
+            constMainState.operator.connection.close()
+        }
         client.abort()
+        _mainState.value = MainState.Start
     }
 }
 
-sealed class MainConnectionStatus {
-    data object Disconnected : MainConnectionStatus()
-    data class ConnectedRC(val roundCounter: RoundCounter) : MainConnectionStatus()
-    data class ConnectedID(val infoDisplay: InfoDisplay) : MainConnectionStatus()
+sealed class MainState {
+    data object Start : MainState()
+    data class Operating(val operator: AbstractOperator) : MainState()
 }
 
 enum class CounterType {

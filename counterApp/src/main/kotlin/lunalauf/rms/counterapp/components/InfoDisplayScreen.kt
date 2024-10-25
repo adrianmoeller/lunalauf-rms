@@ -22,7 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import lunalauf.rms.counterapp.ralewayTextStyle
-import lunalauf.rms.utilities.network.client.CounterOperationMode
+import lunalauf.rms.utilities.network.client.AbstractOperator
 import lunalauf.rms.utilities.network.client.InfoDisplay
 import lunalauf.rms.utilities.network.communication.ErrorType
 import lunalauf.rms.utilities.network.communication.message.response.TeamRunnerInfoResponse
@@ -49,7 +49,7 @@ fun InfoDisplayScreen(
                     alphaAnimation = alphaAnimation
                 )
             }
-            is CounterOperationMode.State.Error -> {
+            is AbstractOperator.State.Error -> {
                 if (constIDState.error == ErrorType.UNKNOWN_ID) {
                     animateLongResponseStatus(
                         scope = scope,
@@ -62,7 +62,7 @@ fun InfoDisplayScreen(
                     )
                 }
             }
-            CounterOperationMode.State.None -> {
+            AbstractOperator.State.None -> {
                 alphaAnimation.snapTo(0f)
             }
         }
@@ -159,7 +159,7 @@ fun InfoDisplayScreen(
                         )
                     }
 
-                    is CounterOperationMode.State.Error -> {
+                    is AbstractOperator.State.Error -> {
                         Text(
                             text = constIDState.error.message,
                             style = ralewayTextStyle,
@@ -169,7 +169,7 @@ fun InfoDisplayScreen(
                         )
                     }
 
-                    CounterOperationMode.State.None -> {}
+                    AbstractOperator.State.None -> {}
                 }
             }
         }

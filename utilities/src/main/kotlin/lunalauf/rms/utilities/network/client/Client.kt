@@ -16,7 +16,7 @@ interface Client<I> {
     }
 
     sealed class ConnectionState {
-        data object Disconnected : ConnectionState()
+        data object Unavailable : ConnectionState()
         data class Available(val connection: Connection) : ConnectionState()
     }
 }
