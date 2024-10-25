@@ -1,6 +1,7 @@
 package lunalauf.rms.utilities.network.client.javasocket
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +21,7 @@ class JavaSocketClient : Client<JavaSocketClient.Input> {
     }
 
     private val connectService = object : Service<Input, ConnectResult>() {
-        override fun CoroutineScope.run(input: Input): ConnectResult {
+        override suspend fun CoroutineScope.run(input: Input): ConnectResult {
             while (true) {
                 if (!isActive) return ConnectResult.Aborted
 
@@ -40,6 +41,7 @@ class JavaSocketClient : Client<JavaSocketClient.Input> {
                     }
                     logger.info("Could no connect to any preferred port. Retrying...")
                 }
+                delay(TIMEOUT.toLong())
             }
         }
 

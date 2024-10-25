@@ -18,7 +18,7 @@ abstract class Service<S, T>(
     private val _state = MutableStateFlow(State.Idling)
     val state get() = _state.asStateFlow()
 
-    abstract fun CoroutineScope.run(input: S): T
+    abstract suspend fun CoroutineScope.run(input: S): T
 
     @Synchronized
     fun start(

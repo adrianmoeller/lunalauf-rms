@@ -48,7 +48,7 @@ class ConnectionAcceptService(
         return socket
     }
 
-    override fun CoroutineScope.run(input: Unit) {
+    override suspend fun CoroutineScope.run(input: Unit) {
         logger.info("Accepting connections started")
         var it = 0
         while (isActive && it < MAX_ITERATIONS) {
