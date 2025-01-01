@@ -6,10 +6,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
+import de.lunalauf_rms.centerapp.generated.resources.Res
+import de.lunalauf_rms.centerapp.generated.resources.icon
 import kotlinx.coroutines.launch
 import lunalauf.rms.centralapp.components.dialogs.CloseAppDialog
 import lunalauf.rms.centralapp.components.dialogs.preferences.PublicViewPrefSheet
@@ -20,6 +21,7 @@ import lunalauf.rms.centralapp.components.features.NetworkSheetScreen
 import lunalauf.rms.centralapp.components.main.MainScreenModel
 import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
 import lunalauf.rms.centralapp.theme.AppTheme
+import org.jetbrains.compose.resources.painterResource
 import java.awt.Color
 
 @Composable
@@ -32,7 +34,7 @@ fun ApplicationScope.MainWindow(
     showCloseAppDialog: Boolean,
     content: @Composable () -> Unit
 ) {
-    val icon = painterResource("icons/icon.png")
+    val icon = painterResource(Res.drawable.icon)
     var closeAppPromptOpen by remember { mutableStateOf(false) }
 
     Window(

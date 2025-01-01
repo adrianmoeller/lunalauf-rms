@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="RunAll" type="CompoundRunConfigurationType">
+    <toRun name="lunalauf-rms:centerApp [run]" type="GradleRunConfiguration" />
+    <toRun name="lunalauf-rms:counterApp [run]" type="GradleRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>
