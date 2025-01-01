@@ -14,19 +14,21 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.*
+import de.lunalauf_rms.counterapp.generated.resources.Res
+import de.lunalauf_rms.counterapp.generated.resources.icon
 import lunalauf.rms.counterapp.components.*
 import lunalauf.rms.utilities.logging.Logger
 import lunalauf.rms.utilities.logging.configureStartUpErrorLogging
 import lunalauf.rms.utilities.network.client.InfoDisplay
 import lunalauf.rms.utilities.network.client.RoundCounter
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 @Preview
 fun ApplicationScope.App() {
     val colorScheme = darkColorScheme()
-    val icon = painterResource("icons/icon.png")
+    val icon = painterResource(Res.drawable.icon)
 
     val screenModel = remember { MainScreenModel() }
     val mainState by screenModel.mainState.collectAsState()

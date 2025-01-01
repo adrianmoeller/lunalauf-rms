@@ -19,7 +19,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -28,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberWindowState
+import de.lunalauf_rms.centerapp.generated.resources.Res
+import de.lunalauf_rms.centerapp.generated.resources.icon
 import lunalauf.rms.centralapp.components.commons.tables.PublicViewTable
 import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
 import lunalauf.rms.centralapp.publicViewTypography
@@ -36,6 +37,7 @@ import lunalauf.rms.modelapi.ModelState
 import lunalauf.rms.modelapi.states.RunnersState
 import lunalauf.rms.modelapi.states.TeamsState
 import lunalauf.rms.utilities.publicviewprefs.PublicViewPrefState
+import org.jetbrains.compose.resources.painterResource
 import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
 
@@ -44,7 +46,7 @@ fun PublicViewWindow(
     publicViewScreenModel: PublicViewScreenModel,
     modelState: ModelState.Loaded
 ) {
-    val icon = painterResource("icons/icon.png")
+    val icon = painterResource(Res.drawable.icon)
 
     if (publicViewScreenModel.open) {
         val pref = publicViewScreenModel.prefState

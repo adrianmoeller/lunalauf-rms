@@ -2,6 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.plugin.compose")
 
     id("lunalauf.rms.kotlin-application-conventions")
     id("lunalauf.rms.kotlin-model-conventions")
@@ -10,6 +11,7 @@ plugins {
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
+    implementation(compose.components.resources)
 
     implementation(libs.slf4j)
     implementation(libs.slf4jReload)

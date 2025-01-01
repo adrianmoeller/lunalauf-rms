@@ -16,12 +16,15 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import de.lunalauf_rms.counterapp.generated.resources.Res
+import de.lunalauf_rms.counterapp.generated.resources.signal_logo_green
+import de.lunalauf_rms.counterapp.generated.resources.signal_logo_orange
+import de.lunalauf_rms.counterapp.generated.resources.signal_logo_red
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -30,6 +33,7 @@ import lunalauf.rms.counterapp.ralewayTextStyle
 import lunalauf.rms.utilities.network.client.AbstractOperator
 import lunalauf.rms.utilities.network.client.RoundCounter
 import lunalauf.rms.utilities.network.communication.ErrorType
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun RoundCounterScreen(
@@ -110,7 +114,7 @@ fun RoundCounterScreen(
                 is RoundCounter.RespondedAccepted -> {
                     Image(
                         modifier = Modifier.weight(1f),
-                        painter = painterResource("signals/signal_logo_green.png"),
+                        painter = painterResource(Res.drawable.signal_logo_green),
                         contentDescription = "Status signal",
                         contentScale = ContentScale.FillHeight
                     )
@@ -142,7 +146,7 @@ fun RoundCounterScreen(
                 is RoundCounter.RespondedRejected -> {
                     Image(
                         modifier = Modifier.weight(1f),
-                        painter = painterResource("signals/signal_logo_orange.png"),
+                        painter = painterResource(Res.drawable.signal_logo_orange),
                         contentDescription = "Status signal",
                         contentScale = ContentScale.FillHeight
                     )
@@ -158,7 +162,7 @@ fun RoundCounterScreen(
                 is AbstractOperator.State.Error -> {
                     Image(
                         modifier = Modifier.weight(1f),
-                        painter = painterResource("signals/signal_logo_red.png"),
+                        painter = painterResource(Res.drawable.signal_logo_red),
                         contentDescription = "Status signal",
                         contentScale = ContentScale.FillHeight
                     )
