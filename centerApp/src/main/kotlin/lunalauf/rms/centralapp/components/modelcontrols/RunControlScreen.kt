@@ -25,7 +25,7 @@ fun RunControlScreen(
     val screenModel = remember { RunControlScreenModel(modelState) }
     val commons by modelState.common.collectAsState()
 
-    var runDuration by remember { mutableStateOf(90) } // min
+    var runDuration by remember { mutableStateOf(150) } // min
     val runTimer = modelState.modelAPI.runTimer
     val remainingTime by runTimer.remainingTime.collectAsState()
     val timerState by runTimer.state.collectAsState()
