@@ -9,5 +9,6 @@ dependencies {
     implementation(libs.slf4jReload)
 
     implementation(libs.kotlinCoroutines)
-    implementation(libs.jsonSerialization)
+    implementation(libs.kotlinJsonSerialization)
+    implementation(libs.kotlinDateTime)
 }
