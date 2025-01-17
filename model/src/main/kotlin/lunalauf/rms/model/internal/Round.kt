@@ -2,14 +2,14 @@ package lunalauf.rms.model.internal
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.datetime.LocalDateTime
 
 class Round internal constructor(
     points: Int,
     timestamp: LocalDateTime,
     manuallyLogged: Boolean,
-    runner: Runner,
-    team: Team?
+    runner: Runner
 ) : LogEntry(
     points,
     timestamp
@@ -20,6 +20,10 @@ class Round internal constructor(
     private val _runner = MutableStateFlow(runner)
     val runner get() = _runner.asStateFlow()
 
-    private val _team = MutableStateFlow(team)
+    private val _team = MutableStateFlow<Team?>(null)
     val team get() = _team.asStateFlow()
+
+    internal fun initSetTeam(team: Team?) {
+        _team.update { team }
+    }
 }

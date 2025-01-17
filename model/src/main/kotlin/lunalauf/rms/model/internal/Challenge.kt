@@ -7,7 +7,6 @@ import lunalauf.rms.model.common.ChallengeState
 class Challenge internal constructor(
     name: String,
     description: String,
-    results: List<FunfactorResult>,
     expires: Boolean,
     expireMsg: String,
     duration: Int,
@@ -15,8 +14,7 @@ class Challenge internal constructor(
     receiveImages: Boolean
 ) : Funfactor(
     name,
-    description,
-    results
+    description
 ) {
     private val _expires = MutableStateFlow(expires)
     val expires get() = _expires.asStateFlow()

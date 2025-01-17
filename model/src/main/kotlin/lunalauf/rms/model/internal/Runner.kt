@@ -2,6 +2,7 @@ package lunalauf.rms.model.internal
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import lunalauf.rms.model.common.ContributionType
 
 class Runner internal constructor(
@@ -10,8 +11,6 @@ class Runner internal constructor(
     contributionType: ContributionType,
     chipId: Long,
     name: String,
-    team: Team?,
-    rounds: List<Round>
 ) : Contributor(
     amountPerRound,
     amountFix,
@@ -23,9 +22,17 @@ class Runner internal constructor(
     private val _name = MutableStateFlow(name)
     val name get() = _name.asStateFlow()
 
-    private val _team = MutableStateFlow(team)
+    private val _team = MutableStateFlow<Team?>(null)
     val team get() = _team.asStateFlow()
 
-    private val _rounds = MutableStateFlow(rounds)
+    private val _rounds = MutableStateFlow(emptyList<Round>())
     val rounds get() = _rounds.asStateFlow()
+
+    internal fun initSetTeam(team: Team?) {
+        _team.update { team }
+    }
+
+    internal fun initSetRounds(rounds: List<Round>) {
+        _rounds.update { rounds }
+    }
 }
