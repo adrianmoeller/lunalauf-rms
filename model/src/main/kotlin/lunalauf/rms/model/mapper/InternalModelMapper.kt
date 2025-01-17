@@ -15,6 +15,12 @@ class InternalModelMapper private constructor(
 
     private val teamFunfactorResultsMapping: MutableMap<Team, MutableList<FunfactorResult>> = mutableMapOf()
 
+    companion object {
+        fun EventSM.toInternalModel(): Event {
+            return InternalModelMapper(this).toEvent()
+        }
+    }
+
     private fun toEvent(): Event {
         val event = Event(
             year = eventSM.year,
