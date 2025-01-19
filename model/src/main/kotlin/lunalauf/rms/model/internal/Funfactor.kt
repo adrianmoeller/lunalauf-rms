@@ -5,8 +5,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 sealed class Funfactor(
+    event: Event,
     name: String,
     description: String
+) : EventChild(
+    event
 ) {
     private val _name = MutableStateFlow(name)
     val name get() = _name.asStateFlow()

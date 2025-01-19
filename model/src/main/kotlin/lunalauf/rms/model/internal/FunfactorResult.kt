@@ -5,11 +5,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.LocalDateTime
 
 class FunfactorResult internal constructor(
+    event: Event,
     points: Int,
     timestamp: LocalDateTime,
     team: Team,
     type: Funfactor
 ) : LogEntry(
+    event,
     points,
     timestamp
 ) {

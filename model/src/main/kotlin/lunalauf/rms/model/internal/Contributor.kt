@@ -5,9 +5,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import lunalauf.rms.model.common.ContributionType
 
 sealed class Contributor(
+    event: Event,
     amountPerRound: Double,
     amountFix: Double,
     contributionType: ContributionType
+) : EventChild(
+    event
 ) {
     private val _amountPerRound = MutableStateFlow(amountPerRound)
     val amountPerRound get() = _amountPerRound.asStateFlow()

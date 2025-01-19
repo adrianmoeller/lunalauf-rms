@@ -4,10 +4,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class Minigame internal constructor(
+    event: Event,
     name: String,
     description: String,
     id: Int
 ) : Funfactor(
+    event,
     name,
     description
 ) {

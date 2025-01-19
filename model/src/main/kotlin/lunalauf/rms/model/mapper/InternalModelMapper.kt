@@ -6,12 +6,8 @@ import lunalauf.rms.model.serialization.*
 class InternalModelMapper private constructor(
     private val eventSM: EventSM
 ) {
-    private val runnerUidMapping: MutableMap<Long, Runner> = eventSM.singleRunners
-        .associate { Pair(it.uid, toRunner(it)) }
-        .toMutableMap()
-
-    private val teamUidMapping = eventSM.teams
-        .associate { Pair(it.uid, toTeam(it)) }
+    private lateinit var runnerUidMapping: MutableMap<Long, Runner>
+    private lateinit var teamUidMapping: Map<Long, Team>
 
     private val teamFunfactorResultsMapping: MutableMap<Team, MutableList<FunfactorResult>> = mutableMapOf()
 
@@ -27,13 +23,21 @@ class InternalModelMapper private constructor(
             runDuration = eventSM.runDuration,
             sponsorPoolAmount = eventSM.sponsorPoolAmount,
             sponsorPoolRounds = eventSM.sponsorPoolRounds,
-            additionalContribution = eventSM.additionalContribution,
-            teams = eventSM.teams.map { toTeam(it) },
-            runners = runnerUidMapping.values.toList(),
-            minigames = eventSM.minigames.map { toMinigame(it) },
-            challenges = eventSM.challenges.map { toChallenge(it) },
-            connections = eventSM.connections.map { toConnectionEntry(it) }
+            additionalContribution = eventSM.additionalContribution
         )
+
+        runnerUidMapping = eventSM.singleRunners
+            .associate { Pair(it.uid, toRunner(event, it)) }
+            .toMutableMap()
+
+        teamUidMapping = eventSM.teams
+            .associate { Pair(it.uid, toTeam(event, it)) }
+
+        event.initSetTeams(teamUidMapping.values.toList())
+        event.initSetRunners(runnerUidMapping.values.toList())
+        event.initSetMinigames(eventSM.minigames.map { toMinigame(event, it) })
+        event.initSetChallenges(eventSM.challenges.map { toChallenge(event, it) })
+        event.initSetConnections(eventSM.connections.map { toConnectionEntry(event, it) })
 
         event.teams.value.forEach { team ->
             team.initSetFunfactorResults(
@@ -44,22 +48,24 @@ class InternalModelMapper private constructor(
         return event
     }
 
-    private fun toTeam(teamSM: TeamSM): Team {
+    private fun toTeam(event: Event, teamSM: TeamSM): Team {
         val team = Team(
+            event = event,
             amountPerRound = teamSM.amountPerRound,
             amountFix = teamSM.amountFix,
             contributionType = teamSM.contributionType,
             name = teamSM.name
         )
 
-        team.initSetMembers(teamSM.members.map { toRunner(it, team) })
+        team.initSetMembers(teamSM.members.map { toRunner(event, it, team) })
         team.initSetRounds(team.members.value.flatMap { it.rounds.value })
 
         return team
     }
 
-    private fun toRunner(runnerSM: RunnerSM, team: Team? = null): Runner {
+    private fun toRunner(event: Event, runnerSM: RunnerSM, team: Team? = null): Runner {
         val runner = Runner(
+            event = event,
             amountPerRound = runnerSM.amountPerRound,
             amountFix = runnerSM.amountFix,
             contributionType = runnerSM.contributionType,
@@ -68,15 +74,16 @@ class InternalModelMapper private constructor(
         )
 
         runner.initSetTeam(team)
-        runner.initSetRounds(runnerSM.rounds.map { toRound(it, runner, team) })
+        runner.initSetRounds(runnerSM.rounds.map { toRound(event, it, runner, team) })
 
         runnerUidMapping[runnerSM.uid] = runner
 
         return runner
     }
 
-    private fun toRound(roundSM: RoundSM, runner: Runner, team: Team? = null): Round {
+    private fun toRound(event: Event, roundSM: RoundSM, runner: Runner, team: Team? = null): Round {
         val round = Round(
+            event = event,
             points = roundSM.points,
             timestamp = roundSM.timestamp,
             manuallyLogged = roundSM.manuallyLogged,
@@ -88,20 +95,22 @@ class InternalModelMapper private constructor(
         return round
     }
 
-    private fun toMinigame(minigameSM: MinigameSM): Minigame {
+    private fun toMinigame(event: Event, minigameSM: MinigameSM): Minigame {
         val minigame = Minigame(
+            event = event,
             name = minigameSM.name,
             description = minigameSM.description,
             id = minigameSM.id
         )
 
-        minigame.initSetResults(minigameSM.results.map { toFunfactorResult(it, minigame) })
+        minigame.initSetResults(minigameSM.results.map { toFunfactorResult(event, it, minigame) })
 
         return minigame
     }
 
-    private fun toChallenge(challengeSM: ChallengeSM): Challenge {
+    private fun toChallenge(event: Event, challengeSM: ChallengeSM): Challenge {
         val challenge = Challenge(
+            event = event,
             name = challengeSM.name,
             description = challengeSM.description,
             expires = challengeSM.expires,
@@ -111,13 +120,18 @@ class InternalModelMapper private constructor(
             receiveImages = challengeSM.receiveImages
         )
 
-        challenge.initSetResults(challengeSM.results.map { toFunfactorResult(it, challenge) })
+        challenge.initSetResults(challengeSM.results.map { toFunfactorResult(event, it, challenge) })
 
         return challenge
     }
 
-    private fun toFunfactorResult(funfactorResultSM: FunfactorResultSM, funfactor: Funfactor): FunfactorResult {
+    private fun toFunfactorResult(
+        event: Event,
+        funfactorResultSM: FunfactorResultSM,
+        funfactor: Funfactor
+    ): FunfactorResult {
         val funfactorResult = FunfactorResult(
+            event = event,
             points = funfactorResultSM.points,
             timestamp = funfactorResultSM.timestamp,
             team = teamUidMapping[funfactorResultSM.teamUid]!!,
@@ -130,8 +144,9 @@ class InternalModelMapper private constructor(
         return funfactorResult
     }
 
-    private fun toConnectionEntry(connectionEntrySM: ConnectionEntrySM): ConnectionEntry {
+    private fun toConnectionEntry(event: Event, connectionEntrySM: ConnectionEntrySM): ConnectionEntry {
         return ConnectionEntry(
+            event = event,
             chatId = connectionEntrySM.chatId,
             runner = runnerUidMapping[connectionEntrySM.runnerUid]!!
         )

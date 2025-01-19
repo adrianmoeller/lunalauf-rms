@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import lunalauf.rms.model.common.ChallengeState
 
 class Challenge internal constructor(
+    event: Event,
     name: String,
     description: String,
     expires: Boolean,
@@ -13,6 +14,7 @@ class Challenge internal constructor(
     state: ChallengeState,
     receiveImages: Boolean
 ) : Funfactor(
+    event,
     name,
     description
 ) {

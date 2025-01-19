@@ -6,11 +6,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.datetime.LocalDateTime
 
 class Round internal constructor(
+    event: Event,
     points: Int,
     timestamp: LocalDateTime,
     manuallyLogged: Boolean,
     runner: Runner
 ) : LogEntry(
+    event,
     points,
     timestamp
 ) {

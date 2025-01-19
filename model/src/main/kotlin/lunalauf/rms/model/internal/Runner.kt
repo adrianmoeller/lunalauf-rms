@@ -6,12 +6,14 @@ import kotlinx.coroutines.flow.update
 import lunalauf.rms.model.common.ContributionType
 
 class Runner internal constructor(
+    event: Event,
     amountPerRound: Double,
     amountFix: Double,
     contributionType: ContributionType,
     chipId: Long,
     name: String,
 ) : Contributor(
+    event,
     amountPerRound,
     amountFix,
     contributionType

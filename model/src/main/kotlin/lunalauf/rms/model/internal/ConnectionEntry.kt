@@ -4,8 +4,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class ConnectionEntry internal constructor(
+    event: Event,
     chatId: Long,
     runner: Runner
+) : EventChild(
+    event
 ) {
     private val _chatId = MutableStateFlow(chatId)
     val chatId get() = _chatId.asStateFlow()

@@ -6,11 +6,13 @@ import kotlinx.coroutines.flow.update
 import lunalauf.rms.model.common.ContributionType
 
 class Team internal constructor(
+    event: Event,
     amountPerRound: Double,
     amountFix: Double,
     contributionType: ContributionType,
     name: String
 ) : Contributor(
+    event,
     amountPerRound,
     amountFix,
     contributionType
