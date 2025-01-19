@@ -13,5 +13,6 @@ data class EventSM(
     val singleRunners: List<RunnerSM>,
     val minigames: List<MinigameSM>,
     val challenges: List<ChallengeSM>,
-    val connections: List<ConnectionEntrySM>
+    val connections: List<ConnectionEntrySM>,
+    val runTimer: RunTimerSM
 )

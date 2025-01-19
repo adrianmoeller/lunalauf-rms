@@ -1,9 +1,10 @@
-package lunalauf.rms.model
+package lunalauf.rms.model.api
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.withLock
+import lunalauf.rms.model.PersistenceManager
 import lunalauf.rms.model.internal.Event
 import org.slf4j.LoggerFactory
 
@@ -150,11 +151,6 @@ sealed class ModelManager {
             this.preSaveProcessing = preSaveProcessing
         }
     }
-}
-
-sealed class ModelState {
-    class Loaded(val path: String, val event: Event) : ModelState()
-    data object Unloaded : ModelState()
 }
 
 sealed class ModelResult {

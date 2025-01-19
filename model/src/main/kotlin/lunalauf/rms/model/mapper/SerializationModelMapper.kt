@@ -30,6 +30,7 @@ class SerializationModelMapper private constructor(
             minigames = event.minigames.value.map { toMinigameSM(it) },
             challenges = event.challenges.value.map { toChallengesSM(it) },
             connections = event.connections.value.map { toConnectionSM(it) },
+            runTimer = toRunTimerSM(event.runTimer)
         )
     }
 
@@ -98,6 +99,15 @@ class SerializationModelMapper private constructor(
         return ConnectionEntrySM(
             chatId = connection.chatId.value,
             runnerUid = runnerUidMapping.getValue(connection.runner.value)
+        )
+    }
+
+    private fun toRunTimerSM(runTimer: RunTimer): RunTimerSM {
+        return RunTimerSM(
+            runEnabled = runTimer.runEnabled.value,
+            runDryPhase = runTimer.runDryPhase.value,
+            remainingTime = runTimer.remainingTime.value,
+            state = runTimer.state.value
         )
     }
 }

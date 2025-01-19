@@ -38,6 +38,7 @@ class InternalModelMapper private constructor(
         event.initSetMinigames(eventSM.minigames.map { toMinigame(event, it) })
         event.initSetChallenges(eventSM.challenges.map { toChallenge(event, it) })
         event.initSetConnections(eventSM.connections.map { toConnectionEntry(event, it) })
+        event.initSetRunTimer(toRunTimer(eventSM.runTimer))
 
         event.teams.value.forEach { team ->
             team.initSetFunfactorResults(
@@ -149,6 +150,15 @@ class InternalModelMapper private constructor(
             event = event,
             chatId = connectionEntrySM.chatId,
             runner = runnerUidMapping[connectionEntrySM.runnerUid]!!
+        )
+    }
+
+    private fun toRunTimer(runTimerSM: RunTimerSM): RunTimer {
+        return RunTimer(
+            runEnabled = runTimerSM.runEnabled,
+            runDryPhase = runTimerSM.runDryPhase,
+            remainingTime = runTimerSM.remainingTime,
+            state = runTimerSM.state
         )
     }
 }

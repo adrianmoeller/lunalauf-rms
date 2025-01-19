@@ -4,6 +4,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import lunalauf.rms.model.api.CreateRunnerResult
+import org.slf4j.LoggerFactory
 
 class Event internal constructor(
     year: Int,
@@ -12,6 +15,8 @@ class Event internal constructor(
     sponsorPoolRounds: Int,
     additionalContribution: Double
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     val mutex = Mutex()
 
     private val _year = MutableStateFlow(year)
@@ -44,6 +49,11 @@ class Event internal constructor(
     private val _connections = MutableStateFlow(emptyList<ConnectionEntry>())
     val connections get() = _connections.asStateFlow()
 
+    var runTimer: RunTimer = RunTimer()
+        private set
+
+    internal val chipId2Runner: MutableMap<Long, Runner> = mutableMapOf()
+
     constructor(year: Int) : this(
         year = year,
         runDuration = 150,
@@ -58,6 +68,7 @@ class Event internal constructor(
 
     internal fun initSetRunners(runners: List<Runner>) {
         this._runners.update { runners }
+        this.chipId2Runner.putAll(runners.associateBy { it.chipId.value })
     }
 
     internal fun initSetMinigames(minigames: List<Minigame>) {
@@ -70,5 +81,48 @@ class Event internal constructor(
 
     internal fun initSetConnections(connections: List<ConnectionEntry>) {
         this._connections.update { connections }
+    }
+
+    internal fun initSetRunTimer(runTimer: RunTimer) {
+        this.runTimer = runTimer
+    }
+
+    suspend fun setSponsoringPoolAmount(amount: Double) {
+        mutex.withLock {
+            _sponsorPoolAmount.update { amount }
+        }
+    }
+
+    suspend fun setSponsoringPoolRounds(rounds: Int) {
+        mutex.withLock {
+            _sponsorPoolRounds.update { rounds }
+        }
+    }
+
+    suspend fun updateAdditionalContribution(updateFunction: (Double) -> Double) {
+        mutex.withLock {
+            _additionalContribution.update { updateFunction(it) }
+        }
+    }
+
+    internal fun getRunner(chipId: Long): Runner? = chipId2Runner[chipId]
+
+    suspend fun createRunner(chipId: Long, name: String): CreateRunnerResult {
+        mutex.withLock {
+            getRunner(chipId)?.let {
+                logger.warn("Missing UI check if ID already exists when creating a runner")
+                return CreateRunnerResult.Exists(it)
+            }
+
+            val newRunner = Runner(
+                event = this,
+                chipId = chipId,
+                name = name
+            )
+            this._runners.update { it + newRunner }
+
+            logger.info("Created {}", newRunner)
+            return CreateRunnerResult.Created(newRunner)
+        }
     }
 }
