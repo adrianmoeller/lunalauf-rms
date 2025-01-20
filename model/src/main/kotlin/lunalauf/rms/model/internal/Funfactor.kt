@@ -3,6 +3,9 @@ package lunalauf.rms.model.internal
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.sync.withLock
+import lunalauf.rms.model.api.UpdateMinigameNameResult
+import org.slf4j.LoggerFactory
 
 sealed class Funfactor(
     event: Event,
@@ -11,6 +14,8 @@ sealed class Funfactor(
 ) : EventChild(
     event
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     private val _name = MutableStateFlow(name)
     val name get() = _name.asStateFlow()
 
@@ -22,5 +27,18 @@ sealed class Funfactor(
 
     internal fun initSetResults(results: List<FunfactorResult>) {
         _results.update { results }
+    }
+
+    suspend fun updateName(name: String): UpdateMinigameNameResult {
+        event.mutex.withLock {
+            if (name.isBlank()) {
+                logger.warn("Missing UI check if name is not blank when updating a minigame name")
+                return UpdateMinigameNameResult.BlankName
+            }
+
+            _name.update { name }
+
+            return UpdateMinigameNameResult.Updated
+        }
     }
 }

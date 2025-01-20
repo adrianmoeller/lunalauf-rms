@@ -29,7 +29,7 @@ class Runner internal constructor(
     private val _name = MutableStateFlow(name)
     val name get() = _name.asStateFlow()
 
-    private val _team = MutableStateFlow<Team?>(null)
+    internal val _team = MutableStateFlow<Team?>(null)
     val team get() = _team.asStateFlow()
 
     private val _rounds = MutableStateFlow(emptyList<Round>())
@@ -79,7 +79,9 @@ class Runner internal constructor(
                 return UpdateRunnerIdResult.Exists(it)
             }
 
+            event.chipIdToRunner.remove(this.chipId.value)
             _chipId.update { chipId }
+            event.chipIdToRunner[chipId] = this
 
             return UpdateRunnerIdResult.Updated
         }
@@ -94,12 +96,10 @@ class Runner internal constructor(
     suspend fun getRoundDurations(): List<Long> {
         event.mutex.withLock {
             return rounds.value
-                .asSequence()
                 .filterNot { it.manuallyLogged.value }
                 .map { it.timestamp.value.toInstant(TimeZone.UTC).toEpochMilliseconds() }
                 .sorted()
                 .zipWithNext { a, b -> b - a }
-                .toList()
         }
     }
 }

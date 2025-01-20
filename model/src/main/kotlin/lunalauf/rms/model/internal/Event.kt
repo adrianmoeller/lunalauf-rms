@@ -5,8 +5,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import lunalauf.rms.model.api.CreateMinigameResult
 import lunalauf.rms.model.api.CreateRunnerResult
+import lunalauf.rms.model.api.CreateTeamResult
 import org.slf4j.LoggerFactory
+
+private const val CREATED_LOG_MSG = "Created {}"
 
 class Event internal constructor(
     year: Int,
@@ -52,7 +56,9 @@ class Event internal constructor(
     var runTimer: RunTimer = RunTimer()
         private set
 
-    internal val chipId2Runner: MutableMap<Long, Runner> = mutableMapOf()
+    internal val chipIdToRunner: MutableMap<Long, Runner> = mutableMapOf()
+    internal val nameToTeam: MutableMap<String, Team> = mutableMapOf()
+    internal val idToMinigame: MutableMap<Int, Minigame> = mutableMapOf()
 
     constructor(year: Int) : this(
         year = year,
@@ -64,11 +70,12 @@ class Event internal constructor(
 
     internal fun initSetTeams(teams: List<Team>) {
         this._teams.update { teams }
+        this.nameToTeam.putAll(teams.associateBy { it.name.value })
     }
 
     internal fun initSetRunners(runners: List<Runner>) {
         this._runners.update { runners }
-        this.chipId2Runner.putAll(runners.associateBy { it.chipId.value })
+        this.chipIdToRunner.putAll(runners.associateBy { it.chipId.value })
     }
 
     internal fun initSetMinigames(minigames: List<Minigame>) {
@@ -105,12 +112,14 @@ class Event internal constructor(
         }
     }
 
-    internal fun getRunner(chipId: Long): Runner? = chipId2Runner[chipId]
+    internal fun getRunner(chipId: Long): Runner? = chipIdToRunner[chipId]
+    internal fun getTeam(name: String): Team? = nameToTeam[name]
+    internal fun getMinigame(id: Int): Minigame? = idToMinigame[id]
 
     suspend fun createRunner(chipId: Long, name: String): CreateRunnerResult {
         mutex.withLock {
             getRunner(chipId)?.let {
-                logger.warn("Missing UI check if ID already exists when creating a runner")
+                logger.warn("Missing UI check if chip ID already exists when creating a runner")
                 return CreateRunnerResult.Exists(it)
             }
 
@@ -120,9 +129,62 @@ class Event internal constructor(
                 name = name
             )
             this._runners.update { it + newRunner }
+            this.chipIdToRunner[chipId] = newRunner
 
-            logger.info("Created {}", newRunner)
+            logger.info(CREATED_LOG_MSG, newRunner)
             return CreateRunnerResult.Created(newRunner)
+        }
+    }
+
+    suspend fun createTeam(name: String): CreateTeamResult {
+        mutex.withLock {
+            if (name.isBlank()) {
+                logger.warn("Missing UI check if name is not blank when creating a team")
+                return CreateTeamResult.BlankName
+            }
+
+            getTeam(name)?.let {
+                logger.warn("Missing UI check if name already exists when creating a team")
+                return CreateTeamResult.Exists(it)
+            }
+
+            val newTeam = Team(
+                event = this,
+                name = name
+            )
+
+            this._teams.update { it + newTeam }
+            this.nameToTeam[name] = newTeam
+
+            logger.info(CREATED_LOG_MSG, newTeam)
+            return CreateTeamResult.Created(newTeam)
+        }
+    }
+
+    suspend fun createMinigame(name: String, id: Int): CreateMinigameResult {
+        mutex.withLock {
+            getMinigame(id)?.let {
+                logger.warn("Missing UI check if minigame ID already exists when creating a minigame")
+                return CreateMinigameResult.Exists(it)
+            }
+
+            if (name.isBlank()) {
+                logger.warn("Missing UI check if name is not blank when creating a minigame")
+                return CreateMinigameResult.BlankName
+            }
+
+            val newMinigame = Minigame(
+                event = this,
+                name = name,
+                description = "",
+                id = id
+            )
+
+            this._minigames.update { it + newMinigame }
+            this.idToMinigame[id] = newMinigame
+
+            logger.info(CREATED_LOG_MSG, newMinigame)
+            return CreateMinigameResult.Created(newMinigame)
         }
     }
 }
