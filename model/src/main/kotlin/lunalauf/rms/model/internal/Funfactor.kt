@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.withLock
+import lunalauf.rms.model.api.DeleteElementResult
 import lunalauf.rms.model.api.UpdateFunfactorNameResult
 import org.slf4j.LoggerFactory
 
@@ -25,8 +26,12 @@ sealed class Funfactor(
     private val _results = MutableStateFlow(emptyList<FunfactorResult>())
     val results get() = _results.asStateFlow()
 
-    internal fun initSetResults(results: List<FunfactorResult>) {
+    internal fun internalSetResults(results: List<FunfactorResult>) {
         _results.update { results }
+    }
+
+    internal fun internalRemoveResult(result: FunfactorResult) {
+        _results.update { it - result }
     }
 
     suspend fun updateName(name: String): UpdateFunfactorNameResult {
@@ -45,6 +50,20 @@ sealed class Funfactor(
     suspend fun updateDescription(description: String) {
         event.mutex.withLock {
             _description.update { description }
+        }
+    }
+
+    suspend fun delete(): DeleteElementResult {
+        event.mutex.withLock {
+            if (results.value.isNotEmpty())
+                return DeleteElementResult.NotDeleted("Funfactor has results")
+
+            when (this) {
+                is Minigame -> event.internalRemoveMinigame(this)
+                is Challenge -> event.internalRemoveChallenge(this)
+            }
+
+            return DeleteElementResult.Deleted
         }
     }
 }

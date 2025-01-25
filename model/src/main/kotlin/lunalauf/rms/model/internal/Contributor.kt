@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.withLock
+import lunalauf.rms.model.api.DeleteElementResult
 import lunalauf.rms.model.common.ContributionType
 
 sealed class Contributor(
@@ -34,4 +35,6 @@ sealed class Contributor(
             _amountPerRound.update { amountPerRound }
         }
     }
+
+    abstract suspend fun delete(): DeleteElementResult
 }

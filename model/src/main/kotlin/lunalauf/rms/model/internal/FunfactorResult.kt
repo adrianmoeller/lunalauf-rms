@@ -2,7 +2,9 @@ package lunalauf.rms.model.internal
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.LocalDateTime
+import lunalauf.rms.model.api.DeleteElementResult
 
 class FunfactorResult internal constructor(
     event: Event,
@@ -20,4 +22,13 @@ class FunfactorResult internal constructor(
 
     private val _type = MutableStateFlow(type)
     val type get() = _type.asStateFlow()
+
+    override suspend fun delete(): DeleteElementResult {
+        event.mutex.withLock {
+            team.value.internalRemoveFunfactorResult(this)
+            type.value.internalRemoveResult(this)
+
+            return DeleteElementResult.Deleted
+        }
+    }
 }

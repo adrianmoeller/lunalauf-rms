@@ -34,15 +34,15 @@ class InternalModelMapper private constructor(
         teamUidMapping = eventSM.teams
             .associate { Pair(it.uid, toTeam(event, it)) }
 
-        event.initSetTeams(teamUidMapping.values.toList())
-        event.initSetRunners(runnerUidMapping.values.toList())
-        event.initSetMinigames(eventSM.minigames.map { toMinigame(event, it) })
-        event.initSetChallenges(eventSM.challenges.map { toChallenge(event, it) })
-        event.initSetConnections(eventSM.connections.map { toConnectionEntry(event, it) })
-        event.initSetRunTimer(toRunTimer(eventSM.runTimer))
+        event.internalSetTeams(teamUidMapping.values.toList())
+        event.internalSetRunners(runnerUidMapping.values.toList())
+        event.internalSetMinigames(eventSM.minigames.map { toMinigame(event, it) })
+        event.internalSetChallenges(eventSM.challenges.map { toChallenge(event, it) })
+        event.internalSetConnections(eventSM.connections.map { toConnectionEntry(event, it) })
+        event.internalSetRunTimer(toRunTimer(eventSM.runTimer))
 
         event.teams.value.forEach { team ->
-            team.initSetFunfactorResults(
+            team.internalSetFunfactorResults(
                 teamFunfactorResultsMapping[team]!!
                     .sortedBy { it.timestamp.value })
         }
@@ -59,8 +59,8 @@ class InternalModelMapper private constructor(
             name = teamSM.name
         )
 
-        team.initSetMembers(teamSM.members.map { toRunner(event, it, team) })
-        team.initSetRounds(team.members.value.flatMap { it.rounds.value })
+        team.internalSetMembers(teamSM.members.map { toRunner(event, it, team) })
+        team.internalSetRounds(team.members.value.flatMap { it.rounds.value })
 
         return team
     }
@@ -75,8 +75,8 @@ class InternalModelMapper private constructor(
             name = runnerSM.name
         )
 
-        runner.initSetTeam(team)
-        runner.initSetRounds(runnerSM.rounds.map { toRound(event, it, runner, team) })
+        runner.internalSetTeam(team)
+        runner.internalSetRounds(runnerSM.rounds.map { toRound(event, it, runner, team) })
 
         runnerUidMapping[runnerSM.uid] = runner
 
@@ -92,7 +92,7 @@ class InternalModelMapper private constructor(
             runner = runner
         )
 
-        round.initSetTeam(team)
+        round.internalSetTeam(team)
 
         return round
     }
@@ -105,7 +105,7 @@ class InternalModelMapper private constructor(
             id = minigameSM.id
         )
 
-        minigame.initSetResults(minigameSM.results.map { toFunfactorResult(event, it, minigame) })
+        minigame.internalSetResults(minigameSM.results.map { toFunfactorResult(event, it, minigame) })
 
         return minigame
     }
@@ -122,7 +122,7 @@ class InternalModelMapper private constructor(
             receiveImages = challengeSM.receiveImages
         )
 
-        challenge.initSetResults(challengeSM.results.map { toFunfactorResult(event, it, challenge) })
+        challenge.internalSetResults(challengeSM.results.map { toFunfactorResult(event, it, challenge) })
 
         return challenge
     }

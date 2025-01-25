@@ -3,6 +3,7 @@ package lunalauf.rms.model.internal
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.LocalDateTime
+import lunalauf.rms.model.api.DeleteElementResult
 
 sealed class LogEntry(
     event: Event,
@@ -16,4 +17,6 @@ sealed class LogEntry(
 
     private val _timestamp = MutableStateFlow(timestamp)
     val timestamp get() = _timestamp.asStateFlow()
+
+    abstract suspend fun delete(): DeleteElementResult
 }

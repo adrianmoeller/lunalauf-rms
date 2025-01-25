@@ -3,7 +3,9 @@ package lunalauf.rms.model.internal
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.LocalDateTime
+import lunalauf.rms.model.api.DeleteElementResult
 
 class Round internal constructor(
     event: Event,
@@ -25,7 +27,15 @@ class Round internal constructor(
     private val _team = MutableStateFlow<Team?>(null)
     val team get() = _team.asStateFlow()
 
-    internal fun initSetTeam(team: Team?) {
+    internal fun internalSetTeam(team: Team?) {
         _team.update { team }
+    }
+
+    override suspend fun delete(): DeleteElementResult {
+        event.mutex.withLock {
+            runner.value.internalRemoveRound(this)
+
+            return DeleteElementResult.Deleted
+        }
     }
 }

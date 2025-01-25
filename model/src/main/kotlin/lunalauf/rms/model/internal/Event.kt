@@ -75,30 +75,46 @@ class Event internal constructor(
         roundThreshold = 40
     )
 
-    internal fun initSetTeams(teams: List<Team>) {
+    internal fun internalSetTeams(teams: List<Team>) {
         this._teams.update { teams }
         this.nameToTeam.putAll(teams.associateBy { it.name.value })
     }
 
-    internal fun initSetRunners(runners: List<Runner>) {
+    internal fun internalSetRunners(runners: List<Runner>) {
         this._runners.update { runners }
         this.chipIdToRunner.putAll(runners.associateBy { it.chipId.value })
     }
 
-    internal fun initSetMinigames(minigames: List<Minigame>) {
+    internal fun internalSetMinigames(minigames: List<Minigame>) {
         this._minigames.update { minigames }
     }
 
-    internal fun initSetChallenges(challenges: List<Challenge>) {
+    internal fun internalSetChallenges(challenges: List<Challenge>) {
         this._challenges.update { challenges }
     }
 
-    internal fun initSetConnections(connections: List<ConnectionEntry>) {
+    internal fun internalSetConnections(connections: List<ConnectionEntry>) {
         this._connections.update { connections }
     }
 
-    internal fun initSetRunTimer(runTimer: RunTimer) {
+    internal fun internalSetRunTimer(runTimer: RunTimer) {
         this.runTimer = runTimer
+    }
+
+    internal fun internalRemoveRunner(runner: Runner) {
+        this._runners.update { it - runner }
+    }
+
+    internal fun internalRemoveTeam(team: Team) {
+        this._teams.update { it - team }
+    }
+
+    internal fun internalRemoveMinigame(minigame: Minigame) {
+        this._minigames.update { it - minigame }
+    }
+
+    internal fun internalRemoveChallenge(challenge: Challenge) {
+        this._challenges.update { it - challenge }
     }
 
     suspend fun setSponsoringPoolAmount(amount: Double) {
@@ -255,5 +271,13 @@ class Event internal constructor(
         }
     }
 
+    suspend fun storeConnections(connectionId2Runner: Map<Long, Runner>) {
+        mutex.withLock {
+            _connections.update {
+                connectionId2Runner.map { (id, runner) -> ConnectionEntry(this, id, runner) }
+            }
 
+            logger.info("Connections stored")
+        }
+    }
 }

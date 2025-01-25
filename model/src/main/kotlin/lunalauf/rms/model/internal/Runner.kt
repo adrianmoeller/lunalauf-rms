@@ -5,6 +5,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import lunalauf.rms.model.api.DeleteElementResult
 import lunalauf.rms.model.api.LogRoundResult
 import lunalauf.rms.model.api.UpdateRunnerIdResult
 import lunalauf.rms.model.common.ContributionType
@@ -72,12 +73,16 @@ class Runner internal constructor(
         name = name,
     )
 
-    internal fun initSetTeam(team: Team?) {
+    internal fun internalSetTeam(team: Team?) {
         _team.update { team }
     }
 
-    internal fun initSetRounds(rounds: List<Round>) {
+    internal fun internalSetRounds(rounds: List<Round>) {
         _rounds.update { rounds }
+    }
+
+    internal fun internalRemoveRound(round: Round) {
+        _rounds.update { it - round }
     }
 
     suspend fun updateChipId(chipId: Long): UpdateRunnerIdResult {
@@ -147,8 +152,8 @@ class Runner internal constructor(
             this._rounds.update { it + newRound }
 
             if (team != null) {
-                newRound.initSetTeam(team)
-                team.addRound(newRound)
+                newRound.internalSetTeam(team)
+                team.internalAddRound(newRound)
             }
 
             logger.info("Logged {}", newRound)
@@ -174,5 +179,17 @@ class Runner internal constructor(
             if (!roundLog[i].manuallyLogged.value) return roundLog[i].timestamp.value
         }
         return null
+    }
+
+    override suspend fun delete(): DeleteElementResult {
+        event.mutex.withLock {
+            if (rounds.value.isNotEmpty())
+                return DeleteElementResult.NotDeleted("Runner has counted rounds")
+
+            team.value?.internalRemoveRunner(this)
+            event.internalRemoveRunner(this)
+
+            return DeleteElementResult.Deleted
+        }
     }
 }
