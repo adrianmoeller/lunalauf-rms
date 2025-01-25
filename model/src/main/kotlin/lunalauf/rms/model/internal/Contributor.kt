@@ -2,6 +2,7 @@ package lunalauf.rms.model.internal
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.withLock
 import lunalauf.rms.model.api.DeleteElementResult
@@ -9,12 +10,16 @@ import lunalauf.rms.model.common.ContributionType
 
 sealed class Contributor(
     event: Event,
+    name: String,
     amountPerRound: Double,
     amountFix: Double,
     contributionType: ContributionType
 ) : EventChild(
     event
 ) {
+    private val _name = MutableStateFlow(name)
+    val name get() = _name.asStateFlow()
+
     private val _amountPerRound = MutableStateFlow(amountPerRound)
     val amountPerRound get() = _amountPerRound.asStateFlow()
 
@@ -23,6 +28,29 @@ sealed class Contributor(
 
     private val _contributionType = MutableStateFlow(contributionType)
     val contributionType get() = _contributionType.asStateFlow()
+
+    private val _rounds = MutableStateFlow(emptyList<Round>())
+    val rounds get() = _rounds.asStateFlow()
+
+    val numOfRounds = rounds.map { it.sumOf { round -> round.points.value } }
+
+    internal fun internalSetRounds(rounds: List<Round>) {
+        this._rounds.update { rounds }
+    }
+
+    internal fun internalAddRound(round: Round) {
+        _rounds.update { it + round }
+    }
+
+    internal fun internalRemoveRound(round: Round) {
+        _rounds.update { it - round }
+    }
+
+    suspend fun updateName(name: String) {
+        event.mutex.withLock {
+            _name.update { name }
+        }
+    }
 
     suspend fun updateContribution(
         type: ContributionType,

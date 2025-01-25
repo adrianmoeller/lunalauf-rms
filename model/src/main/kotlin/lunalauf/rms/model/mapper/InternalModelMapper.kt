@@ -53,10 +53,10 @@ class InternalModelMapper private constructor(
     private fun toTeam(event: Event, teamSM: TeamSM): Team {
         val team = Team(
             event = event,
+            name = teamSM.name,
             amountPerRound = teamSM.amountPerRound,
             amountFix = teamSM.amountFix,
-            contributionType = teamSM.contributionType,
-            name = teamSM.name
+            contributionType = teamSM.contributionType
         )
 
         team.internalSetMembers(teamSM.members.map { toRunner(event, it, team) })
@@ -68,11 +68,11 @@ class InternalModelMapper private constructor(
     private fun toRunner(event: Event, runnerSM: RunnerSM, team: Team? = null): Runner {
         val runner = Runner(
             event = event,
+            name = runnerSM.name,
             amountPerRound = runnerSM.amountPerRound,
             amountFix = runnerSM.amountFix,
             contributionType = runnerSM.contributionType,
-            chipId = runnerSM.chipId,
-            name = runnerSM.name
+            chipId = runnerSM.chipId
         )
 
         runner.internalSetTeam(team)

@@ -1,6 +1,9 @@
 package lunalauf.rms.model.internal
 
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -15,13 +18,14 @@ import org.slf4j.LoggerFactory
 
 class Runner internal constructor(
     event: Event,
+    name: String,
     amountPerRound: Double,
     amountFix: Double,
     contributionType: ContributionType,
     chipId: Long,
-    name: String,
 ) : Contributor(
     event,
+    name,
     amountPerRound,
     amountFix,
     contributionType
@@ -35,16 +39,8 @@ class Runner internal constructor(
     private val _chipId = MutableStateFlow(chipId)
     val chipId get() = _chipId.asStateFlow()
 
-    private val _name = MutableStateFlow(name)
-    val name get() = _name.asStateFlow()
-
     private val _team = MutableStateFlow<Team?>(null)
     val team get() = _team.asStateFlow()
-
-    private val _rounds = MutableStateFlow(emptyList<Round>())
-    val rounds get() = _rounds.asStateFlow()
-
-    val numOfRounds = rounds.map { it.sumOf { round -> round.points.value } }
 
     val totalAmount = combine(
         super.contributionType,
@@ -66,23 +62,15 @@ class Runner internal constructor(
         name: String
     ) : this(
         event = event,
+        name = name,
         amountPerRound = 0.0,
         amountFix = 0.0,
         contributionType = ContributionType.NONE,
         chipId = chipId,
-        name = name,
     )
 
     internal fun internalSetTeam(team: Team?) {
         _team.update { team }
-    }
-
-    internal fun internalSetRounds(rounds: List<Round>) {
-        _rounds.update { rounds }
-    }
-
-    internal fun internalRemoveRound(round: Round) {
-        _rounds.update { it - round }
     }
 
     suspend fun updateChipId(chipId: Long): UpdateRunnerIdResult {
@@ -97,12 +85,6 @@ class Runner internal constructor(
             event.chipIdToRunner[chipId] = this
 
             return UpdateRunnerIdResult.Updated
-        }
-    }
-
-    suspend fun updateName(name: String) {
-        event.mutex.withLock {
-            _name.update { name }
         }
     }
 
@@ -149,7 +131,7 @@ class Runner internal constructor(
                 runner = this
             )
 
-            this._rounds.update { it + newRound }
+            this.internalAddRound(newRound)
 
             if (team != null) {
                 newRound.internalSetTeam(team)

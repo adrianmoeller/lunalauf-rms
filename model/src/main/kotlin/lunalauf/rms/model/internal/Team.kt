@@ -14,31 +14,24 @@ import org.slf4j.LoggerFactory
 
 class Team internal constructor(
     event: Event,
+    name: String,
     amountPerRound: Double,
     amountFix: Double,
-    contributionType: ContributionType,
-    name: String
+    contributionType: ContributionType
 ) : Contributor(
     event,
+    name,
     amountPerRound,
     amountFix,
     contributionType
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private val _name = MutableStateFlow(name)
-    val name get() = _name.asStateFlow()
-
     private val _members = MutableStateFlow(emptyList<Runner>())
     val members get() = _members.asStateFlow()
 
-    private val _rounds = MutableStateFlow(emptyList<Round>())
-    val rounds get() = _rounds.asStateFlow()
-
     private val _funfactorResults = MutableStateFlow(emptyList<FunfactorResult>())
     val funfactorResults get() = _funfactorResults.asStateFlow()
-
-    val numOfRounds = rounds.map { it.sumOf { round -> round.points.value } }
 
     val numOfFunfactorPoints = funfactorResults.map { it.sumOf { result -> result.points.value } }
 
@@ -62,26 +55,18 @@ class Team internal constructor(
         name: String
     ) : this(
         event = event,
+        name = name,
         amountPerRound = 0.0,
         amountFix = 0.0,
-        contributionType = ContributionType.NONE,
-        name = name
+        contributionType = ContributionType.NONE
     )
 
     internal fun internalSetMembers(members: List<Runner>) {
         this._members.update { members }
     }
 
-    internal fun internalSetRounds(rounds: List<Round>) {
-        this._rounds.update { rounds }
-    }
-
     internal fun internalSetFunfactorResults(funfactorResults: List<FunfactorResult>) {
         this._funfactorResults.update { funfactorResults }
-    }
-
-    internal fun internalAddRound(round: Round) {
-        _rounds.update { it + round }
     }
 
     internal fun internalRemoveRunner(runner: Runner) {
@@ -90,12 +75,6 @@ class Team internal constructor(
 
     internal fun internalRemoveFunfactorResult(result: FunfactorResult) {
         _funfactorResults.update { it - result }
-    }
-
-    suspend fun updateName(name: String) {
-        event.mutex.withLock {
-            _name.update { name }
-        }
     }
 
     suspend fun addRunner(runner: Runner): AddRunnerToTeamResult {
