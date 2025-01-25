@@ -12,7 +12,7 @@ private val logger = LoggerFactory.getLogger(ModelManager.Companion::class.java)
 
 sealed class ModelManager {
     companion object {
-        const val FILE_EXTENSION = "ll"
+        const val FILE_EXTENSION = "llj"
 
         fun initialize(persistenceManager: PersistenceManager): ModelManager {
             return try {
@@ -44,14 +44,18 @@ sealed class ModelManager {
         private var _model = MutableStateFlow<ModelState>(ModelState.Unloaded)
         val model = _model.asStateFlow()
 
+        init {
+            persistenceManager.initialize()
+        }
+
         suspend fun new(path: String, year: Int): ModelResult {
             val constModel = _model.value
             if (constModel is ModelState.Loaded) {
                 constModel.event.mutex.withLock {
-                    runPreSaveProcessing()
+
 
                     try {
-                        persistenceManager.save(path, constModel.event)
+                        persistenceManager.save(path, constModel.event) { runPreSaveProcessing() }
                     } catch (e: Exception) {
                         return ModelResult.Error("Failed saving model before creating new one", e)
                     }
@@ -63,7 +67,7 @@ sealed class ModelManager {
             return internalNew(path, year)
         }
 
-        private fun internalNew(path: String, year: Int): ModelResult {
+        private suspend fun internalNew(path: String, year: Int): ModelResult {
             try {
                 val newEvent = Event(year)
                 persistenceManager.save(path, newEvent)
@@ -79,10 +83,8 @@ sealed class ModelManager {
             val constModel = _model.value
             if (constModel is ModelState.Loaded) {
                 constModel.event.mutex.withLock {
-                    runPreSaveProcessing()
-
                     try {
-                        persistenceManager.save(path, constModel.event)
+                        persistenceManager.save(path, constModel.event) { runPreSaveProcessing() }
                     } catch (e: Exception) {
                         return ModelResult.Error("Failed saving model before loading new one", e)
                     }
@@ -94,7 +96,7 @@ sealed class ModelManager {
             return internalLoad(path)
         }
 
-        private fun internalLoad(path: String): ModelResult {
+        private suspend fun internalLoad(path: String): ModelResult {
             try {
                 val event = persistenceManager.load(path)
                 _model.update { ModelState.Loaded(path, event) }
@@ -109,10 +111,8 @@ sealed class ModelManager {
             val constModel = _model.value
             if (constModel is ModelState.Loaded) {
                 constModel.event.mutex.withLock {
-                    runPreSaveProcessing()
-
                     try {
-                        persistenceManager.save(constModel.path, constModel.event)
+                        persistenceManager.save(constModel.path, constModel.event) { runPreSaveProcessing() }
                     } catch (e: Exception) {
                         return SaveResult.Error("Failed saving model", e)
                     }

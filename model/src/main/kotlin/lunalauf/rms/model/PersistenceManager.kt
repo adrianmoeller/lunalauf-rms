@@ -8,6 +8,11 @@ interface PersistenceManager {
         // NO-OP
     }
 
-    fun save(path: String, event: Event)
-    fun load(path: String): Event
+    suspend fun save(
+        path: String,
+        event: Event,
+        preSaveActions: () -> Unit = {}
+    )
+
+    suspend fun load(path: String): Event
 }
