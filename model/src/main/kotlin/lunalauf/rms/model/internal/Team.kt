@@ -77,6 +77,10 @@ class Team internal constructor(
         this._funfactorResults.update { funfactorResults }
     }
 
+    internal fun addRound(round: Round) {
+        _rounds.update { it + round }
+    }
+
     suspend fun updateName(name: String) {
         event.mutex.withLock {
             _name.update { name }
@@ -94,7 +98,7 @@ class Team internal constructor(
 
             oldTeam?._members?.update { it - runner }
             this._members.update { it + runner }
-            runner._team.update { this }
+            runner.initSetTeam(this)
 
             logger.info("Added {} to {}", runner, this)
             return AddRunnerToTeamResult.Added
@@ -111,7 +115,7 @@ class Team internal constructor(
             }
 
             this._members.update { it - runner }
-            runner._team.update { null }
+            runner.initSetTeam(null)
 
             logger.info("Removed {} from {}", runner, oldTeam)
             return RemoveRunnerFromTeamResult.Removed

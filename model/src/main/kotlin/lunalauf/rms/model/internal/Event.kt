@@ -5,9 +5,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import lunalauf.rms.model.api.CreateChallengeResult
 import lunalauf.rms.model.api.CreateMinigameResult
 import lunalauf.rms.model.api.CreateRunnerResult
 import lunalauf.rms.model.api.CreateTeamResult
+import lunalauf.rms.model.common.ChallengeState
 import org.slf4j.LoggerFactory
 
 private const val CREATED_LOG_MSG = "Created {}"
@@ -17,7 +19,8 @@ class Event internal constructor(
     runDuration: Int,
     sponsorPoolAmount: Double,
     sponsorPoolRounds: Int,
-    additionalContribution: Double
+    additionalContribution: Double,
+    roundThreshold: Int
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -37,6 +40,9 @@ class Event internal constructor(
 
     private val _additionalContribution = MutableStateFlow(additionalContribution)
     val additionalContribution get() = _additionalContribution.asStateFlow()
+
+    private val _roundThreshold = MutableStateFlow(roundThreshold)
+    val roundThreshold get() = _roundThreshold.asStateFlow()
 
     private val _teams = MutableStateFlow(emptyList<Team>())
     val teams get() = _teams.asStateFlow()
@@ -65,7 +71,8 @@ class Event internal constructor(
         runDuration = 150,
         sponsorPoolAmount = 0.0,
         sponsorPoolRounds = 0,
-        additionalContribution = 0.0
+        additionalContribution = 0.0,
+        roundThreshold = 40
     )
 
     internal fun initSetTeams(teams: List<Team>) {
@@ -187,4 +194,66 @@ class Event internal constructor(
             return CreateMinigameResult.Created(newMinigame)
         }
     }
+
+    private fun internalCreateChallenge(
+        name: String,
+        description: String,
+        expires: Boolean = false,
+        expireMsg: String = "",
+        duration: Int = 0,
+        receiveImage: Boolean = false
+    ): CreateChallengeResult {
+        if (name.isBlank()) {
+            logger.warn("Missing UI check if name is not blank when creating a challenge")
+            return CreateChallengeResult.BlankName
+        }
+
+        val newChallenge = Challenge(
+            event = this,
+            name = name,
+            description = description,
+            expires = expires,
+            expireMsg = expireMsg,
+            duration = duration,
+            state = ChallengeState.PENDING,
+            receiveImages = receiveImage
+        )
+
+        this._challenges.update { it + newChallenge }
+
+        logger.info(CREATED_LOG_MSG, newChallenge)
+        return CreateChallengeResult.Created(newChallenge)
+    }
+
+    suspend fun createChallenge(name: String, description: String): CreateChallengeResult {
+        mutex.withLock {
+            return internalCreateChallenge(name, description)
+        }
+    }
+
+    suspend fun createExpiringChallenge(
+        name: String,
+        description: String,
+        duration: Int,
+        expireMsg: String,
+        receiveImage: Boolean
+    ): CreateChallengeResult {
+        mutex.withLock {
+            if (duration < 0) {
+                logger.warn("Missing UI check if duration is positive when creating a challenge")
+                return CreateChallengeResult.NegativeDuration
+            }
+
+            return internalCreateChallenge(
+                name = name,
+                description = description,
+                expires = true,
+                expireMsg = expireMsg,
+                duration = duration,
+                receiveImage = receiveImage
+            )
+        }
+    }
+
+
 }

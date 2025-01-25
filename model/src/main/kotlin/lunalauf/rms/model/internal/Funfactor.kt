@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.withLock
-import lunalauf.rms.model.api.UpdateMinigameNameResult
+import lunalauf.rms.model.api.UpdateFunfactorNameResult
 import org.slf4j.LoggerFactory
 
 sealed class Funfactor(
@@ -29,16 +29,22 @@ sealed class Funfactor(
         _results.update { results }
     }
 
-    suspend fun updateName(name: String): UpdateMinigameNameResult {
+    suspend fun updateName(name: String): UpdateFunfactorNameResult {
         event.mutex.withLock {
             if (name.isBlank()) {
-                logger.warn("Missing UI check if name is not blank when updating a minigame name")
-                return UpdateMinigameNameResult.BlankName
+                logger.warn("Missing UI check if name is not blank when updating a funfactor name")
+                return UpdateFunfactorNameResult.BlankName
             }
 
             _name.update { name }
 
-            return UpdateMinigameNameResult.Updated
+            return UpdateFunfactorNameResult.Updated
+        }
+    }
+
+    suspend fun updateDescription(description: String) {
+        event.mutex.withLock {
+            _description.update { description }
         }
     }
 }

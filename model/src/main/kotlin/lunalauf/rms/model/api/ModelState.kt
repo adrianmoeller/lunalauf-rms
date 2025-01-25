@@ -4,7 +4,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.newSingleThreadContext
 import lunalauf.rms.model.internal.Event
-import org.slf4j.LoggerFactory
 
 sealed class ModelState {
     companion object {
@@ -21,9 +20,5 @@ sealed class ModelState {
     class Loaded(
         val path: String,
         val event: Event
-    ) : ModelState() {
-        private val logger = LoggerFactory.getLogger(this::class.java)
-
-
-    }
+    ) : ModelState()
 }

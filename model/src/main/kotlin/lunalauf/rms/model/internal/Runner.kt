@@ -2,10 +2,14 @@ package lunalauf.rms.model.internal
 
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.withLock
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import lunalauf.rms.model.api.LogRoundResult
 import lunalauf.rms.model.api.UpdateRunnerIdResult
 import lunalauf.rms.model.common.ContributionType
+import lunalauf.rms.model.helper.Timestamps
+import lunalauf.rms.model.helper.Timestamps.toMilliseconds
 import org.slf4j.LoggerFactory
 
 class Runner internal constructor(
@@ -21,6 +25,10 @@ class Runner internal constructor(
     amountFix,
     contributionType
 ) {
+    companion object {
+        const val DEFAULT_ROUND_POINTS = 1
+    }
+
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val _chipId = MutableStateFlow(chipId)
@@ -29,7 +37,7 @@ class Runner internal constructor(
     private val _name = MutableStateFlow(name)
     val name get() = _name.asStateFlow()
 
-    internal val _team = MutableStateFlow<Team?>(null)
+    private val _team = MutableStateFlow<Team?>(null)
     val team get() = _team.asStateFlow()
 
     private val _rounds = MutableStateFlow(emptyList<Round>())
@@ -101,5 +109,70 @@ class Runner internal constructor(
                 .sorted()
                 .zipWithNext { a, b -> b - a }
         }
+    }
+
+    suspend fun logRound(
+        points: Int = DEFAULT_ROUND_POINTS,
+        manualLogged: Boolean = false
+    ): LogRoundResult {
+        val currentTime = Timestamps.now()
+
+        event.mutex.withLock {
+            val team = team.value
+            if (!manualLogged) {
+                val runTimer = event.runTimer
+
+                if (!runTimer.runEnabled.value) {
+                    logger.info("Tried to log round while run is disabled: {}", this)
+                    return LogRoundResult.RunDisabled
+                }
+
+                if (runTimer.validateFinishedRunDryPhase(this))
+                    return LogRoundResult.LastRoundAlreadyLogged
+
+                if (!validateInTime(currentTime)) {
+                    logger.info("Round count interval is too short: {}", this)
+                    return LogRoundResult.ValidationFailed
+                }
+            }
+
+            val newRound = Round(
+                event = event,
+                points = points,
+                timestamp = currentTime,
+                manuallyLogged = manualLogged,
+                runner = this
+            )
+
+            this._rounds.update { it + newRound }
+
+            if (team != null) {
+                newRound.initSetTeam(team)
+                team.addRound(newRound)
+            }
+
+            logger.info("Logged {}", newRound)
+            return LogRoundResult.Logged(newRound)
+        }
+    }
+
+    private fun validateInTime(
+        currentTime: LocalDateTime
+    ): Boolean {
+        val lastCountRunner = getLastCount(getRoundLogHistory()) ?: return true
+        val timeDifference = currentTime.toMilliseconds() - lastCountRunner.toMilliseconds()
+        return timeDifference > event.roundThreshold.value * 1000
+    }
+
+    private fun getRoundLogHistory(): List<Round> {
+        val team = this.team.value ?: return this.rounds.value
+        return team.rounds.value
+    }
+
+    private fun getLastCount(roundLog: List<Round>): LocalDateTime? {
+        for (i in roundLog.indices.reversed()) {
+            if (!roundLog[i].manuallyLogged.value) return roundLog[i].timestamp.value
+        }
+        return null
     }
 }

@@ -23,6 +23,7 @@ class SerializationModelMapper private constructor(
             sponsorPoolAmount = event.sponsorPoolAmount.value,
             sponsorPoolRounds = event.sponsorPoolRounds.value,
             additionalContribution = event.additionalContribution.value,
+            roundThreshold = event.roundThreshold.value,
             teams = event.teams.value.map { toTeamSM(it) },
             singleRunners = event.runners.value
                 .filter { it.team.value != null }

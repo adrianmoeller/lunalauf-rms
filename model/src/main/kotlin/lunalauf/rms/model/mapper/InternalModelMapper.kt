@@ -23,7 +23,8 @@ class InternalModelMapper private constructor(
             runDuration = eventSM.runDuration,
             sponsorPoolAmount = eventSM.sponsorPoolAmount,
             sponsorPoolRounds = eventSM.sponsorPoolRounds,
-            additionalContribution = eventSM.additionalContribution
+            additionalContribution = eventSM.additionalContribution,
+            roundThreshold = eventSM.roundThreshold
         )
 
         runnerUidMapping = eventSM.singleRunners

@@ -9,6 +9,7 @@ data class EventSM(
     val sponsorPoolAmount: Double,
     val sponsorPoolRounds: Int,
     val additionalContribution: Double,
+    val roundThreshold: Int,
     val teams: List<TeamSM>,
     val singleRunners: List<RunnerSM>,
     val minigames: List<MinigameSM>,
