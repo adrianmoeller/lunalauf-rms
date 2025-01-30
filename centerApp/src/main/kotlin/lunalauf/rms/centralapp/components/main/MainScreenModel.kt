@@ -90,7 +90,7 @@ class MainScreenModel : AbstractStatelessScreenModel() {
             val loadedModelState = _modelState.value
             _modelState.value = ModelState.Loading
             launchInModelScope {
-                val result = modelResourceManager.save()
+                val result = modelResourceManager.save(modelState.value)
                 _modelState.value = when (result) {
                     is SaveResult.Success, SaveResult.NoFileOpen -> {
                         modelResourceManager.close()
@@ -114,7 +114,7 @@ class MainScreenModel : AbstractStatelessScreenModel() {
     fun saveFile() {
         if (modelResourceManager is ModelResourceManager.Accessible) {
             launchInModelScope {
-                when (val result = modelResourceManager.save()) {
+                when (val result = modelResourceManager.save(modelState.value)) {
                     is SaveResult.Error -> launchInDefaultScope {
                         snackBarHostState.showSnackbar(
                             message = result.message,

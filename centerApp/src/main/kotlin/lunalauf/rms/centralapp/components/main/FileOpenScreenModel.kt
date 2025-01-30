@@ -31,7 +31,7 @@ class FileOpenScreenModel(
         onError = { _preferences.update { it.copy(autoSaveActive = false) } }
     ) {
         if (modelResourceManager is ModelResourceManager.Accessible) {
-            when (val result = modelResourceManager.save()) {
+            when (val result = modelResourceManager.save(modelState)) {
                 is SaveResult.Error -> {
                     launchInDefaultScope {
                         snackBarHostState.showSnackbar(

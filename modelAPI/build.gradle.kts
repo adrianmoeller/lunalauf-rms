@@ -8,4 +8,8 @@ dependencies {
     implementation(libs.slf4jReload)
 
     implementation(libs.kotlinCoroutines)
+    implementation(libs.kotlinDateTime)
+    implementation(libs.kotlinJsonSerialization)
+
+    implementation(project(":model"))
 }

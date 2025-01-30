@@ -5,7 +5,12 @@ import LunaLaufLanguage.LunaLaufLanguagePackage
 import LunaLaufLanguage.impl.LunaLaufLanguageFactoryImpl
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToStream
+import lunalauf.rms.model.serialization.EventSM
 import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.modelapi.resource.LunaLaufToSerializationModelMapper.Companion.toSerializationModel
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
@@ -13,7 +18,9 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import kotlin.time.measureTime
 
 private val logger = LoggerFactory.getLogger(ModelResourceManager.Companion::class.java)
 
@@ -124,10 +131,42 @@ sealed class ModelResourceManager {
             }
         }
 
-        suspend fun save(): SaveResult {
+        suspend fun save(modelState: ModelState): SaveResult {
             runPreSaveProcessing()
             mutex.withLock {
-                return internalSave()
+                val jsonTime = measureTime {
+                    toJson(modelState)
+                }
+                logger.info("json time: {}", jsonTime)
+
+                var saveResult: SaveResult
+                val emfTime = measureTime {
+                    saveResult = internalSave()
+                }
+                logger.info("emf time: {}", emfTime)
+
+                return saveResult
+            }
+        }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        private fun toJson(modelState: ModelState) {
+            if (modelState !is ModelState.Loaded)
+                return
+
+            val constResource = resource ?: return
+
+            FileOutputStream(constResource.uri.path() + "j").use {
+                var sModel: EventSM
+                val time = measureTime {
+                    sModel = modelState.toSerializationModel()
+                }
+                logger.info("json convert: {}", time)
+
+                val jsonTime = measureTime {
+                    Json.encodeToStream(sModel, it)
+                }
+                logger.info("json save: {}", jsonTime)
             }
         }
 
