@@ -1,6 +1,6 @@
 package lunalauf.rms.utilities.network.bot.util
 
-import LunaLaufLanguage.Team
+import lunalauf.rms.model.internal.Team
 import java.io.File
 
 data class ImageViewData(

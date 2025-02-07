@@ -1,8 +1,8 @@
 package lunalauf.rms.model.internal
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import lunalauf.rms.model.api.CreateChallengeResult
@@ -24,6 +24,7 @@ class Event internal constructor(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    internal val scope = CoroutineScope(Dispatchers.Default)
     val mutex = Mutex()
 
     private val _year = MutableStateFlow(year)
@@ -40,6 +41,36 @@ class Event internal constructor(
 
     private val _additionalContribution = MutableStateFlow(additionalContribution)
     val additionalContribution get() = _additionalContribution.asStateFlow()
+
+    private val overallRunnerRounds = combine(runners.value.map { it.numOfRounds }) { it.sum() }
+    private val overallFunfactorPoints = combine(teams.value.map { it.numOfFunfactorPoints }) { it.sum() }
+
+    val overallRounds = combine(overallRunnerRounds, overallFunfactorPoints) { rounds, points -> rounds + points }
+        .stateIn(scope, SharingStarted.Eagerly, 0)
+
+    private val teamsContribution = combine(teams.value.map { it.totalAmount }) { it.sum() }
+    private val singleRunnersContribution = combine(
+        runners.value.filter { it.team.value == null }.map { it.totalAmount }) { it.sum() }
+
+    val runnersContribution = combine(
+        teamsContribution,
+        singleRunnersContribution,
+        this.additionalContribution
+    ) { teams, single, additional ->
+        teams + single + additional
+    }.stateIn(scope, SharingStarted.Eagerly, 0.0)
+
+    val currentSponsorPoolAmount = combine(
+        overallRounds,
+        this.sponsorPoolAmount,
+        this.sponsorPoolRounds
+    ) { overall, amount, rounds ->
+        calcCurrentSponsorPoolAmount(overall, amount, rounds)
+    }.stateIn(scope, SharingStarted.Eagerly, 0.0)
+
+    val overallContribution = combine(runnersContribution, currentSponsorPoolAmount) { contribution, amount ->
+        contribution + amount
+    }.stateIn(scope, SharingStarted.Eagerly, 0.0)
 
     private val _roundThreshold = MutableStateFlow(roundThreshold)
     val roundThreshold get() = _roundThreshold.asStateFlow()
@@ -135,7 +166,7 @@ class Event internal constructor(
         }
     }
 
-    internal fun getRunner(chipId: Long): Runner? = chipIdToRunner[chipId]
+    fun getRunner(chipId: Long): Runner? = chipIdToRunner[chipId]
     internal fun getTeam(name: String): Team? = nameToTeam[name]
     internal fun getMinigame(id: Int): Minigame? = idToMinigame[id]
 
@@ -279,5 +310,15 @@ class Event internal constructor(
 
             logger.info("Connections stored")
         }
+    }
+
+    private fun calcCurrentSponsorPoolAmount(
+        overallRounds: Int,
+        sponsorPoolAmount: Double,
+        sponsorPoolRounds: Int
+    ): Double {
+        return if (overallRounds > sponsorPoolRounds) sponsorPoolAmount
+        else if (sponsorPoolRounds == 0) 0.0
+        else sponsorPoolAmount / sponsorPoolRounds * overallRounds
     }
 }

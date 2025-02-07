@@ -2,10 +2,9 @@ package lunalauf.rms.utilities.network.bot
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import lunalauf.rms.modelapi.ModelAPI
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelManager
+import lunalauf.rms.model.api.ModelState
 import lunalauf.rms.utilities.network.bot.util.reply.ReplyContainer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,7 +13,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 
 abstract class AbstractBot(
     protected val token: String,
-    protected val modelState: StateFlow<ModelState>,
+    protected val modelManager: ModelManager.Available,
     silentStart: Boolean
 ) : TelegramLongPollingBot(token) {
     companion object {
@@ -24,7 +23,7 @@ abstract class AbstractBot(
     protected val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     private val defaultScope = CoroutineScope(Dispatchers.IO)
-    private val modelScope = CoroutineScope(ModelAPI.modelContext)
+    private val modelScope = CoroutineScope(ModelState.modelContext)
 
     private val startTime = System.currentTimeMillis()
     private var silentStart: Boolean

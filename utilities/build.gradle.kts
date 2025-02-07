@@ -12,5 +12,5 @@ dependencies {
     implementation(libs.gsonLib)
     implementation(libs.telegramBots)
 
-    implementation(project(":modelAPI"))
+    implementation(project(":model"))
 }

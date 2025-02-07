@@ -50,6 +50,9 @@ sealed class ModelManager {
 
         suspend fun new(path: String, year: Int): ModelResult {
             val constModel = _model.value
+
+            _model.update { ModelState.Loading }
+
             if (constModel is ModelState.Loaded) {
                 constModel.event.mutex.withLock {
 
@@ -57,6 +60,7 @@ sealed class ModelManager {
                     try {
                         persistenceManager.save(path, constModel.event) { runPreSaveProcessing() }
                     } catch (e: Exception) {
+                        _model.update { ModelState.Loaded(constModel.path, constModel.event) }
                         return ModelResult.Error("Failed saving model before creating new one", e)
                     }
 
@@ -73,6 +77,7 @@ sealed class ModelManager {
                 persistenceManager.save(path, newEvent)
                 _model.update { ModelState.Loaded(path, newEvent) }
             } catch (e: Exception) {
+                _model.update { ModelState.Unloaded }
                 return ModelResult.Error("Failed creating new file", e)
             }
 
@@ -81,11 +86,15 @@ sealed class ModelManager {
 
         suspend fun load(path: String): ModelResult {
             val constModel = _model.value
+
+            _model.update { ModelState.Loading }
+
             if (constModel is ModelState.Loaded) {
                 constModel.event.mutex.withLock {
                     try {
                         persistenceManager.save(path, constModel.event) { runPreSaveProcessing() }
                     } catch (e: Exception) {
+                        _model.update { ModelState.Loaded(constModel.path, constModel.event) }
                         return ModelResult.Error("Failed saving model before loading new one", e)
                     }
 
@@ -101,6 +110,7 @@ sealed class ModelManager {
                 val event = persistenceManager.load(path)
                 _model.update { ModelState.Loaded(path, event) }
             } catch (e: Exception) {
+                _model.update { ModelState.Unloaded }
                 return ModelResult.Error("Failed loading file", e)
             }
 
@@ -117,7 +127,7 @@ sealed class ModelManager {
                         return SaveResult.Error("Failed saving model", e)
                     }
 
-                    return SaveResult.Success
+                    return SaveResult.Success(constModel.path)
                 }
             }
 
@@ -155,7 +165,7 @@ sealed class ModelManager {
 
 sealed class ModelResult {
     data object Available : ModelResult()
-    class Error(val message: String, val exception: Exception? = null) : ModelResult() {
+    class Error(val message: String, exception: Exception? = null) : ModelResult() {
         init {
             if (exception == null) logger.error(message) else logger.error(message, exception)
         }
@@ -164,13 +174,13 @@ sealed class ModelResult {
 
 sealed class SaveResult {
     data object NoFileOpen : SaveResult()
-    data object Success : SaveResult() {
+    class Success(val path: String) : SaveResult() {
         init {
             logger.info("Model saved")
         }
     }
 
-    class Error(val message: String, val exception: Exception) : SaveResult() {
+    class Error(val message: String, exception: Exception) : SaveResult() {
         init {
             logger.error(message, exception)
         }

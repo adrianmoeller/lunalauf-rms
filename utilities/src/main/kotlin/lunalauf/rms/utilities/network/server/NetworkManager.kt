@@ -1,7 +1,7 @@
 package lunalauf.rms.utilities.network.server
 
-import kotlinx.coroutines.flow.StateFlow
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelManager
+import lunalauf.rms.model.api.ModelState
 import lunalauf.rms.utilities.network.communication.ErrorType
 import lunalauf.rms.utilities.network.communication.message.request.Request
 import lunalauf.rms.utilities.network.communication.message.response.ResponseFactory
@@ -13,9 +13,9 @@ private val logger = LoggerFactory.getLogger(NetworkManager::class.java)
 
 sealed class NetworkManager {
     companion object {
-        fun initialize(modelState: StateFlow<ModelState>): NetworkManager {
+        fun initialize(modelManager: ModelManager): NetworkManager {
             return try {
-                Available(modelState)
+                Available(modelManager)
             } catch (e: Exception) {
                 InitializationError(
                     message = "Could not create server.\n Please restart",
@@ -35,16 +35,19 @@ sealed class NetworkManager {
     }
 
     class Available internal constructor(
-        modelState: StateFlow<ModelState>
+        modelManager: ModelManager
     ) : NetworkManager() {
         val server: Server = JavaSocketServer()
 
         val port get() = server.port
 
         init {
+            if (modelManager !is ModelManager.Available)
+                throw IllegalStateException("Model manager is not available")
+
             server.setOnMessageReceived { client, message ->
                 if (message is Request) {
-                    val constModelState = modelState.value
+                    val constModelState = modelManager.model.value
                     if (constModelState is ModelState.Loaded) {
                         val modelUpdater = ModelUpdater(constModelState, message)
                         try {

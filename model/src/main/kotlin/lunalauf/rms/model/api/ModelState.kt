@@ -16,6 +16,7 @@ sealed class ModelState {
     }
 
     data object Unloaded : ModelState()
+    data object Loading : ModelState()
 
     class Loaded(
         val path: String,

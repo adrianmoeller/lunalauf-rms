@@ -1,9 +1,6 @@
 package lunalauf.rms.model.internal
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -54,7 +51,7 @@ class Runner internal constructor(
             ContributionType.BOTH -> amountFix + amountPerRound * numOfRounds
             ContributionType.NONE -> 0.0
         }
-    }
+    }.stateIn(event.scope, SharingStarted.Eagerly, 0.0)
 
     internal constructor(
         event: Event,

@@ -25,7 +25,7 @@ dependencies {
     implementation(libs.voyagerTabNavigator)
     implementation(libs.voyagerTransitions)
 
-    implementation(project(":modelAPI"))
+    implementation(project(":model"))
     implementation(project(":utilities"))
 }
 

@@ -34,6 +34,7 @@ class Team internal constructor(
     val funfactorResults get() = _funfactorResults.asStateFlow()
 
     val numOfFunfactorPoints = funfactorResults.map { it.sumOf { result -> result.points.value } }
+        .stateIn(event.scope, SharingStarted.Eagerly, 0)
 
     val totalAmount = combine(
         super.contributionType,
@@ -48,7 +49,7 @@ class Team internal constructor(
             ContributionType.BOTH -> amountFix + amountPerRound * (numOfRounds + numOfFunfactorPoints)
             ContributionType.NONE -> 0.0
         }
-    }
+    }.stateIn(event.scope, SharingStarted.Eagerly, 0.0)
 
     internal constructor(
         event: Event,

@@ -33,9 +33,9 @@ import lunalauf.rms.centralapp.components.commons.tables.PublicViewTable
 import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
 import lunalauf.rms.centralapp.publicViewTypography
 import lunalauf.rms.centralapp.utils.Formats
-import lunalauf.rms.modelapi.ModelState
-import lunalauf.rms.modelapi.states.RunnersState
-import lunalauf.rms.modelapi.states.TeamsState
+import lunalauf.rms.model.internal.Event
+import lunalauf.rms.model.internal.Runner
+import lunalauf.rms.model.internal.Team
 import lunalauf.rms.utilities.publicviewprefs.PublicViewPrefState
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.min
@@ -44,7 +44,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun PublicViewWindow(
     publicViewScreenModel: PublicViewScreenModel,
-    modelState: ModelState.Loaded
+    event: Event
 ) {
     val icon = painterResource(Res.drawable.icon)
 
@@ -100,21 +100,21 @@ fun PublicViewWindow(
                                     .weight(1f - pref.cmn_poolSponsorWidth),
                                 verticalArrangement = Arrangement.spacedBy(borderWidth)
                             ) {
-                                val teamsState by modelState.teams.collectAsState()
+                                val teams by event.teams.collectAsState()
                                 TeamPanel(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .weight(pref.cmn_teamsHeight),
-                                    teamsState = teamsState,
+                                    teams = teams,
                                     baseFontSize = (screenWidth / 45) * pref.tms_fontScale,
                                     pref = pref
                                 )
-                                val runnersState by modelState.runners.collectAsState()
+                                val runners by event.runners.collectAsState()
                                 RunnerPanel(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .weight(1f - pref.cmn_teamsHeight),
-                                    runnersState = runnersState,
+                                    runners = runners,
                                     baseFontSize = (screenWidth / 55) * pref.rns_fontScale,
                                     pref = pref
                                 )
@@ -123,7 +123,7 @@ fun PublicViewWindow(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .weight(pref.cmn_poolSponsorWidth),
-                                modelState = modelState,
+                                event = event,
                                 padding = screenWidth.value.dp / 170,
                                 baseFontSize = (screenWidth / 50) * pref.ps_fontScale,
                                 borderColor = borderColor
@@ -139,21 +139,21 @@ fun PublicViewWindow(
 @Composable
 private fun TeamPanel(
     modifier: Modifier = Modifier,
-    teamsState: TeamsState,
+    teams: List<Team>,
     baseFontSize: TextUnit,
     pref: PublicViewPrefState
 ) {
-    val data = teamsState.teams
-        .sortedByDescending { it.numOfRounds() + it.numOfFunfactorPoints() }
+    val data = teams
+        .sortedByDescending { it.numOfRounds.value + it.numOfFunfactorPoints.value }
         .map {
-            val numOfRounds = it.numOfRounds()
-            val numOfFunfactorPoints = it.numOfFunfactorPoints()
+            val numOfRounds = it.numOfRounds.value
+            val numOfFunfactorPoints = it.numOfFunfactorPoints.value
             listOf(
-                it.name ?: "-",
+                it.name.value,
                 numOfRounds.toString(),
                 numOfFunfactorPoints.toString(),
                 (numOfRounds + numOfFunfactorPoints).toString(),
-                Formats.germanEuroFormat(it.totalAmount(), true)
+                Formats.germanEuroFormat(it.totalAmount.value, true)
             )
         }
     PublicViewTable(
@@ -191,13 +191,22 @@ private fun TeamPanel(
 @Composable
 private fun RunnerPanel(
     modifier: Modifier = Modifier,
-    runnersState: RunnersState,
+    runners: List<Runner>,
     baseFontSize: TextUnit,
     pref: PublicViewPrefState
 ) {
-    val singleRunners = runnersState.runners
-        .filter { it.team == null }
-        .sortedByDescending { it.numOfRounds() }
+    val states = runners.map {
+        val totalAmount by it.totalAmount.collectAsState()
+        totalAmount
+    }
+
+    key(*states.toTypedArray()) {
+        // TODO continue here
+    }
+
+    val singleRunners = runners
+        .filter { it.team.value == null }
+        .sortedByDescending { it.numOfRounds.value }
     val splitRunners = split(singleRunners, pref.rns_numOfRows)
 
     Row(
@@ -207,9 +216,9 @@ private fun RunnerPanel(
         splitRunners.forEachIndexed { index, runners ->
             var data = runners.map {
                 listOf(
-                    it.name ?: it.id.toString(),
-                    it.numOfRounds().toString(),
-                    Formats.germanEuroFormat(it.totalAmount(), true)
+                    it.name.value.ifEmpty { it.chipId.value.toString() },
+                    it.numOfRounds.value.toString(),
+                    Formats.germanEuroFormat(it.totalAmount.value, true)
                 )
             }
             if (index == splitRunners.lastIndex && data.size < pref.rns_numOfRows) {
@@ -256,17 +265,17 @@ private fun <T> split(list: List<T>, subListSize: Int): List<List<T>> {
 @Composable
 private fun CommonPanel(
     modifier: Modifier = Modifier,
-    modelState: ModelState.Loaded,
+    event: Event,
     baseFontSize: TextUnit,
     padding: Dp,
     borderColor: Color
 ) {
     val density = LocalDensity.current
-    val commonState by modelState.common.collectAsState()
-    val overallRounds by modelState.overallRounds.collectAsState()
-    val overallContribution by modelState.overallContribution.collectAsState()
-    val currentSponsorPoolAmount by modelState.currentSponsorPoolAmount.collectAsState()
-    val remainingTime by modelState.modelAPI.runTimer.remainingTime.collectAsState()
+    val sponsorPoolAmount by event.sponsorPoolAmount.collectAsState()
+    val overallRounds by event.overallRounds.collectAsState()
+    val overallContribution by event.overallContribution.collectAsState()
+    val currentSponsorPoolAmount by event.currentSponsorPoolAmount.collectAsState()
+    val remainingTime by event.runTimer.remainingTime.collectAsState()
     val baseTextStyle = TextStyle(fontSize = baseFontSize)
     var clockHeight by remember { mutableStateOf(0.dp) }
     val cornerRadius = clockHeight / 2
@@ -321,8 +330,8 @@ private fun CommonPanel(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    val poolBarLevel = if (commonState.sponsorPoolAmount == 0.0) 0.0
-                    else currentSponsorPoolAmount / commonState.sponsorPoolAmount
+                    val poolBarLevel = if (sponsorPoolAmount == 0.0) 0.0
+                    else currentSponsorPoolAmount / sponsorPoolAmount
                     VerticalPoolBar(
                         modifier = Modifier.fillMaxWidth(.25f),
                         level = poolBarLevel.toFloat(),

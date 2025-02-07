@@ -1,9 +1,6 @@
 package lunalauf.rms.model.internal
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.withLock
 import lunalauf.rms.model.api.DeleteElementResult
 import lunalauf.rms.model.common.ContributionType
@@ -33,6 +30,7 @@ sealed class Contributor(
     val rounds get() = _rounds.asStateFlow()
 
     val numOfRounds = rounds.map { it.sumOf { round -> round.points.value } }
+        .stateIn(event.scope, SharingStarted.Eagerly, 0)
 
     internal fun internalSetRounds(rounds: List<Round>) {
         this._rounds.update { rounds }

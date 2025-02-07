@@ -7,15 +7,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.utils.Timer
-import lunalauf.rms.modelapi.ModelState
-import lunalauf.rms.modelapi.resource.ModelResourceManager
+import lunalauf.rms.model.api.ModelManager
+import lunalauf.rms.model.api.ModelState
 import lunalauf.rms.modelapi.resource.SaveResult
 import lunalauf.rms.modelapi.states.PreferencesState
 import lunalauf.rms.utilities.network.bot.BotManager
 import kotlin.time.Duration.Companion.seconds
 
 class FileOpenScreenModel(
-    private val modelResourceManager: ModelResourceManager,
+    private val modelManager: ModelManager,
     private val botManager: BotManager,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
@@ -30,8 +30,8 @@ class FileOpenScreenModel(
         launcher = { action -> launchInModelScope { action() } },
         onError = { _preferences.update { it.copy(autoSaveActive = false) } }
     ) {
-        if (modelResourceManager is ModelResourceManager.Accessible) {
-            when (val result = modelResourceManager.save()) {
+        if (modelManager is ModelResourceManager.Accessible) {
+            when (val result = modelManager.save()) {
                 is SaveResult.Error -> {
                     launchInDefaultScope {
                         snackBarHostState.showSnackbar(
@@ -78,14 +78,14 @@ class FileOpenScreenModel(
     }
 
     fun updateSaveConnectionsActive(active: Boolean) {
-        if (modelResourceManager is ModelResourceManager.Accessible && botManager is BotManager.Available) {
+        if (modelManager is ModelResourceManager.Accessible && botManager is BotManager.Available) {
             _preferences.update { it.copy(saveConnectionsActive = active) }
 
             launchInDefaultScope {
                 if (active) {
-                    modelResourceManager.setPreSaveProcessing { botManager.saveConnectionData() }
+                    modelManager.setPreSaveProcessing { botManager.saveConnectionData() }
                 } else {
-                    modelResourceManager.removePreSaveProcessing()
+                    modelManager.removePreSaveProcessing()
                 }
             }
         } else {
