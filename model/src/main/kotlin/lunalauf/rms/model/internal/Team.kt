@@ -7,7 +7,6 @@ import kotlinx.datetime.toInstant
 import lunalauf.rms.model.api.AddRunnerToTeamResult
 import lunalauf.rms.model.api.DeleteElementResult
 import lunalauf.rms.model.api.LogMinigameResultResult
-import lunalauf.rms.model.api.RemoveRunnerFromTeamResult
 import lunalauf.rms.model.common.ContributionType
 import lunalauf.rms.model.helper.Timestamps
 import org.slf4j.LoggerFactory
@@ -96,23 +95,6 @@ class Team internal constructor(
         }
     }
 
-    suspend fun removeRunner(runner: Runner): RemoveRunnerFromTeamResult {
-        event.mutex.withLock {
-            val oldTeam = runner.team.value
-
-            if (oldTeam == null) {
-                logger.warn("Missing UI check if runner is already in no team")
-                return RemoveRunnerFromTeamResult.AlreadyInNoTeam
-            }
-
-            this.internalRemoveRunner(runner)
-            runner.internalSetTeam(null)
-
-            logger.info("Removed {} from {}", runner, oldTeam)
-            return RemoveRunnerFromTeamResult.Removed
-        }
-    }
-
     suspend fun getRoundDurations(): List<Long> {
         event.mutex.withLock {
             return rounds.value
@@ -137,7 +119,7 @@ class Team internal constructor(
         return newFunfactorResult
     }
 
-    suspend fun logFunfactorResult(team: Team, type: Funfactor, points: Int): FunfactorResult {
+    suspend fun logFunfactorResult(type: Funfactor, points: Int): FunfactorResult {
         event.mutex.withLock {
             return internalLogFunfactorResult(type, points)
         }
@@ -145,7 +127,7 @@ class Team internal constructor(
 
     suspend fun logMinigameResult(minigameID: Int, points: Int): LogMinigameResultResult {
         event.mutex.withLock {
-            val minigame = event.getMinigame(minigameID)
+            val minigame = event.internalGetMinigame(minigameID)
             if (minigame == null) {
                 logger.warn("There is no minigame with ID '{}'", minigameID)
                 return LogMinigameResultResult.NoMinigameWithId

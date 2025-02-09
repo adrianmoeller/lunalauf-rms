@@ -9,8 +9,8 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
 import lunalauf.rms.centralapp.utils.InputValidator
-import lunalauf.rms.modelapi.CreateRunnerResult
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.CreateRunnerResult
+import lunalauf.rms.model.api.ModelState
 
 class EnterNameScreenModel(
     modelState: ModelState.Loaded,
@@ -32,7 +32,7 @@ class EnterNameScreenModel(
     fun createRunner(onClose: () -> Unit) {
         processing = true
         launchInModelScope {
-            when (modelAPI.createRunner(id, name)) {
+            when (event.createRunner(id, name)) {
                 is CreateRunnerResult.Created -> {
                     launchInDefaultScope {
                         snackBarHostState.showSnackbar(

@@ -1,5 +1,6 @@
 package lunalauf.rms.utilities.network.bot
 
+import kotlinx.coroutines.runBlocking
 import lunalauf.rms.model.api.ModelManager
 import lunalauf.rms.model.api.ModelState
 import lunalauf.rms.model.internal.Runner
@@ -167,7 +168,9 @@ class RunnerInfoBot(
             val event = constModelState.event
             try {
                 val chipId = msg.text.toLong()
-                val runner = event.getRunner(chipId)
+                val runner = runBlocking(ModelState.modelContext) {
+                    event.getRunner(chipId)
+                }
                 if (runner != null) {
                     chatId2runner[msg.chatId] = runner
                     val preAddress = "*Hallo " + runner.name.value + ", "

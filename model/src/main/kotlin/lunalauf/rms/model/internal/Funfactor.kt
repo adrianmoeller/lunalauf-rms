@@ -53,7 +53,7 @@ sealed class Funfactor(
         }
     }
 
-    suspend fun delete(): DeleteElementResult {
+    override suspend fun delete(): DeleteElementResult {
         event.mutex.withLock {
             if (results.value.isNotEmpty())
                 return DeleteElementResult.NotDeleted("Funfactor has results")
@@ -66,4 +66,6 @@ sealed class Funfactor(
             return DeleteElementResult.Deleted
         }
     }
+
+    abstract suspend fun print(): String
 }

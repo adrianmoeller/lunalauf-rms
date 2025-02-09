@@ -1,22 +1,27 @@
 package lunalauf.rms.centralapp.components.dialogs.details.minigame
 
-import LunaLaufLanguage.Minigame
+import kotlinx.coroutines.runBlocking
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.utils.InputValidator
-import lunalauf.rms.modelapi.ModelState
-import lunalauf.rms.modelapi.UpdateMinigameIdResult
-import lunalauf.rms.modelapi.UpdateMinigameNameResult
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.api.UpdateFunfactorNameResult
+import lunalauf.rms.model.api.UpdateMinigameIdResult
+import lunalauf.rms.model.internal.Minigame
 
 class MinigameDetailsScreenModel(
     private val modelState: ModelState.Loaded
 ) : AbstractScreenModel(modelState) {
     fun validateId(id: String): Int? {
-        return id.trim().toIntOrNull()?.takeIf { it >= 0 && !modelState.minigames.value.ids.contains(it) }
+        return runBlocking(ModelState.modelContext) {
+            id.trim().toIntOrNull()?.takeIf {
+                it >= 0 && event.getMinigame(it) == null
+            }
+        }
     }
 
     fun updateId(minigame: Minigame, id: Int) {
         launchInModelScope {
-            when (modelAPI.updateMinigameId(minigame, id)) {
+            when (minigame.updateId(id)) {
                 is UpdateMinigameIdResult.Exists -> {}
                 UpdateMinigameIdResult.Updated -> {}
             }
@@ -29,9 +34,9 @@ class MinigameDetailsScreenModel(
 
     fun updateName(minigame: Minigame, name: String) {
         launchInModelScope {
-            when (modelAPI.updateMinigameName(minigame, name)) {
-                UpdateMinigameNameResult.BlankName -> {}
-                UpdateMinigameNameResult.Updated -> {}
+            when (minigame.updateName(name)) {
+                UpdateFunfactorNameResult.BlankName -> {}
+                UpdateFunfactorNameResult.Updated -> {}
             }
         }
     }

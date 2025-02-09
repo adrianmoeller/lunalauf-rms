@@ -13,7 +13,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.OptionTile
 import lunalauf.rms.centralapp.components.commons.tryRequestFocus
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

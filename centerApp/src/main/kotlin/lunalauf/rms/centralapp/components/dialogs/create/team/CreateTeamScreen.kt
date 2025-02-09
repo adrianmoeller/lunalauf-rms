@@ -1,6 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.create.team
 
-import LunaLaufLanguage.Team
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -12,7 +11,8 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
 import lunalauf.rms.centralapp.components.dialogs.DummyScreen
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Team
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

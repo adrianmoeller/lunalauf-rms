@@ -9,20 +9,19 @@ import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.utils.Timer
 import lunalauf.rms.model.api.ModelManager
 import lunalauf.rms.model.api.ModelState
-import lunalauf.rms.modelapi.resource.SaveResult
-import lunalauf.rms.modelapi.states.PreferencesState
+import lunalauf.rms.model.api.PreferencesState
+import lunalauf.rms.model.api.SaveResult
 import lunalauf.rms.utilities.network.bot.BotManager
 import kotlin.time.Duration.Companion.seconds
 
 class FileOpenScreenModel(
-    private val modelManager: ModelManager,
+    private val modelManager: ModelManager.Available,
     private val botManager: BotManager,
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
 ) : AbstractScreenModel(modelState) {
-    private val _preferences = MutableStateFlow(
-        PreferencesState(roundThreshold = modelAPI.roundThreshold.toFloat())
-    )
+    private val _preferences =
+        MutableStateFlow(PreferencesState(roundThreshold = event.roundThreshold.value.toFloat()))
     val preferences get() = _preferences.asStateFlow()
 
     private val autoSaveTimer = Timer(
@@ -30,24 +29,20 @@ class FileOpenScreenModel(
         launcher = { action -> launchInModelScope { action() } },
         onError = { _preferences.update { it.copy(autoSaveActive = false) } }
     ) {
-        if (modelManager is ModelResourceManager.Accessible) {
-            when (val result = modelManager.save()) {
-                is SaveResult.Error -> {
-                    launchInDefaultScope {
-                        snackBarHostState.showSnackbar(
-                            message = result.message,
-                            withDismissAction = true,
-                            duration = SnackbarDuration.Indefinite
-                        )
-                    }
-                    throw Exception("Terminate task")
+        when (val result = modelManager.save()) {
+            is SaveResult.Error -> {
+                launchInDefaultScope {
+                    snackBarHostState.showSnackbar(
+                        message = result.message,
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Indefinite
+                    )
                 }
-
-                is SaveResult.NoFileOpen -> throw Exception("Terminate task")
-                is SaveResult.Success -> {}
+                throw Exception("Terminate task")
             }
-        } else {
-            throw Exception("Terminate task")
+
+            is SaveResult.NoFileOpen -> throw Exception("Terminate task")
+            is SaveResult.Success -> {}
         }
     }
 
@@ -73,12 +68,12 @@ class FileOpenScreenModel(
 
     fun updateRoundThreshold() {
         launchInModelScope {
-            modelAPI.setRoundThreshold(preferences.value.roundThreshold.toInt())
+            event.setRoundThreshold(preferences.value.roundThreshold.toInt())
         }
     }
 
     fun updateSaveConnectionsActive(active: Boolean) {
-        if (modelManager is ModelResourceManager.Accessible && botManager is BotManager.Available) {
+        if (botManager is BotManager.Available) {
             _preferences.update { it.copy(saveConnectionsActive = active) }
 
             launchInDefaultScope {

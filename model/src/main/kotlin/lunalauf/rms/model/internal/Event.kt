@@ -166,13 +166,37 @@ class Event internal constructor(
         }
     }
 
-    fun getRunner(chipId: Long): Runner? = chipIdToRunner[chipId]
-    internal fun getTeam(name: String): Team? = nameToTeam[name]
-    internal fun getMinigame(id: Int): Minigame? = idToMinigame[id]
+    suspend fun setRoundThreshold(threshold: Int) {
+        mutex.withLock {
+            _roundThreshold.update { threshold }
+        }
+    }
+
+    internal fun internalGetRunner(chipId: Long): Runner? = chipIdToRunner[chipId]
+    internal fun internalGetTeam(name: String): Team? = nameToTeam[name]
+    internal fun internalGetMinigame(id: Int): Minigame? = idToMinigame[id]
+
+    suspend fun getRunner(chipId: Long): Runner? {
+        mutex.withLock {
+            return internalGetRunner(chipId)
+        }
+    }
+
+    suspend fun getTeam(name: String): Team? {
+        mutex.withLock {
+            return internalGetTeam(name)
+        }
+    }
+
+    suspend fun getMinigame(id: Int): Minigame? {
+        mutex.withLock {
+            return internalGetMinigame(id)
+        }
+    }
 
     suspend fun createRunner(chipId: Long, name: String): CreateRunnerResult {
         mutex.withLock {
-            getRunner(chipId)?.let {
+            internalGetRunner(chipId)?.let {
                 logger.warn("Missing UI check if chip ID already exists when creating a runner")
                 return CreateRunnerResult.Exists(it)
             }
@@ -197,7 +221,7 @@ class Event internal constructor(
                 return CreateTeamResult.BlankName
             }
 
-            getTeam(name)?.let {
+            internalGetTeam(name)?.let {
                 logger.warn("Missing UI check if name already exists when creating a team")
                 return CreateTeamResult.Exists(it)
             }
@@ -217,7 +241,7 @@ class Event internal constructor(
 
     suspend fun createMinigame(name: String, id: Int): CreateMinigameResult {
         mutex.withLock {
-            getMinigame(id)?.let {
+            internalGetMinigame(id)?.let {
                 logger.warn("Missing UI check if minigame ID already exists when creating a minigame")
                 return CreateMinigameResult.Exists(it)
             }

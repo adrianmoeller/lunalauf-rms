@@ -7,6 +7,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import lunalauf.rms.model.api.DeleteElementResult
 import lunalauf.rms.model.api.LogRoundResult
+import lunalauf.rms.model.api.RemoveRunnerFromTeamResult
 import lunalauf.rms.model.api.UpdateRunnerIdResult
 import lunalauf.rms.model.common.ContributionType
 import lunalauf.rms.model.helper.Timestamps
@@ -70,9 +71,10 @@ class Runner internal constructor(
         _team.update { team }
     }
 
+
     suspend fun updateChipId(chipId: Long): UpdateRunnerIdResult {
         event.mutex.withLock {
-            event.getRunner(chipId)?.let {
+            event.internalGetRunner(chipId)?.let {
                 logger.warn("Missing UI check if ID already exists when updating a runner ID")
                 return UpdateRunnerIdResult.Exists(it)
             }
@@ -82,6 +84,23 @@ class Runner internal constructor(
             event.chipIdToRunner[chipId] = this
 
             return UpdateRunnerIdResult.Updated
+        }
+    }
+
+    suspend fun removeFromTeam(): RemoveRunnerFromTeamResult {
+        event.mutex.withLock {
+            val oldTeam = team.value
+
+            if (oldTeam == null) {
+                logger.warn("Missing UI check if runner is already in no team")
+                return RemoveRunnerFromTeamResult.AlreadyInNoTeam
+            }
+
+            oldTeam.internalRemoveRunner(this)
+            this.internalSetTeam(null)
+
+            logger.info("Removed {} from {}", this, oldTeam)
+            return RemoveRunnerFromTeamResult.Removed
         }
     }
 

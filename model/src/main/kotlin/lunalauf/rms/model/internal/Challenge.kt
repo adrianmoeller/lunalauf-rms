@@ -29,24 +29,23 @@ class Challenge internal constructor(
     description
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
     private val scope = CoroutineScope(Dispatchers.Default)
 
     private val _expires = MutableStateFlow(expires)
+
     val expires get() = _expires.asStateFlow()
-
     private val _expireMsg = MutableStateFlow(expireMsg)
+
     val expireMsg get() = _expireMsg.asStateFlow()
-
     private val _duration = MutableStateFlow(duration)
+
     val duration get() = _duration.asStateFlow()
-
     private val _state = MutableStateFlow(state)
+
     val state get() = _state.asStateFlow()
-
     private val _receiveImages = MutableStateFlow(receiveImages)
-    val receiveImages get() = _receiveImages.asStateFlow()
 
+    val receiveImages get() = _receiveImages.asStateFlow()
     suspend fun updateExpires(expires: Boolean) {
         event.mutex.withLock {
             _expires.update { expires }
@@ -154,8 +153,10 @@ class Challenge internal constructor(
             }
 
             _state.update { ChallengeState.PENDING }
-            
+
             return ResetChallengeStateResult.Reset
         }
     }
+
+    override suspend fun print(): String = "Challenge: ${name.value}"
 }

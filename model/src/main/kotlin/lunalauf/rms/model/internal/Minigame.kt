@@ -24,7 +24,7 @@ class Minigame internal constructor(
 
     suspend fun updateId(id: Int): UpdateMinigameIdResult {
         event.mutex.withLock {
-            event.getMinigame(id)?.let {
+            event.internalGetMinigame(id)?.let {
                 logger.warn("Missing UI check if minigame ID already exists when updating a minigame ID")
                 return UpdateMinigameIdResult.Exists(it)
             }
@@ -36,4 +36,6 @@ class Minigame internal constructor(
             return UpdateMinigameIdResult.Updated
         }
     }
+
+    override suspend fun print(): String = "Minigame: ${name.value}"
 }

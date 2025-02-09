@@ -2,6 +2,7 @@ package lunalauf.rms.model.internal
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import lunalauf.rms.model.api.DeleteElementResult
 
 class ConnectionEntry internal constructor(
     event: Event,
@@ -15,4 +16,8 @@ class ConnectionEntry internal constructor(
 
     private val _runner = MutableStateFlow(runner)
     val runner get() = _runner.asStateFlow()
+
+    override suspend fun delete(): DeleteElementResult {
+        throw UnsupportedOperationException()
+    }
 }

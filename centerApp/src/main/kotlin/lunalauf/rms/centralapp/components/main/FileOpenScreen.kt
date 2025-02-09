@@ -34,7 +34,7 @@ import lunalauf.rms.utilities.network.bot.BotManager
 @Composable
 fun FileOpenScreen(
     modifier: Modifier = Modifier,
-    modelManager: ModelManager,
+    modelManager: ModelManager.Available,
     botManager: BotManager,
     modelState: ModelState.Loaded,
     onMenuNewFile: () -> Unit,

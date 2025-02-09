@@ -2,7 +2,6 @@ package lunalauf.rms.model.internal
 
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.withLock
-import lunalauf.rms.model.api.DeleteElementResult
 import lunalauf.rms.model.common.ContributionType
 
 sealed class Contributor(
@@ -61,6 +60,4 @@ sealed class Contributor(
             _amountPerRound.update { amountPerRound }
         }
     }
-
-    abstract suspend fun delete(): DeleteElementResult
 }

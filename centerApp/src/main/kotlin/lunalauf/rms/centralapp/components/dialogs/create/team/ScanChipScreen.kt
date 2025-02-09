@@ -1,6 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.create.team
 
-import LunaLaufLanguage.Team
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,7 +16,8 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import lunalauf.rms.centralapp.components.dialogs.ScanChipField
 import lunalauf.rms.centralapp.components.dialogs.ScanChipScreenModel
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Team
 
 data class ScanChipScreen(
     private val modelState: ModelState.Loaded,
@@ -38,7 +38,7 @@ data class ScanChipScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
-                text = "Add runner to team '${team.name}':",
+                text = "Add runner to team '${team.name.value}':",
                 style = MaterialTheme.typography.titleMedium
             )
             Column(
@@ -68,7 +68,7 @@ data class ScanChipScreen(
                     onEnterKeyEvent = {
                         screenModel.processBufferedId(
                             onKnown = {
-                                if (it.team == team) {
+                                if (it.team.value == team) {
                                     alreadyMember = true
                                 } else {
                                     navigator.push(

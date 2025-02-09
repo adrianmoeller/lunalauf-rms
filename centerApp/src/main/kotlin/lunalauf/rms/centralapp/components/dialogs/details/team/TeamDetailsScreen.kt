@@ -1,9 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.details.team
 
-import LunaLaufLanguage.FunfactorResult
-import LunaLaufLanguage.Round
-import LunaLaufLanguage.Runner
-import LunaLaufLanguage.Team
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,7 +27,11 @@ import lunalauf.rms.centralapp.components.commons.*
 import lunalauf.rms.centralapp.components.commons.tables.ClickableTable
 import lunalauf.rms.centralapp.components.dialogs.details.EditableContributionTile
 import lunalauf.rms.centralapp.components.dialogs.details.StatTile
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.FunfactorResult
+import lunalauf.rms.model.internal.Round
+import lunalauf.rms.model.internal.Runner
+import lunalauf.rms.model.internal.Team
 
 @Composable
 fun TeamDetailsScreen(
@@ -45,10 +45,15 @@ fun TeamDetailsScreen(
 ) {
     val screenModel = remember { TeamDetailsScreenModel(modelState) }
 
+    val name by team.name.collectAsState()
+    val contribution by team.contributionType.collectAsState()
+    val amountFix by team.amountFix.collectAsState()
+    val amountPerRound by team.amountPerRound.collectAsState()
+
     FullScreenDialog(
         modifier = modifier,
         onDismissRequest = onDismissRequest,
-        title = "Team: ${team.name}",
+        title = "Team: $name",
         maxWidth = 1100.dp
     ) {
         val teamDetailsCalc by screenModel.calcTeamDetails(team)
@@ -80,16 +85,16 @@ fun TeamDetailsScreen(
                             ) {
                                 EditableValueTile(
                                     name = "Name",
-                                    value = team.name,
+                                    value = name,
                                     onValueChange = { screenModel.updateName(team, it) },
                                     parser = screenModel::validateName,
                                     default = "",
                                     editTitle = "Update name"
                                 )
                                 EditableContributionTile(
-                                    type = team.contribution,
-                                    amountFixed = team.amountFix,
-                                    amountPerRound = team.amountPerRound,
+                                    type = contribution,
+                                    amountFixed = amountFix,
+                                    amountPerRound = amountPerRound,
                                     onValuesChange = { type, fixed, perRound ->
                                         screenModel.updateContribution(team, type, fixed, perRound)
                                     }

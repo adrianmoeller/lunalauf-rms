@@ -282,7 +282,9 @@ class RoundCounterBot(
             val event = constModelState.event
             sendMsg = try {
                 val chipId = msg.text.toLong()
-                val runner = event.getRunner(chipId)
+                val runner = runBlocking(ModelState.modelContext) {
+                    event.getRunner(chipId)
+                }
                 if (runner != null) {
                     register(msg.chatId, runner)
                     return

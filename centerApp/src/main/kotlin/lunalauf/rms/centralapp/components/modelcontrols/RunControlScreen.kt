@@ -12,8 +12,8 @@ import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.EditDialog
 import lunalauf.rms.centralapp.components.commons.EditableValueTile
 import lunalauf.rms.centralapp.utils.Formats
-import lunalauf.rms.modelapi.ModelState
-import lunalauf.rms.modelapi.RunTimer
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.common.RunTimerState
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -22,13 +22,17 @@ fun RunControlScreen(
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
 ) {
+    val event = modelState.event
     val screenModel = remember { RunControlScreenModel(modelState) }
-    val commons by modelState.common.collectAsState()
 
     var runDuration by remember { mutableStateOf(150) } // min
-    val runTimer = modelState.modelAPI.runTimer
+    val runTimer = event.runTimer
     val remainingTime by runTimer.remainingTime.collectAsState()
     val timerState by runTimer.state.collectAsState()
+
+    val sponsorPoolAmount by event.sponsorPoolAmount.collectAsState()
+    val sponsorPoolRounds by event.sponsorPoolRounds.collectAsState()
+    val additionalContribution by event.additionalContribution.collectAsState()
 
     Column(
         modifier = modifier,
@@ -44,9 +48,9 @@ fun RunControlScreen(
             state = timerState,
             onStartStopClick = {
                 when (timerState) {
-                    RunTimer.State.RUNNING -> runTimer.pause()
-                    RunTimer.State.PAUSED -> runTimer.resume()
-                    RunTimer.State.EXPIRED -> runTimer.start(runDuration * 60L)
+                    RunTimerState.RUNNING -> runTimer.pause()
+                    RunTimerState.PAUSED -> runTimer.resume()
+                    RunTimerState.EXPIRED -> runTimer.start(runDuration * 60L)
                 }
             },
             onResetClick = { runTimer.reset() },
@@ -68,7 +72,7 @@ fun RunControlScreen(
             ) {
                 EditableValueTile(
                     name = "Amount",
-                    value = commons.sponsorPoolAmount,
+                    value = sponsorPoolAmount,
                     onValueChange = screenModel::updateSponsoringPoolAmount,
                     parser = screenModel::validateSponsoringPoolAmount,
                     default = 0.0,
@@ -77,7 +81,7 @@ fun RunControlScreen(
                 )
                 EditableValueTile(
                     name = "Rounds to be reached",
-                    value = commons.sponsorPoolRounds,
+                    value = sponsorPoolRounds,
                     onValueChange = screenModel::updateSponsoringPoolRounds,
                     parser = screenModel::validateSponsoringPoolRounds,
                     default = 0,
@@ -90,7 +94,7 @@ fun RunControlScreen(
             ) {
                 EditableValueTile(
                     name = "Amount",
-                    value = commons.additionalContribution,
+                    value = additionalContribution,
                     onValueChange = screenModel::updateAdditionalContribution,
                     parser = screenModel::validateAdditionalContribution,
                     default = 0.0,
@@ -103,7 +107,7 @@ fun RunControlScreen(
                 ) {
                     var addToAddContrDialogOpen by remember { mutableStateOf(false) }
                     var addToAddContrValue by remember {
-                        mutableStateOf(TextFieldValue(commons.additionalContribution.toString()))
+                        mutableStateOf(TextFieldValue(additionalContribution.toString()))
                     }
                     OutlinedButton(
                         modifier = Modifier.padding(bottom = 5.dp),

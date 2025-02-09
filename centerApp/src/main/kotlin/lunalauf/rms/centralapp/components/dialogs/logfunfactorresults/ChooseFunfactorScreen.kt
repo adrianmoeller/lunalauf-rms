@@ -1,6 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.logfunfactorresults
 
-import LunaLaufLanguage.Funfactor
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -23,7 +22,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import lunalauf.rms.centralapp.components.commons.ListItemDivider
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Funfactor
 
 data class ChooseFunfactorScreen(
     private val modelState: ModelState.Loaded,
@@ -33,9 +33,11 @@ data class ChooseFunfactorScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val minigamesState by modelState.minigames.collectAsState()
-        val challengesState by modelState.challenges.collectAsState()
-        
+        val event = modelState.event
+
+        val minigames by event.minigames.collectAsState()
+        val challenges by event.challenges.collectAsState()
+
         Row(
             modifier = Modifier.padding(bottom = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -49,7 +51,7 @@ data class ChooseFunfactorScreen(
                     text = "Minigames:",
                     style = MaterialTheme.typography.labelLarge
                 )
-                minigamesState.minigames.forEachIndexed { index, minigame ->
+                minigames.forEachIndexed { index, minigame ->
                     FunfactorTile(
                         funfactor = minigame,
                         onClick = {
@@ -63,7 +65,7 @@ data class ChooseFunfactorScreen(
                             )
                         }
                     )
-                    if (index < minigamesState.minigames.lastIndex)
+                    if (index < minigames.lastIndex)
                         ListItemDivider(spacing = 10.dp)
                 }
             }
@@ -76,7 +78,7 @@ data class ChooseFunfactorScreen(
                     text = "Challenges:",
                     style = MaterialTheme.typography.labelLarge
                 )
-                challengesState.challenges.forEachIndexed { index, challenge ->
+                challenges.forEachIndexed { index, challenge ->
                     FunfactorTile(
                         funfactor = challenge,
                         onClick = {
@@ -90,7 +92,7 @@ data class ChooseFunfactorScreen(
                             )
                         }
                     )
-                    if (index < challengesState.challenges.lastIndex)
+                    if (index < challenges.lastIndex)
                         ListItemDivider(spacing = 10.dp)
                 }
             }
@@ -116,12 +118,14 @@ private fun FunfactorTile(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
+        val name by funfactor.name.collectAsState()
+
         Text(
             modifier = Modifier
                 .padding(vertical = 10.dp)
                 .padding(start = 10.dp)
                 .weight(1f),
-            text = funfactor.name,
+            text = name,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -129,7 +133,7 @@ private fun FunfactorTile(
             Row {
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
-                    contentDescription = "Select ${funfactor.name}",
+                    contentDescription = "Select $name",
                     tint = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(Modifier.width(10.dp))
