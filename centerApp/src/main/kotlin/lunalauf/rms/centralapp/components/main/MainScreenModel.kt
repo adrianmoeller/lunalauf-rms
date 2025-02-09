@@ -69,14 +69,20 @@ class MainScreenModel : AbstractStatelessScreenModel() {
     fun closeFile() {
         if (modelManager is ModelManager.Available) {
             launchInModelScope {
-                val result = modelManager.save()
-                if (result is SaveResult.Error) {
-                    snackBarHostState.showSnackbar(
-                        message = result.message,
-                        withDismissAction = true,
-                        duration = SnackbarDuration.Indefinite,
-                        isError = true
-                    )
+                when (val result = modelManager.save()) {
+                    SaveResult.NoFileOpen -> {}
+                    is SaveResult.Error -> {
+                        snackBarHostState.showSnackbar(
+                            message = result.message,
+                            withDismissAction = true,
+                            duration = SnackbarDuration.Indefinite,
+                            isError = true
+                        )
+                    }
+
+                    is SaveResult.Success -> {
+                        modelManager.close()
+                    }
                 }
             }
         }

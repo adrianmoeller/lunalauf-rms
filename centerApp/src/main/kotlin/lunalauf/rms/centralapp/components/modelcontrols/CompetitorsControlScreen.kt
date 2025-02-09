@@ -52,7 +52,7 @@ fun CompetitorsControlScreen(
     val scope = rememberCoroutineScope()
 
     val teams by event.teams.collectAsState()
-    val runners by event.runners.collectAsState()
+    val singleRunners by event.singleRunners.collectAsState()
 
     var teamsTableOpen by remember { mutableStateOf(false) }
     var runnersTableOpen by remember { mutableStateOf(false) }
@@ -86,9 +86,11 @@ fun CompetitorsControlScreen(
                 onCreate = { createTeamOpen = true }
             ) {
                 itemsIndexed(teams) { index, team ->
+                    val name by team.name.collectAsState()
+
                     TeamTile(
                         modifier = Modifier.fillMaxWidth(),
-                        teamName = team.name.value,
+                        teamName = name,
                         onClick = { teamDetailsStatus = TeamDetailsStatus.Open(team) }
                     )
                     if (index < teams.lastIndex)
@@ -102,12 +104,14 @@ fun CompetitorsControlScreen(
                 createLabel = "Create single runner",
                 onCreate = { createRunnerOpen = true }
             ) {
-                val singleRunners = runners.filter { it.team.value == null }
                 itemsIndexed(singleRunners) { index, runner ->
-                    val runnerName = runner.name.value.ifBlank { runner.chipId.value.toString() }
+                    val name by runner.name.collectAsState()
+                    val chipId by runner.chipId.collectAsState()
+
+                    val displayName = name.ifBlank { chipId.toString() }
                     RunnerTile(
                         modifier = Modifier.fillMaxWidth(),
-                        runnerName = runnerName,
+                        runnerName = displayName,
                         onClick = { runnerDetailsStatus = RunnerDetailsStatus.Open(runner) }
                     )
                     if (index < singleRunners.lastIndex)

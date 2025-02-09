@@ -61,7 +61,7 @@ class TeamDetailsScreenModel(
                             .map {
                                 Pair(
                                     listOf(
-                                        Formats.dayTimeFormat.format(it.timestamp.value),
+                                        Formats.timeFormat.format(it.timestamp.value),
                                         it.type.value.print(),
                                         it.points.value.toString()
                                     ),
@@ -74,7 +74,7 @@ class TeamDetailsScreenModel(
                                 val runnerName = it.runner.value.name.value
                                 Pair(
                                     listOf(
-                                        Formats.dayTimeFormat.format(it.timestamp),
+                                        Formats.timeFormat.format(it.timestamp.value),
                                         runnerName.ifBlank { it.runner.value.chipId.value.toString() },
                                         it.points.toString()
                                     ),

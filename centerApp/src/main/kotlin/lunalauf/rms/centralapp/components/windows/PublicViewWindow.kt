@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.window.WindowDraggableArea
-import androidx.compose.material.Surface
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
@@ -109,12 +109,13 @@ fun PublicViewWindow(
                                     baseFontSize = (screenWidth / 45) * pref.tms_fontScale,
                                     pref = pref
                                 )
-                                val runners by event.runners.collectAsState()
+
+                                val singleRunners by event.singleRunners.collectAsState()
                                 RunnerPanel(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .weight(1f - pref.cmn_teamsHeight),
-                                    runners = runners,
+                                    singleRunners = singleRunners,
                                     baseFontSize = (screenWidth / 55) * pref.rns_fontScale,
                                     pref = pref
                                 )
@@ -143,23 +144,37 @@ private fun TeamPanel(
     baseFontSize: TextUnit,
     pref: PublicViewPrefState
 ) {
-    val data = teams
-        .sortedByDescending { it.numOfRounds.value + it.numOfFunfactorPoints.value }
-        .map {
-            val numOfRounds = it.numOfRounds.value
-            val numOfFunfactorPoints = it.numOfFunfactorPoints.value
-            listOf(
-                it.name.value,
-                numOfRounds.toString(),
-                numOfFunfactorPoints.toString(),
-                (numOfRounds + numOfFunfactorPoints).toString(),
-                Formats.germanEuroFormat(it.totalAmount.value, true)
-            )
-        }
+    data class TeamData(
+        val name: String,
+        val numOfRounds: Int,
+        val numOfFunfactorPoints: Int,
+        val totalAmount: Double
+    ) {
+        fun toList() = listOf(
+            name,
+            numOfRounds.toString(),
+            numOfFunfactorPoints.toString(),
+            (numOfRounds + numOfFunfactorPoints).toString(),
+            Formats.germanEuroFormat(totalAmount, true)
+        )
+    }
+
+    val data = mutableListOf<TeamData>()
+    for (team in teams) {
+        val name by team.name.collectAsState()
+        val numOfRounds by team.numOfRounds.collectAsState()
+        val numOfFunfactorPoints by team.numOfFunfactorPoints.collectAsState()
+        val totalAmount by team.totalAmount.collectAsState()
+
+        data.add(TeamData(name, numOfRounds, numOfFunfactorPoints, totalAmount))
+    }
+
     PublicViewTable(
         modifier = modifier,
         header = listOf("Team", "Runden", "Funfactors", "Summe", "Spendenbetrag"),
-        data = data,
+        data = data
+            .sortedByDescending { it.numOfRounds + it.numOfFunfactorPoints }
+            .map { it.toList() },
         weights = listOf(
             3.6f,
             1f * pref.tms_colWidth_rounds,
@@ -191,44 +206,48 @@ private fun TeamPanel(
 @Composable
 private fun RunnerPanel(
     modifier: Modifier = Modifier,
-    runners: List<Runner>,
+    singleRunners: List<Runner>,
     baseFontSize: TextUnit,
     pref: PublicViewPrefState
 ) {
-    val states = runners.map {
-        val totalAmount by it.totalAmount.collectAsState()
-        totalAmount
+    data class RunnerData(
+        val chipId: Long,
+        val name: String,
+        val numOfRounds: Int,
+        val totalAmount: Double
+    ) {
+        fun toList() = listOf(
+            name.ifBlank { chipId.toString() },
+            numOfRounds.toString(),
+            Formats.germanEuroFormat(totalAmount, true)
+        )
     }
 
-    key(*states.toTypedArray()) {
-        // TODO continue here
-    }
+    val data = mutableListOf<RunnerData>()
+    for (team in singleRunners) {
+        val chipId by team.chipId.collectAsState()
+        val name by team.name.collectAsState()
+        val numOfRounds by team.numOfRounds.collectAsState()
+        val totalAmount by team.totalAmount.collectAsState()
 
-    val singleRunners = runners
-        .filter { it.team.value == null }
-        .sortedByDescending { it.numOfRounds.value }
-    val splitRunners = split(singleRunners, pref.rns_numOfRows)
+        data.add(RunnerData(chipId, name, numOfRounds, totalAmount))
+    }
+    val splitData = split(data.sortedByDescending { it.numOfRounds }, pref.rns_numOfRows)
 
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        splitRunners.forEachIndexed { index, runners ->
-            var data = runners.map {
-                listOf(
-                    it.name.value.ifEmpty { it.chipId.value.toString() },
-                    it.numOfRounds.value.toString(),
-                    Formats.germanEuroFormat(it.totalAmount.value, true)
-                )
-            }
-            if (index == splitRunners.lastIndex && data.size < pref.rns_numOfRows) {
-                data = data + 0.until(pref.rns_numOfRows - data.size)
+        splitData.forEachIndexed { index, runners ->
+            var dataList = runners.map { it.toList() }
+            if (index == splitData.lastIndex && dataList.size < pref.rns_numOfRows) {
+                dataList = dataList + 0.until(pref.rns_numOfRows - dataList.size)
                     .map { listOf("", "", "") }
             }
             PublicViewTable(
                 modifier = Modifier.weight(1f),
                 header = listOf("Läufer*in", "Runden", "Spendenbetrag"),
-                data = data,
+                data = dataList,
                 weights = listOf(
                     2f,
                     1f * pref.rns_colWidth_rounds,

@@ -2,6 +2,7 @@ package lunalauf.rms.model.internal
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory
 
 private const val CREATED_LOG_MSG = "Created {}"
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class Event internal constructor(
     year: Int,
     runDuration: Int,
@@ -42,19 +44,53 @@ class Event internal constructor(
     private val _additionalContribution = MutableStateFlow(additionalContribution)
     val additionalContribution get() = _additionalContribution.asStateFlow()
 
-    private val overallRunnerRounds = combine(runners.value.map { it.numOfRounds }) { it.sum() }
-    private val overallFunfactorPoints = combine(teams.value.map { it.numOfFunfactorPoints }) { it.sum() }
+    private val _roundThreshold = MutableStateFlow(roundThreshold)
+    val roundThreshold get() = _roundThreshold.asStateFlow()
+
+    private val _teams = MutableStateFlow(emptyList<Team>())
+    val teams get() = _teams.asStateFlow()
+
+    private val _runners = MutableStateFlow(emptyList<Runner>())
+    val runners get() = _runners.asStateFlow()
+
+    private val _minigames = MutableStateFlow(emptyList<Minigame>())
+    val minigames get() = _minigames.asStateFlow()
+
+    val singleRunners = runners.flatMapLatest { r ->
+        if (r.isEmpty()) emptyFlow() else combine(r.map { it.team }) { r.filter { it.team.value == null } }
+    }.stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    private val _challenges = MutableStateFlow(emptyList<Challenge>())
+    val challenges get() = _challenges.asStateFlow()
+
+    private val _connections = MutableStateFlow(emptyList<ConnectionEntry>())
+    val connections get() = _connections.asStateFlow()
+
+    var runTimer: RunTimer = RunTimer()
+        private set
+
+    val overallRunnerRounds = runners.flatMapLatest { r ->
+        if (r.isEmpty()) flowOf(0) else combine(r.map { it.numOfRounds }) { it.sum() }
+    }.stateIn(scope, SharingStarted.Eagerly, 0)
+
+    private val overallFunfactorPoints = teams.flatMapLatest { t ->
+        if (t.isEmpty()) flowOf(0) else combine(t.map { it.numOfFunfactorPoints }) { it.sum() }
+    }
 
     val overallRounds = combine(overallRunnerRounds, overallFunfactorPoints) { rounds, points -> rounds + points }
         .stateIn(scope, SharingStarted.Eagerly, 0)
 
-    private val teamsContribution = combine(teams.value.map { it.totalAmount }) { it.sum() }
-    private val singleRunnersContribution = combine(
-        runners.value.filter { it.team.value == null }.map { it.totalAmount }) { it.sum() }
+    private val teamsContribution = teams.flatMapLatest { t ->
+        if (t.isEmpty()) flowOf(0.0) else combine(t.map { it.totalAmount }) { it.sum() }
+    }.stateIn(scope, SharingStarted.Eagerly, 0.0)
 
-    val runnersContribution = combine(
+    val runnersContribution = runners.flatMapLatest { r ->
+        if (r.isEmpty()) flowOf(0.0) else combine(r.map { it.totalAmount }) { it.sum() }
+    }.stateIn(scope, SharingStarted.Eagerly, 0.0)
+
+    val participantsContribution = combine(
         teamsContribution,
-        singleRunnersContribution,
+        runnersContribution,
         this.additionalContribution
     ) { teams, single, additional ->
         teams + single + additional
@@ -68,30 +104,9 @@ class Event internal constructor(
         calcCurrentSponsorPoolAmount(overall, amount, rounds)
     }.stateIn(scope, SharingStarted.Eagerly, 0.0)
 
-    val overallContribution = combine(runnersContribution, currentSponsorPoolAmount) { contribution, amount ->
+    val overallContribution = combine(participantsContribution, currentSponsorPoolAmount) { contribution, amount ->
         contribution + amount
     }.stateIn(scope, SharingStarted.Eagerly, 0.0)
-
-    private val _roundThreshold = MutableStateFlow(roundThreshold)
-    val roundThreshold get() = _roundThreshold.asStateFlow()
-
-    private val _teams = MutableStateFlow(emptyList<Team>())
-    val teams get() = _teams.asStateFlow()
-
-    private val _runners = MutableStateFlow(emptyList<Runner>())
-    val runners get() = _runners.asStateFlow()
-
-    private val _minigames = MutableStateFlow(emptyList<Minigame>())
-    val minigames get() = _minigames.asStateFlow()
-
-    private val _challenges = MutableStateFlow(emptyList<Challenge>())
-    val challenges get() = _challenges.asStateFlow()
-
-    private val _connections = MutableStateFlow(emptyList<ConnectionEntry>())
-    val connections get() = _connections.asStateFlow()
-
-    var runTimer: RunTimer = RunTimer()
-        private set
 
     internal val chipIdToRunner: MutableMap<Long, Runner> = mutableMapOf()
     internal val nameToTeam: MutableMap<String, Team> = mutableMapOf()

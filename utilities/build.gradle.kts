@@ -8,6 +8,7 @@ dependencies {
     implementation(libs.slf4jReload)
 
     implementation(libs.kotlinCoroutines)
+    implementation(libs.kotlinDateTime)
 
     implementation(libs.gsonLib)
     implementation(libs.telegramBots)

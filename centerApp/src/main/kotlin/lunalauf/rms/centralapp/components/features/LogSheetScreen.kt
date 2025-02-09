@@ -51,7 +51,7 @@ fun LogSheetScreen(
                     level = logMessage.level,
                     message = logMessage.message,
                     logger = logMessage.logger,
-                    timestamp = Formats.dayTimeFormat.format(logMessage.timestamp)
+                    timestamp = Formats.timeFormat.format(logMessage.timestamp)
                 )
                 if (index < logMessages.lastIndex)
                     ListItemDivider(spacing = 6.dp)

@@ -86,8 +86,13 @@ class Team internal constructor(
                 return AddRunnerToTeamResult.AlreadyMember
             }
 
-            oldTeam?._members?.update { it - runner }
+            if (oldTeam != null) {
+                oldTeam._members.update { it - runner }
+                oldTeam.internalRemoveRounds(runner.rounds.value.toSet())
+            }
+
             this._members.update { it + runner }
+            this._rounds.update { it + runner.rounds.value.toSet() }
             runner.internalSetTeam(this)
 
             logger.info("Added {} to {}", runner, this)

@@ -6,9 +6,8 @@ import lunalauf.rms.model.serialization.*
 class InternalModelMapper private constructor(
     private val eventSM: EventSM
 ) {
-    private lateinit var runnerUidMapping: MutableMap<Long, Runner>
+    private var runnerUidMapping: MutableMap<Long, Runner> = mutableMapOf()
     private lateinit var teamUidMapping: Map<Long, Team>
-
     private val teamFunfactorResultsMapping: MutableMap<Team, MutableList<FunfactorResult>> = mutableMapOf()
 
     companion object {
@@ -27,9 +26,7 @@ class InternalModelMapper private constructor(
             roundThreshold = eventSM.roundThreshold
         )
 
-        runnerUidMapping = eventSM.singleRunners
-            .associate { Pair(it.uid, toRunner(event, it)) }
-            .toMutableMap()
+        eventSM.singleRunners.forEach { toRunner(event, it) }
 
         teamUidMapping = eventSM.teams
             .associate { Pair(it.uid, toTeam(event, it)) }

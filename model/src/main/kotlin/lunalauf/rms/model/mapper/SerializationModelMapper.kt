@@ -26,7 +26,7 @@ class SerializationModelMapper private constructor(
             roundThreshold = event.roundThreshold.value,
             teams = event.teams.value.map { toTeamSM(it) },
             singleRunners = event.runners.value
-                .filter { it.team.value != null }
+                .filter { it.team.value == null }
                 .map { toRunnerSM(it) },
             minigames = event.minigames.value.map { toMinigameSM(it) },
             challenges = event.challenges.value.map { toChallengesSM(it) },

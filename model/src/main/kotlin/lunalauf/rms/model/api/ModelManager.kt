@@ -3,7 +3,6 @@ package lunalauf.rms.model.api
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.sync.withLock
 import lunalauf.rms.model.PersistenceManager
 import lunalauf.rms.model.internal.Event
 import org.slf4j.LoggerFactory
@@ -54,18 +53,14 @@ sealed class ModelManager {
             _model.update { ModelState.Loading }
 
             if (constModel is ModelState.Loaded) {
-                constModel.event.mutex.withLock {
-
-
-                    try {
-                        persistenceManager.save(path, constModel.event) { runPreSaveProcessing() }
-                    } catch (e: Exception) {
-                        _model.update { ModelState.Loaded(constModel.path, constModel.event) }
-                        return ModelResult.Error("Failed saving model before creating new one", e)
-                    }
-
-                    return internalNew(path, year)
+                try {
+                    persistenceManager.save(path, constModel.event) { runPreSaveProcessing() }
+                } catch (e: Exception) {
+                    _model.update { ModelState.Loaded(constModel.path, constModel.event) }
+                    return ModelResult.Error("Failed saving model before creating new one", e)
                 }
+
+                return internalNew(path, year)
             }
 
             return internalNew(path, year)
@@ -90,16 +85,14 @@ sealed class ModelManager {
             _model.update { ModelState.Loading }
 
             if (constModel is ModelState.Loaded) {
-                constModel.event.mutex.withLock {
-                    try {
-                        persistenceManager.save(path, constModel.event) { runPreSaveProcessing() }
-                    } catch (e: Exception) {
-                        _model.update { ModelState.Loaded(constModel.path, constModel.event) }
-                        return ModelResult.Error("Failed saving model before loading new one", e)
-                    }
-
-                    return internalLoad(path)
+                try {
+                    persistenceManager.save(path, constModel.event) { runPreSaveProcessing() }
+                } catch (e: Exception) {
+                    _model.update { ModelState.Loaded(constModel.path, constModel.event) }
+                    return ModelResult.Error("Failed saving model before loading new one", e)
                 }
+
+                return internalLoad(path)
             }
 
             return internalLoad(path)
@@ -120,15 +113,13 @@ sealed class ModelManager {
         suspend fun save(): SaveResult {
             val constModel = _model.value
             if (constModel is ModelState.Loaded) {
-                constModel.event.mutex.withLock {
-                    try {
-                        persistenceManager.save(constModel.path, constModel.event) { runPreSaveProcessing() }
-                    } catch (e: Exception) {
-                        return SaveResult.Error("Failed saving model", e)
-                    }
-
-                    return SaveResult.Success(constModel.path)
+                try {
+                    persistenceManager.save(constModel.path, constModel.event) { runPreSaveProcessing() }
+                } catch (e: Exception) {
+                    return SaveResult.Error("Failed saving model", e)
                 }
+
+                return SaveResult.Success(constModel.path)
             }
 
             return SaveResult.NoFileOpen
@@ -141,13 +132,11 @@ sealed class ModelManager {
             }
         }
 
-        suspend fun close(): CloseResult {
+        fun close(): CloseResult {
             val constModel = _model.value
             if (constModel is ModelState.Loaded) {
-                constModel.event.mutex.withLock {
-                    _model.update { ModelState.Unloaded }
-                    return CloseResult.Success
-                }
+                _model.update { ModelState.Unloaded }
+                return CloseResult.Success
             }
 
             return CloseResult.NoFileOpen

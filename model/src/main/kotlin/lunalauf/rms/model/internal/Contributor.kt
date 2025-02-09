@@ -25,7 +25,7 @@ sealed class Contributor(
     private val _contributionType = MutableStateFlow(contributionType)
     val contributionType get() = _contributionType.asStateFlow()
 
-    private val _rounds = MutableStateFlow(emptyList<Round>())
+    protected val _rounds = MutableStateFlow(emptyList<Round>())
     val rounds get() = _rounds.asStateFlow()
 
     val numOfRounds = rounds.map { it.sumOf { round -> round.points.value } }
@@ -41,6 +41,10 @@ sealed class Contributor(
 
     internal fun internalRemoveRound(round: Round) {
         _rounds.update { it - round }
+    }
+
+    internal fun internalRemoveRounds(rounds: Set<Round>) {
+        _rounds.update { it - rounds }
     }
 
     suspend fun updateName(name: String) {

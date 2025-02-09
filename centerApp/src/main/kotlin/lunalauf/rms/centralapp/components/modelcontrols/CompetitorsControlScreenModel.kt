@@ -32,7 +32,7 @@ class CompetitorsControlScreenModel(
                                 numOfRounds.toString(),
                                 numOfFunfactorPoints.toString(),
                                 (numOfRounds + numOfFunfactorPoints).toString(),
-                                "${it.totalAmount} €"
+                                "${it.totalAmount.value} €"
                             ),
                             it
                         )
@@ -44,25 +44,25 @@ class CompetitorsControlScreenModel(
 
     @Composable
     fun calcRunnersData(): State<CalcResult<List<Pair<List<String>, Runner>>>> {
-        val runners by event.runners.collectAsState()
+        val singleRunners by event.singleRunners.collectAsState()
         val overallRounds by event.overallRounds.collectAsState()
 
         return produceState<CalcResult<List<Pair<List<String>, Runner>>>>(
             initialValue = CalcResult.Loading(),
-            runners,
+            singleRunners,
             overallRounds
         ) {
             launchInModelScope {
                 value = CalcResult.Available(
-                    runners
+                    singleRunners
                         .filter { it.team.value == null }
                         .map {
                             Pair(
                                 listOf(
                                     it.chipId.value.toString(),
                                     it.name.value,
-                                    it.numOfRounds.toString(),
-                                    "${it.totalAmount} €"
+                                    it.numOfRounds.value.toString(),
+                                    "${it.totalAmount.value} €"
                                 ),
                                 it
                             )

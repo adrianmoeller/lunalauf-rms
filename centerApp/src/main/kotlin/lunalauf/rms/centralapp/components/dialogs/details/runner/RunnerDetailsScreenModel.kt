@@ -77,7 +77,7 @@ class RunnerDetailsScreenModel(
                             .map {
                                 Pair(
                                     listOf(
-                                        Formats.dayTimeFormat.format(it.timestamp.value),
+                                        Formats.timeFormat.format(it.timestamp.value),
                                         it.points.value.toString()
                                     ),
                                     it

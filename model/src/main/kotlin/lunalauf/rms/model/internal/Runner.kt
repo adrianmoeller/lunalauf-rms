@@ -96,6 +96,7 @@ class Runner internal constructor(
                 return RemoveRunnerFromTeamResult.AlreadyInNoTeam
             }
 
+            oldTeam.internalRemoveRounds(this.rounds.value.toSet())
             oldTeam.internalRemoveRunner(this)
             this.internalSetTeam(null)
 

@@ -34,6 +34,7 @@ class Round internal constructor(
     override suspend fun delete(): DeleteElementResult {
         event.mutex.withLock {
             runner.value.internalRemoveRound(this)
+            team.value?.internalRemoveRound(this)
 
             return DeleteElementResult.Deleted
         }
