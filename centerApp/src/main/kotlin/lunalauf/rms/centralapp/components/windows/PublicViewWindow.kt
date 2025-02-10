@@ -32,7 +32,7 @@ import de.lunalauf_rms.centerapp.generated.resources.icon
 import lunalauf.rms.centralapp.components.commons.tables.PublicViewTable
 import lunalauf.rms.centralapp.components.main.PublicViewScreenModel
 import lunalauf.rms.centralapp.publicViewTypography
-import lunalauf.rms.centralapp.utils.Formats
+import lunalauf.rms.model.helper.Formats
 import lunalauf.rms.model.internal.Event
 import lunalauf.rms.model.internal.Runner
 import lunalauf.rms.model.internal.Team

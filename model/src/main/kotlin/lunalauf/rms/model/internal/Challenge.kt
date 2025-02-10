@@ -159,4 +159,8 @@ class Challenge internal constructor(
     }
 
     override suspend fun print(): String = "Challenge: ${name.value}"
+
+    override fun toString(): String {
+        return "Challenge(name=${name.value}, expires=${expires.value})"
+    }
 }

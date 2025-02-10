@@ -155,4 +155,8 @@ class Team internal constructor(
             return DeleteElementResult.Deleted
         }
     }
+
+    override fun toString(): String {
+        return "Team(name=${name.value}, members=${members.value.size})"
+    }
 }

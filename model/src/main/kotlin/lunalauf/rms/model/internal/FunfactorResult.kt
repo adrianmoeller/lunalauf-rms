@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.LocalDateTime
 import lunalauf.rms.model.api.DeleteElementResult
+import lunalauf.rms.model.helper.Formats
 
 class FunfactorResult internal constructor(
     event: Event,
@@ -30,5 +31,11 @@ class FunfactorResult internal constructor(
 
             return DeleteElementResult.Deleted
         }
+    }
+
+    override fun toString(): String {
+        return "FunfactorResult(" +
+                "timestamp=${Formats.timeFormat.format(timestamp.value)}, " +
+                "type=${type.value.name}, team=${team.value.name})"
     }
 }

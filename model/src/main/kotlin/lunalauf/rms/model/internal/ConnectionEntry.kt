@@ -20,4 +20,8 @@ class ConnectionEntry internal constructor(
     override suspend fun delete(): DeleteElementResult {
         throw UnsupportedOperationException()
     }
+
+    override fun toString(): String {
+        return "ConnectionEntry(chatId=${chatId.value}, runner=${runner.value.chipId.value})"
+    }
 }

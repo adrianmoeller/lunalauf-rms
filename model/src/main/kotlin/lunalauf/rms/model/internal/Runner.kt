@@ -191,4 +191,8 @@ class Runner internal constructor(
             return DeleteElementResult.Deleted
         }
     }
+
+    override fun toString(): String {
+        return "Runner(chipId=${chipId.value}, name=${name.value}, team=${team.value?.name ?: "-"})"
+    }
 }

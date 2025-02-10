@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.LocalDateTime
 import lunalauf.rms.model.api.DeleteElementResult
+import lunalauf.rms.model.helper.Formats
 
 class Round internal constructor(
     event: Event,
@@ -38,5 +39,9 @@ class Round internal constructor(
 
             return DeleteElementResult.Deleted
         }
+    }
+
+    override fun toString(): String {
+        return "Round(timestamp=${Formats.timeFormat.format(timestamp.value)}, runner=${runner.value.name.value})"
     }
 }

@@ -38,4 +38,8 @@ class Minigame internal constructor(
     }
 
     override suspend fun print(): String = "Minigame: ${name.value}"
+
+    override fun toString(): String {
+        return "Minigame(id=${id.value}, name=${name.value})"
+    }
 }

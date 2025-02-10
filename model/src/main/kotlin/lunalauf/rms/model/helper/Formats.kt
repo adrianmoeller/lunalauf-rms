@@ -1,13 +1,19 @@
-package lunalauf.rms.centralapp.utils
+package lunalauf.rms.model.helper
 
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.LocalTime
+import kotlinx.datetime.format.char
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.time.Duration
 
 object Formats {
-    val timeFormat = LocalDateTime.Format { time(LocalTime.Formats.ISO) }
+    val timeFormat = LocalDateTime.Format {
+        hour()
+        char(':')
+        minute()
+        char(':')
+        second()
+    }
 
     fun minutesFormat(duration: Duration): String {
         var seconds = duration.inWholeSeconds

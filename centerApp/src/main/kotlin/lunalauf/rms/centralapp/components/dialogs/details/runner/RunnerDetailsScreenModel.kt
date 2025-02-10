@@ -3,12 +3,12 @@ package lunalauf.rms.centralapp.components.dialogs.details.runner
 import androidx.compose.runtime.*
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.components.commons.CalcResult
-import lunalauf.rms.centralapp.utils.Formats
 import lunalauf.rms.centralapp.utils.InputValidator
 import lunalauf.rms.model.api.LogRoundResult
 import lunalauf.rms.model.api.ModelState
 import lunalauf.rms.model.api.UpdateRunnerIdResult
 import lunalauf.rms.model.common.ContributionType
+import lunalauf.rms.model.helper.Formats
 import lunalauf.rms.model.internal.Runner
 import lunalauf.rms.model.internal.Team
 import kotlin.time.Duration.Companion.milliseconds

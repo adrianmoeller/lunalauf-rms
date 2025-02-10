@@ -25,7 +25,7 @@ import lunalauf.rms.centralapp.components.commons.IconSize
 import lunalauf.rms.centralapp.components.commons.ListItemDivider
 import lunalauf.rms.centralapp.components.commons.cond
 import lunalauf.rms.centralapp.components.commons.listItemHoverColor
-import lunalauf.rms.centralapp.utils.Formats
+import lunalauf.rms.model.helper.Formats
 import lunalauf.rms.utilities.logging.Logger
 import lunalauf.rms.utilities.logging.Lvl
 

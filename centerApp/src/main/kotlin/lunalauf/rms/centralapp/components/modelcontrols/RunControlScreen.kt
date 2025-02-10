@@ -11,9 +11,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.EditDialog
 import lunalauf.rms.centralapp.components.commons.EditableValueTile
-import lunalauf.rms.centralapp.utils.Formats
 import lunalauf.rms.model.api.ModelState
 import lunalauf.rms.model.common.RunTimerState
+import lunalauf.rms.model.helper.Formats
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
