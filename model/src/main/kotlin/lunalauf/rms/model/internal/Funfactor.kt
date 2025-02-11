@@ -30,6 +30,10 @@ sealed class Funfactor(
         _results.update { results }
     }
 
+    internal fun internalAddResult(result: FunfactorResult) {
+        _results.update { it + result }
+    }
+
     internal fun internalRemoveResult(result: FunfactorResult) {
         _results.update { it - result }
     }

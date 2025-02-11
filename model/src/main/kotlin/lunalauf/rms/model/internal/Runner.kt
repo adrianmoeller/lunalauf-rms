@@ -193,6 +193,6 @@ class Runner internal constructor(
     }
 
     override fun toString(): String {
-        return "Runner(chipId=${chipId.value}, name=${name.value}, team=${team.value?.name ?: "-"})"
+        return "Runner(chipId=${chipId.value}, name=${name.value}, team=${team.value?.name?.value ?: "-"})"
     }
 }

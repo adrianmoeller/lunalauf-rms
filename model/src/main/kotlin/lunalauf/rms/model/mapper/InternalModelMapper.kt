@@ -39,9 +39,11 @@ class InternalModelMapper private constructor(
         event.internalSetRunTimer(toRunTimer(eventSM.runTimer))
 
         event.teams.value.forEach { team ->
-            team.internalSetFunfactorResults(
-                teamFunfactorResultsMapping[team]!!
-                    .sortedBy { it.timestamp.value })
+            if (team in teamFunfactorResultsMapping)
+                team.internalSetFunfactorResults(
+                    teamFunfactorResultsMapping[team]!!
+                        .sortedBy { it.timestamp.value }
+                )
         }
 
         return event

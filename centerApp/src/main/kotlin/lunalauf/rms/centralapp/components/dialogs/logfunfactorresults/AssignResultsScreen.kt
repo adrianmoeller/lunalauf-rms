@@ -59,6 +59,7 @@ data class AssignResultsScreen(
         val event = modelState.event
 
         val teams by event.teams.collectAsState()
+        val name by funfactor.name.collectAsState()
 
         Box(
             contentAlignment = Alignment.Center
@@ -71,7 +72,7 @@ data class AssignResultsScreen(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Text(
-                    text = "Funfactor: ${funfactor.name}",
+                    text = "Funfactor: $name",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Box(

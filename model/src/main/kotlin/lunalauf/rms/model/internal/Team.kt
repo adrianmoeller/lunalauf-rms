@@ -119,6 +119,7 @@ class Team internal constructor(
             type = type
         )
         _funfactorResults.update { it + newFunfactorResult }
+        type.internalAddResult(newFunfactorResult)
 
         logger.info("Logged {}", newFunfactorResult)
         return newFunfactorResult

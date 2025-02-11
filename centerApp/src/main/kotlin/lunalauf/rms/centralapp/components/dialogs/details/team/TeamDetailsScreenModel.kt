@@ -76,7 +76,7 @@ class TeamDetailsScreenModel(
                                     listOf(
                                         Formats.timeFormat.format(it.timestamp.value),
                                         runnerName.ifBlank { it.runner.value.chipId.value.toString() },
-                                        it.points.toString()
+                                        it.points.value.toString()
                                     ),
                                     it
                                 )
