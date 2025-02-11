@@ -1,24 +1,25 @@
 package lunalauf.rms.centralapp.components.dialogs.details.runner
 
-import LunaLaufLanguage.ContrType
-import LunaLaufLanguage.Runner
-import LunaLaufLanguage.Team
 import androidx.compose.runtime.*
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.components.commons.CalcResult
-import lunalauf.rms.centralapp.utils.Formats
 import lunalauf.rms.centralapp.utils.InputValidator
-import lunalauf.rms.modelapi.LogRoundResult
-import lunalauf.rms.modelapi.ModelState
-import lunalauf.rms.modelapi.UpdateRunnerIdResult
+import lunalauf.rms.model.api.LogRoundResult
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.api.UpdateRunnerIdResult
+import lunalauf.rms.model.common.ContributionType
+import lunalauf.rms.model.helper.Formats
+import lunalauf.rms.model.internal.Runner
+import lunalauf.rms.model.internal.Team
 import kotlin.time.Duration.Companion.milliseconds
 
 class RunnerDetailsScreenModel(
-    private val modelState: ModelState.Loaded
+    modelState: ModelState.Loaded
 ) : AbstractScreenModel(modelState) {
-    fun updateID(runner: Runner, id: Long) {
+
+    fun updateChipId(runner: Runner, id: Long) {
         launchInModelScope {
-            when (modelAPI.updateRunnerId(runner, id)) {
+            when (runner.updateChipId(id)) {
                 is UpdateRunnerIdResult.Exists -> {}
                 UpdateRunnerIdResult.Updated -> {}
             }
@@ -32,28 +33,28 @@ class RunnerDetailsScreenModel(
 
     fun updateName(runner: Runner, name: String) {
         launchInModelScope {
-            modelAPI.updateRunnerName(runner, name)
+            runner.updateName(name)
         }
     }
 
     fun updateTeam(runner: Runner, team: Team?) {
         launchInModelScope {
             if (team == null)
-                modelAPI.removeRunnerFromTeam(runner)
+                runner.removeFromTeam()
             else
-                modelAPI.addRunnerToTeam(team, runner)
+                team.addRunner(runner)
         }
     }
 
-    fun updateContribution(runner: Runner, type: ContrType, amountFixed: Double, amountPerRound: Double) {
+    fun updateContribution(runner: Runner, type: ContributionType, amountFixed: Double, amountPerRound: Double) {
         launchInModelScope {
-            modelAPI.updateContribution(runner, type, amountFixed, amountPerRound)
+            runner.updateContribution(type, amountFixed, amountPerRound)
         }
     }
 
     fun manuallyLogPoints(runner: Runner, points: Int) {
         launchInModelScope {
-            when (modelAPI.logRound(runner, points, true)) {
+            when (runner.logRound(points, true)) {
                 LogRoundResult.LastRoundAlreadyLogged -> {}
                 is LogRoundResult.Logged -> {}
                 LogRoundResult.RunDisabled -> {}
@@ -64,19 +65,20 @@ class RunnerDetailsScreenModel(
 
     @Composable
     fun calcRunnerDetails(runner: Runner): State<CalcResult<RunnerDetails>> {
-        val runnersState by modelState.runners.collectAsState()
-        return produceState<CalcResult<RunnerDetails>>(initialValue = CalcResult.Loading(), runnersState) {
+        val rounds by runner.rounds.collectAsState()
+
+        return produceState<CalcResult<RunnerDetails>>(initialValue = CalcResult.Loading(), rounds) {
             value = CalcResult.Loading()
             launchInModelScope {
                 value = CalcResult.Available(
                     RunnerDetails(
                         stats = calcStats(runner),
-                        roundsData = modelAPI.rounds(runner)
+                        roundsData = rounds
                             .map {
                                 Pair(
                                     listOf(
-                                        Formats.dayTimeFormat.format(it.timestamp),
-                                        it.points.toString()
+                                        Formats.timeFormat.format(it.timestamp.value),
+                                        it.points.value.toString()
                                     ),
                                     it
                                 )
@@ -88,11 +90,11 @@ class RunnerDetailsScreenModel(
     }
 
     private suspend fun calcStats(runner: Runner): List<Pair<String, String>> {
-        val roundDurations = modelAPI.roundDurations(runner)
+        val roundDurations = runner.getRoundDurations()
 
         return listOf(
-            Pair("Rounds", modelAPI.numOfRounds(runner).toString()),
-            Pair("Total contribution", "${modelAPI.totalAmount(runner)} €"),
+            Pair("Rounds", runner.numOfRounds.value.toString()),
+            Pair("Total contribution", "${runner.totalAmount.value} €"),
             Pair("Average round duration", average(roundDurations) ?: "-"),
             Pair("Fastest round", min(roundDurations) ?: "-")
         )

@@ -1,11 +1,12 @@
 package lunalauf.rms.centralapp.components.dialogs
 
-import LunaLaufLanguage.Runner
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
-import lunalauf.rms.modelapi.ModelState
+import kotlinx.coroutines.runBlocking
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Runner
 
 class ScanChipScreenModel(
     private val modelState: ModelState.Loaded
@@ -30,7 +31,9 @@ class ScanChipScreenModel(
             return
         }
 
-        val runner = modelState.runners.value.id2runners[scannedId.toLong()]
+        val runner = runBlocking(ModelState.modelContext) {
+            modelState.event.getRunner(scannedId.toLong())
+        }
         if (runner != null)
             onKnown(runner)
         else

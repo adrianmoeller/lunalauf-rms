@@ -1,6 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.details
 
-import LunaLaufLanguage.ContrType
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
@@ -17,14 +16,15 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.OptionTile
 import lunalauf.rms.centralapp.components.commons.tryRequestFocus
+import lunalauf.rms.model.common.ContributionType
 
 @Composable
 fun EditableContributionTile(
     modifier: Modifier = Modifier,
-    type: ContrType,
+    type: ContributionType,
     amountFixed: Double,
     amountPerRound: Double,
-    onValuesChange: (ContrType, Double, Double) -> Unit
+    onValuesChange: (ContributionType, Double, Double) -> Unit
 ) {
     var editDialogOpen by remember { mutableStateOf(false) }
 
@@ -40,7 +40,7 @@ fun EditableContributionTile(
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             when (type) {
-                ContrType.PERROUND -> {
+                ContributionType.PER_ROUND -> {
                     Card(
                         modifier = Modifier.width(IntrinsicSize.Max)
                     ) {
@@ -51,7 +51,7 @@ fun EditableContributionTile(
                     }
                 }
 
-                ContrType.FIXED -> {
+                ContributionType.FIXED -> {
                     Card(
                         modifier = Modifier.width(IntrinsicSize.Max)
                     ) {
@@ -62,7 +62,7 @@ fun EditableContributionTile(
                     }
                 }
 
-                ContrType.BOTH -> {
+                ContributionType.BOTH -> {
                     Card(
                         modifier = Modifier.width(IntrinsicSize.Max)
                     ) {
@@ -78,7 +78,7 @@ fun EditableContributionTile(
                     }
                 }
 
-                ContrType.NONE -> {
+                ContributionType.NONE -> {
                     Text(
                         text = "None",
                         fontWeight = FontWeight.Bold
@@ -133,15 +133,15 @@ private fun ContributionRow(
 @Composable
 fun EditContributionDialog(
     editDialogOpen: Boolean,
-    type: ContrType,
+    type: ContributionType,
     amountFixed: Double,
     amountPerRound: Double,
     onClose: () -> Unit,
-    onValuesChange: (ContrType, Double, Double) -> Unit
+    onValuesChange: (ContributionType, Double, Double) -> Unit
 ) {
     if (editDialogOpen) {
-        var fixedChecked by remember { mutableStateOf(type == ContrType.FIXED || type == ContrType.BOTH) }
-        var perRoundChecked by remember { mutableStateOf(type == ContrType.PERROUND || type == ContrType.BOTH) }
+        var fixedChecked by remember { mutableStateOf(type == ContributionType.FIXED || type == ContributionType.BOTH) }
+        var perRoundChecked by remember { mutableStateOf(type == ContributionType.PER_ROUND || type == ContributionType.BOTH) }
 
         var newAmountFixed by remember { mutableStateOf(TextFieldValue(amountFixed.toString())) }
         var newAmountPerRound by remember {
@@ -159,10 +159,10 @@ fun EditContributionDialog(
 
         val onUpdate = {
             val contributionType = when {
-                fixedChecked && perRoundChecked -> ContrType.BOTH
-                fixedChecked -> ContrType.FIXED
-                perRoundChecked -> ContrType.PERROUND
-                else -> ContrType.NONE
+                fixedChecked && perRoundChecked -> ContributionType.BOTH
+                fixedChecked -> ContributionType.FIXED
+                perRoundChecked -> ContributionType.PER_ROUND
+                else -> ContributionType.NONE
             }
             onValuesChange(contributionType, parsedNewAmountFixed ?: 0.0, parsedNewAmountPerRound ?: 0.0)
             onClose()

@@ -1,13 +1,13 @@
 package lunalauf.rms.centralapp.components.dialogs.logfunfactorresults
 
-import LunaLaufLanguage.Funfactor
-import LunaLaufLanguage.Team
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
 import cafe.adriel.voyager.core.model.ScreenModel
 import lunalauf.rms.centralapp.components.AbstractScreenModel
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Funfactor
+import lunalauf.rms.model.internal.Team
 
 class AssignResultsScreenModel(
     private val modelState: ModelState.Loaded,
@@ -73,7 +73,7 @@ class AssignResultsScreenModel(
         processing = true
         launchInModelScope {
             funfactorResults.forEach { (team, points) ->
-                modelAPI.logFunfactorResult(team, funfactor, points)
+                team.logFunfactorResult(funfactor, points)
             }
             onClose()
             snackBarHostState.showSnackbar(
@@ -85,7 +85,7 @@ class AssignResultsScreenModel(
     }
 
     fun assignRemainingTeams(points: Int) {
-        val remainingTeams = modelState.teams.value.teams.filterNot { it in assignedTeams }
+        val remainingTeams = event.teams.value.filterNot { it in assignedTeams }
         remainingTeams.forEach {
             assignedTeams.add(it)
             funfactorResults[it] = points

@@ -8,8 +8,8 @@ import androidx.compose.runtime.setValue
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
 import lunalauf.rms.centralapp.utils.InputValidator
-import lunalauf.rms.modelapi.CreateChallengeResult
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.CreateChallengeResult
+import lunalauf.rms.model.api.ModelState
 
 class CreateChallengeScreenModel(
     modelState: ModelState.Loaded,
@@ -66,9 +66,9 @@ class CreateChallengeScreenModel(
         processing = true
         launchInModelScope {
             val result = if (expires) {
-                modelAPI.createChallenge(name, description, duration.toInt(), expireMessage, receiveImage)
+                event.createExpiringChallenge(name, description, duration.toInt(), expireMessage, receiveImage)
             } else {
-                modelAPI.createChallenge(name, description)
+                event.createChallenge(name, description)
             }
             when (result) {
                 CreateChallengeResult.BlankName -> {

@@ -25,7 +25,7 @@ import lunalauf.rms.centralapp.components.commons.IconSize
 import lunalauf.rms.centralapp.components.commons.ListItemDivider
 import lunalauf.rms.centralapp.components.commons.cond
 import lunalauf.rms.centralapp.components.commons.listItemHoverColor
-import lunalauf.rms.centralapp.utils.Formats
+import lunalauf.rms.model.helper.Formats
 import lunalauf.rms.utilities.logging.Logger
 import lunalauf.rms.utilities.logging.Lvl
 
@@ -51,7 +51,7 @@ fun LogSheetScreen(
                     level = logMessage.level,
                     message = logMessage.message,
                     logger = logMessage.logger,
-                    timestamp = Formats.dayTimeFormat.format(logMessage.timestamp)
+                    timestamp = Formats.timeFormat.format(logMessage.timestamp)
                 )
                 if (index < logMessages.lastIndex)
                     ListItemDivider(spacing = 6.dp)

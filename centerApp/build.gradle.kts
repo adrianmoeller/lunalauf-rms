@@ -5,13 +5,14 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 
     id("lunalauf.rms.kotlin-application-conventions")
-    id("lunalauf.rms.kotlin-model-conventions")
 }
 
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
     implementation(compose.components.resources)
+
+    implementation(libs.kotlinDateTime)
 
     implementation(libs.slf4j)
     implementation(libs.slf4jReload)
@@ -25,7 +26,7 @@ dependencies {
     implementation(libs.voyagerTabNavigator)
     implementation(libs.voyagerTransitions)
 
-    implementation(project(":modelAPI"))
+    implementation(project(":model"))
     implementation(project(":utilities"))
 }
 

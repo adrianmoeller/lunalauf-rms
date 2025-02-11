@@ -1,7 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.create.team
 
-import LunaLaufLanguage.Runner
-import LunaLaufLanguage.Team
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -18,7 +16,9 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import lunalauf.rms.centralapp.components.commons.tryRequestFocus
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Runner
+import lunalauf.rms.model.internal.Team
 
 data class ExistingRunnerScreen(
     private val modelState: ModelState.Loaded,
@@ -67,7 +67,7 @@ data class ExistingRunnerScreen(
                             horizontalArrangement = Arrangement.spacedBy(5.dp)
                         ) {
                             Text("ID:\nName:")
-                            Text("${runner.id}\n${runner.name ?: "-"}")
+                            Text("${runner.chipId.value}\n${runner.name.value}")
                         }
                     }
                 }

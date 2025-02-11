@@ -1,7 +1,5 @@
 package lunalauf.rms.centralapp.components.modelcontrols
 
-import LunaLaufLanguage.Runner
-import LunaLaufLanguage.Team
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -39,7 +37,9 @@ import lunalauf.rms.centralapp.components.dialogs.create.team.CreateTeamScreen
 import lunalauf.rms.centralapp.components.dialogs.details.runner.RunnerDetailsScreen
 import lunalauf.rms.centralapp.components.dialogs.details.team.TeamDetailsScreen
 import lunalauf.rms.centralapp.components.dialogs.scantoshow.ScanToShowScreen
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Runner
+import lunalauf.rms.model.internal.Team
 
 @Composable
 fun CompetitorsControlScreen(
@@ -47,10 +47,12 @@ fun CompetitorsControlScreen(
     modelState: ModelState.Loaded,
     snackBarHostState: SnackbarHostState
 ) {
+    val event = modelState.event
     val screenModel = remember { CompetitorsControlScreenModel(modelState) }
     val scope = rememberCoroutineScope()
-    val teamsState by modelState.teams.collectAsState()
-    val runnersState by modelState.runners.collectAsState()
+
+    val teams by event.teams.collectAsState()
+    val singleRunners by event.singleRunners.collectAsState()
 
     var teamsTableOpen by remember { mutableStateOf(false) }
     var runnersTableOpen by remember { mutableStateOf(false) }
@@ -83,13 +85,15 @@ fun CompetitorsControlScreen(
                 createLabel = "Create team",
                 onCreate = { createTeamOpen = true }
             ) {
-                itemsIndexed(teamsState.teams) { index, team ->
+                itemsIndexed(teams) { index, team ->
+                    val name by team.name.collectAsState()
+
                     TeamTile(
                         modifier = Modifier.fillMaxWidth(),
-                        teamName = team.name ?: "",
+                        teamName = name,
                         onClick = { teamDetailsStatus = TeamDetailsStatus.Open(team) }
                     )
-                    if (index < teamsState.teams.lastIndex)
+                    if (index < teams.lastIndex)
                         ListItemDivider(spacing = 10.dp)
                 }
             }
@@ -100,12 +104,14 @@ fun CompetitorsControlScreen(
                 createLabel = "Create single runner",
                 onCreate = { createRunnerOpen = true }
             ) {
-                val singleRunners = runnersState.runners.filter { it.team == null }
                 itemsIndexed(singleRunners) { index, runner ->
-                    val runnerName = if (runner.name.isNullOrBlank()) runner.id.toString() else runner.name
+                    val name by runner.name.collectAsState()
+                    val chipId by runner.chipId.collectAsState()
+
+                    val displayName = name.ifBlank { chipId.toString() }
                     RunnerTile(
                         modifier = Modifier.fillMaxWidth(),
-                        runnerName = runnerName,
+                        runnerName = displayName,
                         onClick = { runnerDetailsStatus = RunnerDetailsStatus.Open(runner) }
                     )
                     if (index < singleRunners.lastIndex)
@@ -204,7 +210,7 @@ fun CompetitorsControlScreen(
     if (teamDetailsStatus is TeamDetailsStatus.Open) {
         val team = (teamDetailsStatus as TeamDetailsStatus.Open).team
         TeamDetailsScreen(
-            team = remember(teamsState) { team },
+            team = team,
             onDismissRequest = { teamDetailsStatus = TeamDetailsStatus.Closed },
             onAddRunnerRequest = {
                 knownTeam = it
@@ -219,7 +225,7 @@ fun CompetitorsControlScreen(
     if (runnerDetailsStatus is RunnerDetailsStatus.Open) {
         val runner = (runnerDetailsStatus as RunnerDetailsStatus.Open).runner
         RunnerDetailsScreen(
-            runner = remember(runnersState) { runner },
+            runner = runner,
             onDismissRequest = { runnerDetailsStatus = RunnerDetailsStatus.Closed },
             modelState = modelState,
             snackBarHostState = snackBarHostState

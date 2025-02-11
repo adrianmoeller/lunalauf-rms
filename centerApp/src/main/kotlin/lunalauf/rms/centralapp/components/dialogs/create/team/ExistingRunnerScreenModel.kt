@@ -1,7 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.create.team
 
-import LunaLaufLanguage.Runner
-import LunaLaufLanguage.Team
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
@@ -10,8 +8,10 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
-import lunalauf.rms.modelapi.AddRunnerToTeamResult
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.AddRunnerToTeamResult
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Runner
+import lunalauf.rms.model.internal.Team
 
 class ExistingRunnerScreenModel(
     modelState: ModelState.Loaded,
@@ -19,11 +19,14 @@ class ExistingRunnerScreenModel(
     private val runner: Runner,
     private val snackBarHostState: SnackbarHostState
 ) : ScreenModel, AbstractScreenModel(modelState) {
+    private val runnersTeam = runner.team.value
+
     var displayMessage by mutableStateOf(
-        if (runner.team == null) "Existing single runner:"
-        else "Runner from another team '${runner.team.name}':"
+        if (runnersTeam == null) "Existing single runner:"
+        else "Runner from another team '${runnersTeam.name.value}':"
     )
         private set
+
     var processing by mutableStateOf(false)
         private set
 
@@ -33,10 +36,11 @@ class ExistingRunnerScreenModel(
     ) {
         processing = true
         launchInModelScope {
-            when (modelAPI.addRunnerToTeam(team, runner)) {
+            when (team.addRunner(runner)) {
                 AddRunnerToTeamResult.Added -> {
                     onBack()
                 }
+
                 AddRunnerToTeamResult.AlreadyMember -> {
                     launchInDefaultScope {
                         snackBarHostState.showSnackbar(

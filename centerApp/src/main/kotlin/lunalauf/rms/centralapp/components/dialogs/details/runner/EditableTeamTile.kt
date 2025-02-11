@@ -1,6 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.details.runner
 
-import LunaLaufLanguage.Team
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,12 +24,13 @@ import compose.icons.fontawesomeicons.solid.Ban
 import lunalauf.rms.centralapp.components.commons.IconSize
 import lunalauf.rms.centralapp.components.commons.ListItemDivider
 import lunalauf.rms.centralapp.components.commons.customScrollbarStyle
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Team
 
 @Composable
 fun EditableTeamTile(
     modifier: Modifier = Modifier,
-    value: Team?,
+    team: Team?,
     onTeamChange: (Team?) -> Unit,
     modelState: ModelState.Loaded
 ) {
@@ -42,13 +42,20 @@ fun EditableTeamTile(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(if (value != null) "Team:" else "Single runner")
+        Text(if (team != null) "Team:" else "Single runner")
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
+            val name = if (team != null) {
+                val teamName by team.name.collectAsState()
+                teamName
+            } else {
+                "-"
+            }
+
             Text(
-                text = value?.name ?: "",
+                text = name,
                 fontWeight = FontWeight.Bold
             )
             FilledTonalIconButton(
@@ -63,7 +70,7 @@ fun EditableTeamTile(
     }
     EditTeamDialog(
         editDialogOpen = editDialogOpen,
-        currentTeam = value,
+        currentTeam = team,
         onClose = { editDialogOpen = false },
         onTeamChange = onTeamChange,
         modelState = modelState
@@ -79,7 +86,7 @@ fun EditTeamDialog(
     modelState: ModelState.Loaded
 ) {
     if (editDialogOpen) {
-        val teamState by modelState.teams.collectAsState()
+        val teams by modelState.event.teams.collectAsState()
         var selectedTeam by remember { mutableStateOf(currentTeam) }
 
         AlertDialog(
@@ -100,7 +107,7 @@ fun EditTeamDialog(
                                 onSelect = { selectedTeam = null }
                             )
                         }
-                        items(teamState.teams) { team ->
+                        items(teams) { team ->
                             ListItemDivider(spacing = 10.dp)
                             DialogTeamTile(
                                 team = team,
@@ -164,7 +171,8 @@ private fun DialogTeamTile(
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             if (team != null) {
-                Text(team.name)
+                val name by team.name.collectAsState()
+                Text(name)
             } else {
                 Icon(
                     modifier = Modifier.size(IconSize.small),

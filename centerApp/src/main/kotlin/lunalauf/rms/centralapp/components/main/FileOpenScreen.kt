@@ -26,15 +26,15 @@ import lunalauf.rms.centralapp.components.commons.CustomSnackBarHost
 import lunalauf.rms.centralapp.components.commons.IconSize
 import lunalauf.rms.centralapp.components.dialogs.preferences.PreferencesSheet
 import lunalauf.rms.centralapp.components.modelcontrols.ModelControls
-import lunalauf.rms.modelapi.ModelState
-import lunalauf.rms.modelapi.resource.ModelResourceManager
+import lunalauf.rms.model.api.ModelManager
+import lunalauf.rms.model.api.ModelState
 import lunalauf.rms.utilities.network.bot.BotManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FileOpenScreen(
     modifier: Modifier = Modifier,
-    modelResourceManager: ModelResourceManager,
+    modelManager: ModelManager.Available,
     botManager: BotManager,
     modelState: ModelState.Loaded,
     onMenuNewFile: () -> Unit,
@@ -47,7 +47,7 @@ fun FileOpenScreen(
 ) {
     val screenModel = remember {
         FileOpenScreenModel(
-            modelResourceManager = modelResourceManager,
+            modelManager = modelManager,
             botManager = botManager,
             modelState = modelState,
             snackBarHostState = snackBarHostState
@@ -72,7 +72,7 @@ fun FileOpenScreen(
                 ),
                 title = {
                     Text(
-                        text = modelState.fileName,
+                        text = modelState.path,
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis

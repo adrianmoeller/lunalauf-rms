@@ -5,14 +5,15 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.runBlocking
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
 import lunalauf.rms.centralapp.utils.InputValidator
-import lunalauf.rms.modelapi.CreateMinigameResult
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.CreateMinigameResult
+import lunalauf.rms.model.api.ModelState
 
 class CreateMinigameScreenModel(
-    private val modelState: ModelState.Loaded,
+    modelState: ModelState.Loaded,
     private val snackBarHostState: SnackbarHostState
 ) : AbstractScreenModel(modelState) {
     var id by mutableStateOf("")
@@ -28,7 +29,11 @@ class CreateMinigameScreenModel(
 
     fun updateId(id: String) {
         val trimmedId = id.trim()
-        val parsedId = trimmedId.toIntOrNull()?.takeIf { it >= 0 && !modelState.minigames.value.ids.contains(it) }
+        val parsedId = runBlocking(ModelState.modelContext) {
+            trimmedId.toIntOrNull()?.takeIf {
+                it >= 0 && event.getMinigame(it) == null
+            }
+        }
         idValid = parsedId != null
         this.id = trimmedId
     }
@@ -41,7 +46,7 @@ class CreateMinigameScreenModel(
     fun createMinigame(onClose: () -> Unit) {
         processing = true
         launchInModelScope {
-            when (modelAPI.createMinigame(name, id.toInt())) {
+            when (event.createMinigame(name, id.toInt())) {
                 CreateMinigameResult.BlankName -> {
                     launchInDefaultScope {
                         snackBarHostState.showSnackbar(
