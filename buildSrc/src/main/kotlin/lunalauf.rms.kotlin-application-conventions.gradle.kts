@@ -15,8 +15,8 @@ repositories {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
-tasks.withType(KotlinCompile::class).configureEach {
-    kotlinOptions {
-        freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+tasks.withType(KotlinCompile::class) {
+    compilerOptions {
+        optIn.add("kotlin.RequiresOptIn")
     }
 }
