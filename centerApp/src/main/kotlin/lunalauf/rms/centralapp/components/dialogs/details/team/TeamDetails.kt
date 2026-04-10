@@ -1,8 +1,8 @@
 package lunalauf.rms.centralapp.components.dialogs.details.team
 
-import LunaLaufLanguage.FunfactorResult
-import LunaLaufLanguage.Round
-import LunaLaufLanguage.Runner
+import lunalauf.rms.model.internal.FunfactorResult
+import lunalauf.rms.model.internal.Round
+import lunalauf.rms.model.internal.Runner
 
 data class TeamDetails(
     val stats: List<Pair<String, String>>,

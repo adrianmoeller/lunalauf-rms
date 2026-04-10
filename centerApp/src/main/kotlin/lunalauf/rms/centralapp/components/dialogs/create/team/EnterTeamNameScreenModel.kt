@@ -1,6 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.create.team
 
-import LunaLaufLanguage.Team
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
@@ -10,11 +9,12 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
 import lunalauf.rms.centralapp.utils.InputValidator
-import lunalauf.rms.modelapi.CreateTeamResult
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.CreateTeamResult
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Team
 
 class EnterTeamNameScreenModel(
-    private val modelState: ModelState.Loaded,
+    modelState: ModelState.Loaded,
     private val snackBarHostState: SnackbarHostState
 ) : ScreenModel, AbstractScreenModel(modelState) {
     var name by mutableStateOf("")
@@ -27,9 +27,11 @@ class EnterTeamNameScreenModel(
         private set
 
     fun updateName(name: String) {
-        nameDuplicate = modelState.teams.value.names.contains(name)
-        nameValid = name.isNotBlank() && InputValidator.validateName(name) && !nameDuplicate
-        this.name = name
+        launchInModelScope {
+            nameDuplicate = event.getTeam(name) != null
+            nameValid = name.isNotBlank() && InputValidator.validateName(name) && !nameDuplicate
+            this@EnterTeamNameScreenModel.name = name
+        }
     }
 
     fun createTeam(
@@ -38,7 +40,7 @@ class EnterTeamNameScreenModel(
     ) {
         processing = true
         launchInModelScope {
-            when (val result = modelAPI.createTeam(name)) {
+            when (val result = event.createTeam(name)) {
                 is CreateTeamResult.Created -> {
                     onCreated(result.team)
                 }
@@ -47,7 +49,7 @@ class EnterTeamNameScreenModel(
                     onClose()
                     launchInDefaultScope {
                         snackBarHostState.showSnackbar(
-                            message = "A team with name '${result.team.name}' already exists",
+                            message = "A team with name '${result.team.name.value}' already exists",
                             withDismissAction = true,
                             duration = SnackbarDuration.Long,
                             isError = true

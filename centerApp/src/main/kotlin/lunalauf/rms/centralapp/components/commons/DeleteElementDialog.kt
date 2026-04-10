@@ -10,12 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.AbstractScreenModel
-import lunalauf.rms.modelapi.DeleteElementResult
-import lunalauf.rms.modelapi.ModelState
-import org.eclipse.emf.ecore.EObject
+import lunalauf.rms.model.api.DeleteElementResult
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.EventChild
 
 @Composable
-fun <T : EObject> DeleteElementDialog(
+fun <T : EventChild> DeleteElementDialog(
     modifier: Modifier = Modifier,
     element: T,
     onDeleted: () -> Unit,
@@ -40,7 +40,7 @@ fun <T : EObject> DeleteElementDialog(
 }
 
 @Composable
-fun <T : EObject> DeleteElementDialog(
+fun <T : EventChild> DeleteElementDialog(
     modifier: Modifier = Modifier,
     element: T,
     onClose: () -> Unit,
@@ -55,7 +55,7 @@ fun <T : EObject> DeleteElementDialog(
             fun deleteElement() {
                 launchInModelScope {
                     val elementString = element.toString()
-                    when (val result = modelAPI.deleteElement(element)) {
+                    when (val result = element.delete()) {
                         DeleteElementResult.Deleted -> {
                             onClose()
                             onDeleted()

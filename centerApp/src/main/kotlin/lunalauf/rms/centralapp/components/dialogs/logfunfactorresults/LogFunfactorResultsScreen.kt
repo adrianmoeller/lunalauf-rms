@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
 import lunalauf.rms.centralapp.components.dialogs.DummyScreen
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

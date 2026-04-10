@@ -1,9 +1,9 @@
 package lunalauf.rms.utilities.network.bot
 
-import LunaLaufLanguage.Runner
-import kotlinx.coroutines.flow.StateFlow
-import lunalauf.rms.modelapi.ModelState
-import lunalauf.rms.modelapi.states.RunnersState
+import kotlinx.coroutines.runBlocking
+import lunalauf.rms.model.api.ModelManager
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Runner
 import lunalauf.rms.utilities.network.bot.util.reply.CommandReply
 import org.telegram.telegrambots.meta.api.methods.ActionType
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction
@@ -14,10 +14,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 
 class RunnerInfoBot(
     token: String,
-    modelState: StateFlow<ModelState>,
+    modelManager: ModelManager.Available,
     silentStart: Boolean,
     loadData: Boolean
-) : AbstractBot(token, modelState, silentStart) {
+) : AbstractBot(token, modelManager, silentStart) {
     companion object {
         /* COMMANDS */
         private const val CMD_START = "/start"
@@ -121,8 +121,7 @@ class RunnerInfoBot(
         val sMsg = if (!chatId2runner.containsKey(msg.chatId)) {
             SendMessage(msg.chatId.toString(), AWR_ID_NOT_SET)
         } else {
-            var rounds: Int
-            synchronized(modelState) { rounds = chatId2runner[msg.chatId]!!.numOfRounds() }
+            val rounds = chatId2runner[msg.chatId]!!.numOfRounds.value
             SendMessage(msg.chatId.toString(), AWR_ROUNDS + rounds)
         }
         sMsg.enableMarkdown(true)
@@ -164,15 +163,17 @@ class RunnerInfoBot(
         typingAction.setAction(ActionType.TYPING)
         execute(typingAction)
 
-        val constModelState = modelState.value
+        val constModelState = modelManager.model.value
         val sMsg = if (constModelState is ModelState.Loaded) {
-            val runnersState: RunnersState = constModelState.runners.value
+            val event = constModelState.event
             try {
                 val chipId = msg.text.toLong()
-                val runner = runnersState.getRunner(chipId)
+                val runner = runBlocking(ModelState.modelContext) {
+                    event.getRunner(chipId)
+                }
                 if (runner != null) {
                     chatId2runner[msg.chatId] = runner
-                    val preAddress = "*Hallo " + runner.name + ", "
+                    val preAddress = "*Hallo " + runner.name.value + ", "
                     SendMessage(msg.chatId.toString(), preAddress + AWR_ID_SET)
                 } else {
                     SendMessage(msg.chatId.toString(), AWR_NO_RUNNER)

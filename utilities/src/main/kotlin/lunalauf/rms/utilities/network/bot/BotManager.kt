@@ -1,11 +1,11 @@
 package lunalauf.rms.utilities.network.bot
 
-import LunaLaufLanguage.Team
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelManager
+import lunalauf.rms.model.internal.Team
 import lunalauf.rms.utilities.bottokens.BotTokenContainer
 import lunalauf.rms.utilities.network.bot.util.ImageReceiveValidator
 import lunalauf.rms.utilities.network.communication.competitors.CompetitorMessenger
@@ -22,7 +22,7 @@ sealed class BotManager {
     companion object {
         private val persistenceManager = PersistenceManager()
 
-        fun initialize(modelState: StateFlow<ModelState>): BotManager {
+        fun initialize(modelManager: ModelManager): BotManager {
             return try {
                 val botTokens = persistenceManager.load(BotTokenContainer::class.java)
                 if (botTokens.roundCounter.isBlank() || botTokens.runnerInfo.isBlank()) {
@@ -32,7 +32,7 @@ sealed class BotManager {
                 } else {
                     Available(
                         tokens = botTokens,
-                        modelState = modelState
+                        modelManager = modelManager
                     )
                 }
             } catch (e: PersistenceManager.PersistenceException) {
@@ -62,9 +62,11 @@ sealed class BotManager {
 
     class Available internal constructor(
         private val tokens: BotTokenContainer,
-        private val modelState: StateFlow<ModelState>
+        modelManager: ModelManager
     ) : BotManager() {
         private val scope = CoroutineScope(Dispatchers.IO)
+
+        private val modelManager: ModelManager.Available
 
         private val api: TelegramBotsApi = TelegramBotsApi(DefaultBotSession::class.java)
         private val botSessions: MutableList<BotSession> = mutableListOf()
@@ -116,6 +118,13 @@ sealed class BotManager {
                 }
             }.stateIn(scope, SharingStarted.Eagerly, CompetitorMessenger.Unavailable)
 
+        init {
+            if (modelManager !is ModelManager.Available)
+                throw IllegalStateException("Model manager is not available")
+
+            this.modelManager = modelManager
+        }
+
         fun silentStart(silentStart: Boolean) {
             _silentStart.value = silentStart
         }
@@ -136,7 +145,7 @@ sealed class BotManager {
                     if (runnerInfoBotSession == null) {
                         runnerInfoBot = RunnerInfoBot(
                             token = tokens.runnerInfo,
-                            modelState = modelState,
+                            modelManager = modelManager,
                             silentStart = silentStart.value,
                             loadData = loadConnections.value
                         )
@@ -181,7 +190,7 @@ sealed class BotManager {
                     if (roundCounterBotSession == null) {
                         roundCounterBot = RoundCounterBot(
                             token = tokens.roundCounter,
-                            modelState = modelState,
+                            modelManager = modelManager,
                             silentStart = silentStart.value,
                             loadData = loadConnections.value
                         )

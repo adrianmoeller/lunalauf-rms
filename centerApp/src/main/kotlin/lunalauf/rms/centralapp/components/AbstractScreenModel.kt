@@ -3,8 +3,7 @@ package lunalauf.rms.centralapp.components
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import lunalauf.rms.modelapi.ModelAPI
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
 import org.slf4j.LoggerFactory
 
 abstract class AbstractStatelessScreenModel {
@@ -13,7 +12,7 @@ abstract class AbstractStatelessScreenModel {
     companion object {
         private val defaultScope = CoroutineScope(Dispatchers.Default)
         private val ioScope = CoroutineScope(Dispatchers.IO)
-        private val modelScope = CoroutineScope(ModelAPI.modelContext)
+        private val modelScope = CoroutineScope(ModelState.modelContext)
     }
 
     private suspend fun catchAll(block: suspend CoroutineScope.() -> Unit, scope: CoroutineScope) {
@@ -46,5 +45,5 @@ abstract class AbstractStatelessScreenModel {
 abstract class AbstractScreenModel(
     modelState: ModelState.Loaded
 ) : AbstractStatelessScreenModel() {
-    protected val modelAPI = modelState.modelAPI
+    protected val event = modelState.event
 }

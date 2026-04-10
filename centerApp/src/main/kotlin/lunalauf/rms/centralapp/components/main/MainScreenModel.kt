@@ -2,53 +2,41 @@ package lunalauf.rms.centralapp.components.main
 
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import lunalauf.rms.centralapp.components.AbstractStatelessScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
 import lunalauf.rms.centralapp.utils.showNewFileChooser
 import lunalauf.rms.centralapp.utils.showOpenFileChooser
-import lunalauf.rms.modelapi.ModelAPI
-import lunalauf.rms.modelapi.ModelState
-import lunalauf.rms.modelapi.resource.ModelResourceManager
-import lunalauf.rms.modelapi.resource.ModelResult
-import lunalauf.rms.modelapi.resource.SaveResult
+import lunalauf.rms.model.api.ModelManager
+import lunalauf.rms.model.api.ModelResult
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.api.SaveResult
+import lunalauf.rms.model.serialization.JsonPersistenceManager
 import lunalauf.rms.utilities.network.bot.BotManager
 import lunalauf.rms.utilities.network.server.NetworkManager
-import org.eclipse.emf.common.util.URI
 import java.time.LocalDate
 
 class MainScreenModel : AbstractStatelessScreenModel() {
 
-    val modelResourceManager = ModelResourceManager.initialize()
-    private val _modelState: MutableStateFlow<ModelState> = MutableStateFlow(ModelState.Unloaded)
-    val modelState = _modelState.asStateFlow()
-    val networkManager = NetworkManager.initialize(modelState)
-    val botManager = BotManager.initialize(modelState)
+    val modelManager = ModelManager.initialize(JsonPersistenceManager())
+    val networkManager = NetworkManager.initialize(modelManager)
+    val botManager = BotManager.initialize(modelManager)
 
     val snackBarHostState = SnackbarHostState()
 
     fun newFile() {
-        if (modelResourceManager is ModelResourceManager.Accessible) {
+        if (modelManager is ModelManager.Available) {
             val path = showNewFileChooser()
-            if (path != null) {
-                _modelState.value = ModelState.Loading
-                launchInModelScope {
-                    val result = modelResourceManager.newFile(URI.createFileURI(path), LocalDate.now().year)
-                    _modelState.value = when (result) {
-                        is ModelResult.Available -> {
-                            result.modelState
-                        }
 
-                        is ModelResult.Error -> {
-                            launchInDefaultScope {
-                                snackBarHostState.showSnackbar(
-                                    message = result.message,
-                                    withDismissAction = true,
-                                    duration = SnackbarDuration.Indefinite
-                                )
-                            }
-                            ModelState.Unloaded
+            if (path != null) {
+                launchInModelScope {
+                    val result = modelManager.new(path, LocalDate.now().year)
+                    if (result is ModelResult.Error) {
+                        launchInDefaultScope {
+                            snackBarHostState.showSnackbar(
+                                message = result.message,
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Indefinite
+                            )
                         }
                     }
                 }
@@ -57,27 +45,20 @@ class MainScreenModel : AbstractStatelessScreenModel() {
     }
 
     fun openFile() {
-        if (modelResourceManager is ModelResourceManager.Accessible) {
+        if (modelManager is ModelManager.Available) {
             val path = showOpenFileChooser()
-            if (path != null) {
-                _modelState.value = ModelState.Loading
-                launchInModelScope {
-                    val result = modelResourceManager.load(URI.createFileURI(path))
-                    _modelState.value = when (result) {
-                        is ModelResult.Available -> {
-                            result.modelState
-                        }
 
-                        is ModelResult.Error -> {
-                            launchInDefaultScope {
-                                snackBarHostState.showSnackbar(
-                                    message = result.message,
-                                    withDismissAction = true,
-                                    duration = SnackbarDuration.Indefinite,
-                                    isError = true
-                                )
-                            }
-                            ModelState.Unloaded
+            if (path != null) {
+                launchInModelScope {
+                    val result = modelManager.load(path)
+                    if (result is ModelResult.Error) {
+                        launchInDefaultScope {
+                            snackBarHostState.showSnackbar(
+                                message = result.message,
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Indefinite,
+                                isError = true
+                            )
                         }
                     }
                 }
@@ -86,17 +67,10 @@ class MainScreenModel : AbstractStatelessScreenModel() {
     }
 
     fun closeFile() {
-        if (modelResourceManager is ModelResourceManager.Accessible) {
-            val loadedModelState = _modelState.value
-            _modelState.value = ModelState.Loading
+        if (modelManager is ModelManager.Available) {
             launchInModelScope {
-                val result = modelResourceManager.save()
-                _modelState.value = when (result) {
-                    is SaveResult.Success, SaveResult.NoFileOpen -> {
-                        modelResourceManager.close()
-                        ModelState.Unloaded
-                    }
-
+                when (val result = modelManager.save()) {
+                    SaveResult.NoFileOpen -> {}
                     is SaveResult.Error -> {
                         snackBarHostState.showSnackbar(
                             message = result.message,
@@ -104,7 +78,10 @@ class MainScreenModel : AbstractStatelessScreenModel() {
                             duration = SnackbarDuration.Indefinite,
                             isError = true
                         )
-                        loadedModelState
+                    }
+
+                    is SaveResult.Success -> {
+                        modelManager.close()
                     }
                 }
             }
@@ -112,9 +89,9 @@ class MainScreenModel : AbstractStatelessScreenModel() {
     }
 
     fun saveFile() {
-        if (modelResourceManager is ModelResourceManager.Accessible) {
+        if (modelManager is ModelManager.Available) {
             launchInModelScope {
-                when (val result = modelResourceManager.save()) {
+                when (val result = modelManager.save()) {
                     is SaveResult.Error -> launchInDefaultScope {
                         snackBarHostState.showSnackbar(
                             message = result.message,
@@ -124,10 +101,10 @@ class MainScreenModel : AbstractStatelessScreenModel() {
                         )
                     }
 
-                    SaveResult.NoFileOpen -> _modelState.value = ModelState.Unloaded
+                    SaveResult.NoFileOpen -> {}
                     is SaveResult.Success -> launchInDefaultScope {
                         snackBarHostState.showSnackbar(
-                            message = "Model saved to file: ${result.uri.path()}",
+                            message = "Model saved to file: ${result.path}",
                             withDismissAction = true,
                             duration = SnackbarDuration.Short
                         )
@@ -142,6 +119,6 @@ class MainScreenModel : AbstractStatelessScreenModel() {
             networkManager.shutdown()
         if (botManager is BotManager.Available)
             botManager.shutdown()
-        ModelAPI.freeResources()
+        ModelState.freeResources()
     }
 }

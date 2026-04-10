@@ -15,4 +15,4 @@ pluginManagement {
 }
 
 rootProject.name = "lunalauf-rms"
-include("centerApp", "counterApp", "utilities", "modelAPI")
+include("centerApp", "counterApp", "utilities", "modelAPI", "model")

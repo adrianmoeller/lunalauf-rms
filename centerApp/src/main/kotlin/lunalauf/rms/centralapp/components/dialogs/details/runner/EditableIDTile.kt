@@ -11,7 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.dialogs.ScanChipField
 import lunalauf.rms.centralapp.components.dialogs.ScanChipScreenModel
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
 
 @Composable
 fun EditableIDTile(

@@ -1,7 +1,7 @@
 package lunalauf.rms.centralapp.components.modelcontrols
 
 import lunalauf.rms.centralapp.components.AbstractScreenModel
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
 
 class RunControlScreenModel(
     modelState: ModelState.Loaded
@@ -12,7 +12,7 @@ class RunControlScreenModel(
 
     fun updateSponsoringPoolAmount(amount: Double) {
         launchInModelScope {
-            modelAPI.setSponsoringPoolAmount(amount)
+            event.setSponsoringPoolAmount(amount)
         }
     }
 
@@ -22,7 +22,7 @@ class RunControlScreenModel(
 
     fun updateSponsoringPoolRounds(rounds: Int) {
         launchInModelScope {
-            modelAPI.setSponsoringPoolRounds(rounds)
+            event.setSponsoringPoolRounds(rounds)
         }
     }
 
@@ -32,13 +32,13 @@ class RunControlScreenModel(
 
     fun updateAdditionalContribution(amount: Double) {
         launchInModelScope {
-            modelAPI.updateAdditionalContribution { amount }
+            event.updateAdditionalContribution { amount }
         }
     }
 
     fun addToAdditionalContribution(amount: Double) {
         launchInModelScope {
-            modelAPI.updateAdditionalContribution { it + amount }
+            event.updateAdditionalContribution { it + amount }
         }
     }
 }

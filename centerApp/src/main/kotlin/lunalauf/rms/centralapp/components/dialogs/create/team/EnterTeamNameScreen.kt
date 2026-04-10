@@ -17,7 +17,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import lunalauf.rms.centralapp.components.commons.tryRequestFocus
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
 
 data class EnterTeamNameScreen(
     private val modelState: ModelState.Loaded,

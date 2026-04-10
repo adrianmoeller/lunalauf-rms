@@ -1,13 +1,13 @@
 package lunalauf.rms.utilities.network.bot
 
-import LunaLaufLanguage.Runner
-import LunaLaufLanguage.Team
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
-import lunalauf.rms.modelapi.LogRoundResult
-import lunalauf.rms.modelapi.ModelAPI
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.LogRoundResult
+import lunalauf.rms.model.api.ModelManager
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Runner
+import lunalauf.rms.model.internal.Team
 import lunalauf.rms.utilities.network.bot.util.ImageReceiveValidator
 import lunalauf.rms.utilities.network.bot.util.ImageViewData
 import lunalauf.rms.utilities.network.bot.util.reply.*
@@ -30,10 +30,10 @@ import java.util.concurrent.atomic.AtomicReference
 
 class RoundCounterBot(
     token: String,
-    modelState: StateFlow<ModelState>,
+    modelManager: ModelManager.Available,
     silentStart: Boolean,
     loadData: Boolean
-) : AbstractBot(token, modelState, silentStart) {
+) : AbstractBot(token, modelManager, silentStart) {
     companion object {    /* COMMANDS */
         private const val CMD_START = "/start"
         private const val CMD_COUNT = "/count"
@@ -148,12 +148,12 @@ class RoundCounterBot(
     }
 
     private fun loadConnectionData() {
-        val constModelState = modelState.value
+        val constModelState = modelManager.model.value
         if (constModelState is ModelState.Loaded) {
-            runBlocking(ModelAPI.modelContext) {
-                constModelState.modelAPI.connections()
+            runBlocking(ModelState.modelContext) {
+                constModelState.event.connections.value
             }.forEach {
-                registerChatId(it.chatId, it.runner)
+                registerChatId(it.chatId.value, it.runner.value)
             }
         } else {
             logger.error("Cannot load connection data since model is not available")
@@ -161,11 +161,11 @@ class RoundCounterBot(
     }
 
     override fun saveConnectionData() {
-        val constModelState = modelState.value
+        val constModelState = modelManager.model.value
         if (constModelState is ModelState.Loaded) {
             val connectionId2Runner = getChatId2Runner()
             runBlocking {
-                constModelState.modelAPI.storeConnections(connectionId2Runner)
+                constModelState.event.storeConnections(connectionId2Runner)
             }
         } else {
             logger.error("Cannot save connection data since model is not available")
@@ -181,7 +181,7 @@ class RoundCounterBot(
     @Throws(TelegramApiException::class)
     fun sendGlobalMessage(message: String, onlyTeams: Boolean) {
         for ((chatId, runner) in getChatId2Runner()) {
-            if (onlyTeams && runner.team == null)
+            if (onlyTeams && runner.team.value == null)
                 continue
             execute(send(chatId, message))
         }
@@ -277,12 +277,14 @@ class RoundCounterBot(
         execute(typingAction)
 
         val sendMsg: SendMessage
-        val constModelState = modelState.value
+        val constModelState = modelManager.model.value
         if (constModelState is ModelState.Loaded) {
-            val runnersState = constModelState.runners.value
+            val event = constModelState.event
             sendMsg = try {
                 val chipId = msg.text.toLong()
-                val runner = runnersState.getRunner(chipId)
+                val runner = runBlocking(ModelState.modelContext) {
+                    event.getRunner(chipId)
+                }
                 if (runner != null) {
                     register(msg.chatId, runner)
                     return
@@ -307,7 +309,7 @@ class RoundCounterBot(
         val registeredChatId = runner2chatId[runner]
         val isChatIdRegistered = registeredRunner != null
         val isRunnerRegistered = registeredChatId != null
-        val isTeam = runner.team != null
+        val isTeam = runner.team.value != null
 
         if (!isChatIdRegistered && !isRunnerRegistered) {
             registerChatId(chatId, runner)
@@ -448,10 +450,10 @@ class RoundCounterBot(
             return
         }
 
-        val constModelState = modelState.value
+        val constModelState = modelManager.model.value
         val sMsg = if (constModelState is ModelState.Loaded) {
-            val result = runBlocking(ModelAPI.modelContext) {
-                runCatching { constModelState.modelAPI.logRound(runner) }.getOrNull()
+            val result = runBlocking(ModelState.modelContext) {
+                runCatching { runner.logRound() }.getOrNull()
             }
             if (result == null) {
                 send(chatId, AWR_FAILURE)
@@ -461,7 +463,7 @@ class RoundCounterBot(
                     LogRoundResult.RunDisabled -> send(chatId, AWR_NOT_IN_TIME)
                     is LogRoundResult.LastRoundAlreadyLogged -> send(chatId, LAST_ROUND_LOGGED)
                     is LogRoundResult.Logged -> {
-                        val rounds = runner.numOfRounds()
+                        val rounds = runner.numOfRounds.value
                         var text = "<b><i>Runde $rounds</i></b>"
                         if (rounds % 10 == 0) text += " 🎉 weiter so!"
                         send(chatId, text)
@@ -484,7 +486,7 @@ class RoundCounterBot(
             execute(send(chatId, AWR_NO_REG))
             return
         }
-        val team = runner.team
+        val team = runner.team.value
         if (team == null) {
             execute(send(chatId, AWR_ONLY_TEAM_PHOTO))
             return
@@ -529,6 +531,6 @@ class RoundCounterBot(
     private fun calcPhotoFilePath(team: Team, file: File): String {
         val path = Paths.get("").toAbsolutePath().toString()
         val extension = file.filePath.substring(file.filePath.lastIndexOf("."))
-        return path + "/team_photos/" + team.name + extension
+        return path + "/team_photos/" + team.name.value + extension
     }
 }

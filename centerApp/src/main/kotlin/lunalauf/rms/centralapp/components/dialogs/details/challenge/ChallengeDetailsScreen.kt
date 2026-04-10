@@ -1,7 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.details.challenge
 
-import LunaLaufLanguage.Challenge
-import LunaLaufLanguage.ChallengeState
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,12 +11,16 @@ import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.commons.*
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.common.ChallengeState
+import lunalauf.rms.model.internal.Challenge
 import lunalauf.rms.utilities.network.communication.competitors.CompetitorMessenger
 
 @Composable
@@ -32,10 +34,18 @@ fun ChallengeDetailsScreen(
 ) {
     val screenModel = remember { ChallengeDetailsScreenModel(modelState) }
 
+    val name by challenge.name.collectAsState()
+    val description by challenge.description.collectAsState()
+    val expires by challenge.expires.collectAsState()
+    val duration by challenge.duration.collectAsState()
+    val expireMsg by challenge.expireMsg.collectAsState()
+    val receiveImages by challenge.receiveImages.collectAsState()
+    val state by challenge.state.collectAsState()
+
     FullScreenDialog(
         modifier = modifier,
         onDismissRequest = onDismissRequest,
-        title = "Challenge: ${challenge.name}",
+        title = "Challenge: $name",
         maxWidth = 600.dp
     ) {
         Column(
@@ -62,7 +72,7 @@ fun ChallengeDetailsScreen(
                             item {
                                 EditableValueTile(
                                     name = "Name",
-                                    value = challenge.name,
+                                    value = name,
                                     onValueChange = { screenModel.updateName(challenge, it) },
                                     parser = screenModel::validateName,
                                     default = "",
@@ -72,7 +82,7 @@ fun ChallengeDetailsScreen(
                             item {
                                 EditableLongValueTile(
                                     name = "Description",
-                                    value = challenge.description,
+                                    value = description,
                                     onValueChange = { screenModel.updateDescription(challenge, it) },
                                     parser = screenModel::validateDescription,
                                     default = "",
@@ -82,15 +92,15 @@ fun ChallengeDetailsScreen(
                             item {
                                 OptionTile(
                                     text = "Expires",
-                                    checked = challenge.isExpires,
+                                    checked = expires,
                                     onCheckedChange = { screenModel.updateExpires(challenge, it) }
                                 )
                             }
-                            if (challenge.isExpires) {
+                            if (expires) {
                                 item {
                                     EditableValueTile(
                                         name = "Duration",
-                                        value = challenge.duration,
+                                        value = duration,
                                         onValueChange = { screenModel.updateDuration(challenge, it) },
                                         parser = screenModel::validateDuration,
                                         default = 0,
@@ -101,7 +111,7 @@ fun ChallengeDetailsScreen(
                                 item {
                                     EditableLongValueTile(
                                         name = "Expire message",
-                                        value = challenge.expireMsg,
+                                        value = expireMsg,
                                         onValueChange = { screenModel.updateExpireMessage(challenge, it) },
                                         parser = screenModel::validateExpireMessage,
                                         default = "",
@@ -113,7 +123,7 @@ fun ChallengeDetailsScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Checkbox(
-                                            checked = challenge.isReceiveImages,
+                                            checked = receiveImages,
                                             onCheckedChange = { screenModel.updateReceiveImage(challenge, it) }
                                         )
                                         Text("Receive image")
@@ -161,7 +171,7 @@ fun ChallengeDetailsScreen(
                 ) {
                     IconButton(
                         onClick = { screenModel.resetState(challenge) },
-                        enabled = challenge.state == ChallengeState.COMPLETED
+                        enabled = state == ChallengeState.COMPLETED
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Refresh,
@@ -171,9 +181,9 @@ fun ChallengeDetailsScreen(
                     if (competitorMessenger is CompetitorMessenger.Available) {
                         OutlinedButton(
                             onClick = { screenModel.start(challenge, competitorMessenger) },
-                            enabled = challenge.state == ChallengeState.PENDING
+                            enabled = state == ChallengeState.PENDING
                         ) {
-                            when (challenge.state) {
+                            when (state) {
                                 ChallengeState.PENDING -> {
                                     Icon(
                                         imageVector = Icons.Rounded.PlayArrow,
@@ -184,7 +194,7 @@ fun ChallengeDetailsScreen(
                                 }
 
                                 ChallengeState.STARTED -> Text("Started")
-                                ChallengeState.COMPLETED, null -> Text("Completed")
+                                ChallengeState.COMPLETED -> Text("Completed")
                             }
                         }
                     } else {

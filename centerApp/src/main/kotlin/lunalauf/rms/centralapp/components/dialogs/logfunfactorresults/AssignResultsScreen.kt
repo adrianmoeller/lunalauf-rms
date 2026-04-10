@@ -1,7 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.logfunfactorresults
 
-import LunaLaufLanguage.Funfactor
-import LunaLaufLanguage.Team
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -38,7 +36,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import lunalauf.rms.centralapp.components.commons.ListItemDivider
 import lunalauf.rms.centralapp.components.commons.customScrollbarStyle
 import lunalauf.rms.centralapp.components.commons.tryRequestFocus
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Funfactor
+import lunalauf.rms.model.internal.Team
 
 data class AssignResultsScreen(
     private val modelState: ModelState.Loaded,
@@ -55,8 +55,11 @@ data class AssignResultsScreen(
                 snackBarHostState = snackBarHostState
             )
         }
-        val teamsState by modelState.teams.collectAsState()
         val navigator = LocalNavigator.currentOrThrow
+        val event = modelState.event
+
+        val teams by event.teams.collectAsState()
+        val name by funfactor.name.collectAsState()
 
         Box(
             contentAlignment = Alignment.Center
@@ -69,7 +72,7 @@ data class AssignResultsScreen(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Text(
-                    text = "Funfactor: ${funfactor.name}",
+                    text = "Funfactor: $name",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Box(
@@ -90,7 +93,7 @@ data class AssignResultsScreen(
                         item {
                             Card {
                                 Column {
-                                    val remainingTeams = teamsState.teams.filterNot { it in screenModel.assignedTeams }
+                                    val remainingTeams = teams.filterNot { it in screenModel.assignedTeams }
                                     AllTeamsTile(
                                         onAssignAll = screenModel::assignRemainingTeams,
                                         validatePoints = screenModel::validatePoints,
@@ -284,11 +287,13 @@ private fun RemainingTeamTile(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
+        val name by team.name.collectAsState()
+
         Text(
             modifier = Modifier
                 .padding(vertical = 10.dp)
                 .padding(start = 10.dp),
-            text = team.name
+            text = name
         )
         if (hovered) {
             Row {
@@ -330,7 +335,9 @@ private fun AssignedTeamTile(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("${team.name}:")
+            val name by team.name.collectAsState()
+
+            Text("${name}:")
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -374,7 +381,9 @@ private fun AssignedEditingTeamTile(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text("${team.name}:")
+        val name by team.name.collectAsState()
+
+        Text("${name}:")
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)

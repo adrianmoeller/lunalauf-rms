@@ -19,7 +19,7 @@ import compose.icons.fontawesomeicons.solid.Bolt
 import compose.icons.fontawesomeicons.solid.ListAlt
 import compose.icons.fontawesomeicons.solid.Running
 import lunalauf.rms.centralapp.components.commons.TabNavigationBarItem
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
 import lunalauf.rms.utilities.network.bot.BotManager
 
 @Composable

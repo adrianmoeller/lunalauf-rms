@@ -1,7 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.details.runner
 
-import LunaLaufLanguage.Round
-import LunaLaufLanguage.Runner
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,7 +21,9 @@ import lunalauf.rms.centralapp.components.commons.*
 import lunalauf.rms.centralapp.components.commons.tables.ClickableTable
 import lunalauf.rms.centralapp.components.dialogs.details.EditableContributionTile
 import lunalauf.rms.centralapp.components.dialogs.details.StatTile
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Round
+import lunalauf.rms.model.internal.Runner
 
 @Composable
 fun RunnerDetailsScreen(
@@ -35,10 +35,17 @@ fun RunnerDetailsScreen(
 ) {
     val screenModel = remember { RunnerDetailsScreenModel(modelState) }
 
+    val name by runner.name.collectAsState()
+    val chipId by runner.chipId.collectAsState()
+    val team by runner.team.collectAsState()
+    val contribution by runner.contributionType.collectAsState()
+    val amountFix by runner.amountFix.collectAsState()
+    val amountPerRound by runner.amountPerRound.collectAsState()
+
     FullScreenDialog(
         modifier = modifier,
         onDismissRequest = onDismissRequest,
-        title = "Runner: ${if (runner.name.isNullOrBlank()) runner.id else runner.name}",
+        title = "Runner: ${name.ifBlank { chipId }}",
         maxWidth = 800.dp
     ) {
         val runnerDetailsCalc by screenModel.calcRunnerDetails(runner)
@@ -70,27 +77,27 @@ fun RunnerDetailsScreen(
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
                                 EditableIDTile(
-                                    value = runner.id,
-                                    onIdChange = { screenModel.updateID(runner, it) },
+                                    value = chipId,
+                                    onIdChange = { screenModel.updateChipId(runner, it) },
                                     modelState = modelState
                                 )
                                 EditableValueTile(
                                     name = "Name",
-                                    value = runner.name,
+                                    value = name,
                                     onValueChange = { screenModel.updateName(runner, it) },
                                     parser = screenModel::validateName,
                                     default = "",
                                     editTitle = "Update name"
                                 )
                                 EditableTeamTile(
-                                    value = runner.team,
+                                    team = team,
                                     onTeamChange = { screenModel.updateTeam(runner, it) },
                                     modelState = modelState
                                 )
                                 EditableContributionTile(
-                                    type = runner.contribution,
-                                    amountFixed = runner.amountFix,
-                                    amountPerRound = runner.amountPerRound,
+                                    type = contribution,
+                                    amountFixed = amountFix,
+                                    amountPerRound = amountPerRound,
                                     onValuesChange = { type, fixed, perRound ->
                                         screenModel.updateContribution(runner, type, fixed, perRound)
                                     }
@@ -199,13 +206,13 @@ fun RunnerDetailsScreen(
                         snackBarHostState = snackBarHostState
                     )
                 }
-                var newPointsValue by remember { mutableStateOf(TextFieldValue("1", selection = TextRange(0,1))) }
+                var newPointsValue by remember { mutableStateOf(TextFieldValue("1", selection = TextRange(0, 1))) }
                 EditDialog(
                     editTitle = "Manually log points",
                     editDialogOpen = logPointsOpen,
                     onClose = {
                         logPointsOpen = false
-                        newPointsValue = TextFieldValue("1", selection = TextRange(0,1))
+                        newPointsValue = TextFieldValue("1", selection = TextRange(0, 1))
                     },
                     onValueChange = { screenModel.manuallyLogPoints(runner, it) },
                     valueName = "Points",

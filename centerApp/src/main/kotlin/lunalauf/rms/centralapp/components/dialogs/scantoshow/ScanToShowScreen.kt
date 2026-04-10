@@ -1,6 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.scantoshow
 
-import LunaLaufLanguage.Runner
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -10,7 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import lunalauf.rms.centralapp.components.dialogs.ScanChipField
 import lunalauf.rms.centralapp.components.dialogs.ScanChipScreenModel
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Runner
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

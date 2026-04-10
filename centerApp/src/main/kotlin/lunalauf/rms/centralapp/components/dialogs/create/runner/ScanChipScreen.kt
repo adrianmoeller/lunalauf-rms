@@ -1,6 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.create.runner
 
-import LunaLaufLanguage.Runner
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,7 +15,8 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import lunalauf.rms.centralapp.components.dialogs.ScanChipField
 import lunalauf.rms.centralapp.components.dialogs.ScanChipScreenModel
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Runner
 
 data class ScanChipScreen(
     private val modelState: ModelState.Loaded,

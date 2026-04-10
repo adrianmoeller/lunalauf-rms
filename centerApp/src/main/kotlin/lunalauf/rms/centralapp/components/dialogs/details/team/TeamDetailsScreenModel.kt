@@ -1,12 +1,13 @@
 package lunalauf.rms.centralapp.components.dialogs.details.team
 
-import LunaLaufLanguage.*
 import androidx.compose.runtime.*
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.components.commons.CalcResult
-import lunalauf.rms.centralapp.utils.Formats
 import lunalauf.rms.centralapp.utils.InputValidator
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.common.ContributionType
+import lunalauf.rms.model.helper.Formats
+import lunalauf.rms.model.internal.Team
 import kotlin.time.Duration.Companion.milliseconds
 
 class TeamDetailsScreenModel(
@@ -18,56 +19,64 @@ class TeamDetailsScreenModel(
 
     fun updateName(team: Team, name: String) {
         launchInModelScope {
-            modelAPI.updateTeamName(team, name)
+            team.updateName(name)
         }
     }
 
-    fun updateContribution(team: Team, type: ContrType, amountFixed: Double, amountPerRound: Double) {
+    fun updateContribution(team: Team, type: ContributionType, amountFixed: Double, amountPerRound: Double) {
         launchInModelScope {
-            modelAPI.updateContribution(team, type, amountFixed, amountPerRound)
+            team.updateContribution(type, amountFixed, amountPerRound)
         }
     }
 
     @Composable
     fun calcTeamDetails(team: Team): State<CalcResult<TeamDetails>> {
-        val teamsState by modelState.teams.collectAsState()
-        return produceState<CalcResult<TeamDetails>>(initialValue = CalcResult.Loading(), teamsState) {
+        val members by team.members.collectAsState()
+        val rounds by team.rounds.collectAsState()
+        val funfactorResults by team.funfactorResults.collectAsState()
+
+        return produceState<CalcResult<TeamDetails>>(
+            initialValue = CalcResult.Loading(),
+            members,
+            rounds,
+            funfactorResults
+        ) {
             value = CalcResult.Loading()
             launchInModelScope {
                 value = CalcResult.Available(
                     TeamDetails(
                         stats = calcStats(team),
-                        membersData = modelAPI.members(team)
+                        membersData = members
                             .map {
                                 Pair(
                                     listOf(
-                                        it.id.toString(),
-                                        it.name ?: "",
-                                        it.numOfRounds().toString()
+                                        it.chipId.value.toString(),
+                                        it.name.value,
+                                        it.numOfRounds.value.toString()
                                     ),
                                     it
                                 )
                             },
-                        funfactorResultsData = modelAPI.funfactorResults(team)
+                        funfactorResultsData = funfactorResults
                             .map {
                                 Pair(
                                     listOf(
-                                        Formats.dayTimeFormat.format(it.timestamp),
-                                        it.type.print(),
-                                        it.points.toString()
+                                        Formats.timeFormat.format(it.timestamp.value),
+                                        it.type.value.print(),
+                                        it.points.value.toString()
                                     ),
                                     it
                                 )
                             },
-                        roundsData = modelAPI.rounds(team)
-                            .sortedBy { it.timestamp }
+                        roundsData = rounds
+                            .sortedBy { it.timestamp.value }
                             .map {
-                                val runnerName = it.runner.name
+                                val runnerName = it.runner.value.name.value
                                 Pair(
                                     listOf(
-                                        Formats.dayTimeFormat.format(it.timestamp),
-                                        if (runnerName.isNullOrBlank()) it.runner.id.toString() else runnerName,
-                                        it.points.toString()
+                                        Formats.timeFormat.format(it.timestamp.value),
+                                        runnerName.ifBlank { it.runner.value.chipId.value.toString() },
+                                        it.points.value.toString()
                                     ),
                                     it
                                 )
@@ -79,15 +88,15 @@ class TeamDetailsScreenModel(
     }
 
     private suspend fun calcStats(team: Team): List<Pair<String, String>> {
-        val roundDurations = modelAPI.roundDurations(team)
-        val numOfRounds = modelAPI.numOfRounds(team)
-        val numOfFunfactorPoints = modelAPI.numOfFunfactorPoints(team)
+        val roundDurations = team.getRoundDurations()
+        val numOfRounds = team.numOfRounds.value
+        val numOfFunfactorPoints = team.numOfFunfactorPoints.value
 
         return listOf(
             Pair("Rounds", numOfRounds.toString()),
             Pair("Funfactor points", numOfFunfactorPoints.toString()),
             Pair("Total rounds", (numOfRounds + numOfFunfactorPoints).toString()),
-            Pair("Total contribution", "${modelAPI.totalAmount(team)} €"),
+            Pair("Total contribution", "${team.totalAmount.value} €"),
             Pair("Average round duration", average(roundDurations) ?: "-"),
             Pair("Fastest round", min(roundDurations) ?: "-")
         )
@@ -100,13 +109,5 @@ class TeamDetailsScreenModel(
         val average = roundDurations.average()
         return if (average.isNaN()) null
         else Formats.minutesFormat(average.milliseconds)
-    }
-
-    private fun Funfactor.print(): String {
-        return when (this) {
-            is Minigame -> "Minigame: $name"
-            is Challenge -> "Challenge: $name"
-            else -> ""
-        }
     }
 }

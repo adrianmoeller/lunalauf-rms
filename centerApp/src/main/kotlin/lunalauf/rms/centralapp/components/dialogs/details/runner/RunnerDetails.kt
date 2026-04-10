@@ -1,6 +1,6 @@
 package lunalauf.rms.centralapp.components.dialogs.details.runner
 
-import LunaLaufLanguage.Round
+import lunalauf.rms.model.internal.Round
 
 data class RunnerDetails(
     val stats: List<Pair<String, String>>,

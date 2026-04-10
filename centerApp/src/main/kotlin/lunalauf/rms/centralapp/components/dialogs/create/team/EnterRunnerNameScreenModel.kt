@@ -1,6 +1,5 @@
 package lunalauf.rms.centralapp.components.dialogs.create.team
 
-import LunaLaufLanguage.Team
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
@@ -10,9 +9,10 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.components.commons.showSnackbar
 import lunalauf.rms.centralapp.utils.InputValidator
-import lunalauf.rms.modelapi.AddRunnerToTeamResult
-import lunalauf.rms.modelapi.CreateRunnerResult
-import lunalauf.rms.modelapi.ModelState
+import lunalauf.rms.model.api.AddRunnerToTeamResult
+import lunalauf.rms.model.api.CreateRunnerResult
+import lunalauf.rms.model.api.ModelState
+import lunalauf.rms.model.internal.Team
 
 class EnterRunnerNameScreenModel(
     modelState: ModelState.Loaded,
@@ -38,12 +38,13 @@ class EnterRunnerNameScreenModel(
     ) {
         processing = true
         launchInModelScope {
-            when (val result = modelAPI.createRunner(id, name)) {
+            when (val result = event.createRunner(id, name)) {
                 is CreateRunnerResult.Created -> {
-                    when (modelAPI.addRunnerToTeam(team, result.runner)) {
+                    when (team.addRunner(result.runner)) {
                         AddRunnerToTeamResult.Added -> {
                             onBack()
                         }
+
                         AddRunnerToTeamResult.AlreadyMember -> {
                             launchInDefaultScope {
                                 snackBarHostState.showSnackbar(
@@ -57,6 +58,7 @@ class EnterRunnerNameScreenModel(
                         }
                     }
                 }
+
                 is CreateRunnerResult.Exists -> {
                     launchInDefaultScope {
                         snackBarHostState.showSnackbar(

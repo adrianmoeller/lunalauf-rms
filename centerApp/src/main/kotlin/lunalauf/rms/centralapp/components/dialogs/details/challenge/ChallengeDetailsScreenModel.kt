@@ -1,9 +1,9 @@
 package lunalauf.rms.centralapp.components.dialogs.details.challenge
 
-import LunaLaufLanguage.Challenge
 import lunalauf.rms.centralapp.components.AbstractScreenModel
 import lunalauf.rms.centralapp.utils.InputValidator
-import lunalauf.rms.modelapi.*
+import lunalauf.rms.model.api.*
+import lunalauf.rms.model.internal.Challenge
 import lunalauf.rms.utilities.network.communication.competitors.CompetitorMessenger
 
 class ChallengeDetailsScreenModel(
@@ -15,9 +15,9 @@ class ChallengeDetailsScreenModel(
 
     fun updateName(challenge: Challenge, name: String) {
         launchInModelScope {
-            when (modelAPI.updateChallengeName(challenge, name)) {
-                UpdateChallengeNameResult.BlankName -> {}
-                UpdateChallengeNameResult.Updated -> {}
+            when (challenge.updateName(name)) {
+                UpdateFunfactorNameResult.BlankName -> {}
+                UpdateFunfactorNameResult.Updated -> {}
             }
         }
     }
@@ -28,13 +28,13 @@ class ChallengeDetailsScreenModel(
 
     fun updateDescription(challenge: Challenge, description: String) {
         launchInModelScope {
-            modelAPI.updateChallengeDescription(challenge, description)
+            challenge.updateDescription(description)
         }
     }
 
     fun updateExpires(challenge: Challenge, expires: Boolean) {
         launchInModelScope {
-            modelAPI.updateChallengeExpires(challenge, expires)
+            challenge.updateExpires(expires)
         }
     }
 
@@ -44,7 +44,7 @@ class ChallengeDetailsScreenModel(
 
     fun updateDuration(challenge: Challenge, duration: Int) {
         launchInModelScope {
-            when (modelAPI.updateChallengeDuration(challenge, duration)) {
+            when (challenge.updateDuration(duration)) {
                 UpdateChallengeDurationResult.NegativeDuration -> {}
                 UpdateChallengeDurationResult.Updated -> {}
             }
@@ -53,7 +53,7 @@ class ChallengeDetailsScreenModel(
 
     fun updateExpireMessage(challenge: Challenge, expireMessage: String) {
         launchInModelScope {
-            modelAPI.updateChallengeExpireMessage(challenge, expireMessage)
+            challenge.updateExpireMessage(expireMessage)
         }
     }
 
@@ -63,14 +63,13 @@ class ChallengeDetailsScreenModel(
 
     fun updateReceiveImage(challenge: Challenge, receiveImage: Boolean) {
         launchInModelScope {
-            modelAPI.updateChallengeReceiveImage(challenge, receiveImage)
+            challenge.updateReceiveImage(receiveImage)
         }
     }
 
     fun start(challenge: Challenge, competitorMessenger: CompetitorMessenger.Available) {
         launchInModelScope {
-            val result = modelAPI.startChallenge(
-                challenge = challenge,
+            val result = challenge.start(
                 onSendTeamMessage = {
                     try {
                         competitorMessenger.sendToTeams(it)
@@ -92,7 +91,7 @@ class ChallengeDetailsScreenModel(
 
     fun resetState(challenge: Challenge) {
         launchInModelScope {
-            when (modelAPI.resetChallengeState(challenge)) {
+            when (challenge.resetState()) {
                 ResetChallengeStateResult.NotCompleted -> {}
                 ResetChallengeStateResult.Reset -> {}
             }

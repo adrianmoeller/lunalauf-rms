@@ -6,9 +6,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.apache.log4j.AppenderSkeleton
 import org.apache.log4j.spi.LoggingEvent
-import java.sql.Timestamp
 
 class FlowAppender : AppenderSkeleton() {
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -27,7 +29,7 @@ class FlowAppender : AppenderSkeleton() {
             val logger = it.loggerName
                 ?.removePrefix("lunalauf.rms.")
                 ?.removeSuffix("\$Companion")
-            val timestamp = Timestamp(it.timeStamp)
+            val timestamp = Instant.fromEpochMilliseconds(it.timeStamp).toLocalDateTime(TimeZone.UTC)
 
 
             if (message != null && level != null && logger != null) {
