@@ -71,12 +71,8 @@ sealed class ModelState {
         private val _runnersContribution = MutableStateFlow(calcRunnersContribution())
         val runnersContribution get() = _runnersContribution.asStateFlow()
 
-        val currentSponsorPoolAmount = overallRounds.combine(common) { rounds, commonState ->
-            calcCurrentSponsorPoolAmount(rounds, commonState.sponsorPoolAmount, commonState.sponsorPoolRounds)
-        }.stateIn(coroutineScope, SharingStarted.Eagerly, 0.0)
-
-        val overallContribution get() = runnersContribution.combine(currentSponsorPoolAmount) { runnersContr, poolAmount ->
-            runnersContr + poolAmount
+        val overallContribution get() = runnersContribution.combine(common) { runnersContr, commonState ->
+            runnersContr + commonState.sponsorPoolAmount
         }.stateIn(coroutineScope, SharingStarted.Eagerly, 0.0)
 
         init {
@@ -211,16 +207,6 @@ sealed class ModelState {
             for (runner in model.runners) if (runner.team == null) contribution += runner.totalAmount()
             contribution += model.additionalContribution
             return contribution
-        }
-
-        private fun calcCurrentSponsorPoolAmount(
-            overallRounds: Int,
-            sponsorPoolAmount: Double,
-            sponsorPoolRounds: Int
-        ): Double {
-            return if (overallRounds > sponsorPoolRounds) sponsorPoolAmount
-            else if (sponsorPoolRounds == 0) 0.0
-            else sponsorPoolAmount / sponsorPoolRounds * overallRounds
         }
     }
 }

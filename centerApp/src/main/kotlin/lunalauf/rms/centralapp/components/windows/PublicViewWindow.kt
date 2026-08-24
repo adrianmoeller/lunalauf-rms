@@ -1,5 +1,6 @@
 package lunalauf.rms.centralapp.components.windows
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -12,7 +13,10 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -21,12 +25,14 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberWindowState
+import kotlinx.coroutines.delay
 import de.lunalauf_rms.centerapp.generated.resources.Res
 import de.lunalauf_rms.centerapp.generated.resources.icon
 import lunalauf.rms.centralapp.components.commons.tables.PublicViewTable
@@ -39,6 +45,7 @@ import lunalauf.rms.modelapi.states.TeamsState
 import lunalauf.rms.utilities.publicviewprefs.PublicViewPrefState
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.min
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -88,46 +95,60 @@ fun PublicViewWindow(
                         },
                         color = borderColor
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(2.dp),
-                            horizontalArrangement = Arrangement.spacedBy(borderWidth)
-                        ) {
-                            Column(
+                        val commonState by modelState.common.collectAsState()
+                        val overallRounds by modelState.overallRounds.collectAsState()
+                        val lastYearRoundsReached = commonState.sponsorPoolRounds in 1..overallRounds
+                        val celebrating = rememberCelebrationState(lastYearRoundsReached)
+
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Row(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .weight(1f - pref.cmn_poolSponsorWidth),
-                                verticalArrangement = Arrangement.spacedBy(borderWidth)
+                                    .padding(2.dp),
+                                horizontalArrangement = Arrangement.spacedBy(borderWidth)
                             ) {
-                                val teamsState by modelState.teams.collectAsState()
-                                TeamPanel(
+                                Column(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .weight(pref.cmn_teamsHeight),
-                                    teamsState = teamsState,
-                                    baseFontSize = (screenWidth / 45) * pref.tms_fontScale,
-                                    pref = pref
-                                )
-                                val runnersState by modelState.runners.collectAsState()
-                                RunnerPanel(
+                                        .weight(1f - pref.cmn_poolSponsorWidth),
+                                    verticalArrangement = Arrangement.spacedBy(borderWidth)
+                                ) {
+                                    val teamsState by modelState.teams.collectAsState()
+                                    TeamPanel(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .weight(pref.cmn_teamsHeight),
+                                        teamsState = teamsState,
+                                        baseFontSize = (screenWidth / 45) * pref.tms_fontScale,
+                                        pref = pref
+                                    )
+                                    val runnersState by modelState.runners.collectAsState()
+                                    RunnerPanel(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .weight(1f - pref.cmn_teamsHeight),
+                                        runnersState = runnersState,
+                                        baseFontSize = (screenWidth / 55) * pref.rns_fontScale,
+                                        pref = pref
+                                    )
+                                }
+                                CommonPanel(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .weight(1f - pref.cmn_teamsHeight),
-                                    runnersState = runnersState,
-                                    baseFontSize = (screenWidth / 55) * pref.rns_fontScale,
-                                    pref = pref
+                                        .weight(pref.cmn_poolSponsorWidth),
+                                    modelState = modelState,
+                                    padding = screenWidth.value.dp / 170,
+                                    baseFontSize = (screenWidth / 50) * pref.ps_fontScale,
+                                    borderColor = borderColor
                                 )
                             }
-                            CommonPanel(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .weight(pref.cmn_poolSponsorWidth),
-                                modelState = modelState,
-                                padding = screenWidth.value.dp / 170,
-                                baseFontSize = (screenWidth / 50) * pref.ps_fontScale,
-                                borderColor = borderColor
-                            )
+                            if (celebrating) {
+                                CelebrationOverlay(
+                                    modifier = Modifier.fillMaxSize(),
+                                    text = "Vorjahresrunden erreicht!",
+                                    fontSize = screenWidth / 20
+                                )
+                            }
                         }
                     }
                 }
@@ -265,7 +286,6 @@ private fun CommonPanel(
     val commonState by modelState.common.collectAsState()
     val overallRounds by modelState.overallRounds.collectAsState()
     val overallContribution by modelState.overallContribution.collectAsState()
-    val currentSponsorPoolAmount by modelState.currentSponsorPoolAmount.collectAsState()
     val remainingTime by modelState.modelAPI.runTimer.remainingTime.collectAsState()
     val baseTextStyle = TextStyle(fontSize = baseFontSize)
     var clockHeight by remember { mutableStateOf(0.dp) }
@@ -309,11 +329,11 @@ private fun CommonPanel(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Sponsorenpool",
+                    text = "Vorjahresrunden",
                     style = TextStyle(fontSize = baseFontSize * .6).merge(CommonPanelTextStyles.header)
                 )
                 Text(
-                    text = Formats.germanEuroFormat(currentSponsorPoolAmount),
+                    text = commonState.sponsorPoolRounds.toString(),
                     style = TextStyle(fontSize = baseFontSize * .8).merge(CommonPanelTextStyles.amount)
                 )
                 Spacer(Modifier.height(padding))
@@ -321,8 +341,8 @@ private fun CommonPanel(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    val poolBarLevel = if (commonState.sponsorPoolAmount == 0.0) 0.0
-                    else currentSponsorPoolAmount / commonState.sponsorPoolAmount
+                    val poolBarLevel = if (commonState.sponsorPoolRounds <= 0) 0.0
+                    else min(1.0, overallRounds.toDouble() / commonState.sponsorPoolRounds)
                     VerticalPoolBar(
                         modifier = Modifier.fillMaxWidth(.25f),
                         level = poolBarLevel.toFloat(),
@@ -404,6 +424,140 @@ private fun VerticalPoolBar(
                     shape = CircleShape
                 ),
         ) {
+        }
+    }
+}
+
+private const val CELEBRATION_DURATION_SECONDS = 10L
+
+/**
+ * Turns true for [CELEBRATION_DURATION_SECONDS] whenever [reached] switches from false to true.
+ * A state that is already reached when the public view opens does not trigger a celebration.
+ */
+@Composable
+private fun rememberCelebrationState(reached: Boolean): Boolean {
+    var celebrating by remember { mutableStateOf(false) }
+    var previouslyReached by remember { mutableStateOf<Boolean?>(null) }
+
+    LaunchedEffect(reached) {
+        val justReached = previouslyReached == false && reached
+        previouslyReached = reached
+        if (justReached) {
+            celebrating = true
+            delay(CELEBRATION_DURATION_SECONDS.seconds)
+            celebrating = false
+        }
+    }
+
+    return celebrating
+}
+
+@Composable
+private fun CelebrationOverlay(
+    modifier: Modifier = Modifier,
+    text: String,
+    fontSize: TextUnit
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Confetti(modifier = Modifier.fillMaxSize())
+        Text(
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(percent = 20)
+                )
+                .padding(horizontal = fontSize.value.dp / 2, vertical = fontSize.value.dp / 4),
+            text = text,
+            textAlign = TextAlign.Center,
+            style = TextStyle(
+                fontSize = fontSize,
+                fontWeight = FontWeight.Bold,
+                color = Color(156, 17, 51)
+            )
+        )
+    }
+}
+
+private val confettiColors = listOf(
+    Color(156, 17, 51),
+    Color(240, 180, 40),
+    Color(40, 140, 200),
+    Color(60, 170, 110),
+    Color(230, 120, 60)
+)
+
+private class ConfettiParticle(random: Random) {
+    /** Horizontal position as a fraction of the canvas width. */
+    var x = random.nextFloat()
+
+    /** Vertical position as a fraction of the canvas height. Starts above the canvas. */
+    var y = -random.nextFloat() * 1.5f
+    var rotation = random.nextFloat() * 360f
+
+    val fallSpeed = .18f + random.nextFloat() * .32f
+    val driftSpeed = (random.nextFloat() - .5f) * .12f
+    val spinSpeed = (random.nextFloat() - .5f) * 360f
+    val widthFraction = .004f + random.nextFloat() * .006f
+    val aspectRatio = .4f + random.nextFloat() * .8f
+    val color = confettiColors[random.nextInt(confettiColors.size)]
+
+    fun advance(deltaSeconds: Float) {
+        y += fallSpeed * deltaSeconds
+        x += driftSpeed * deltaSeconds
+        rotation += spinSpeed * deltaSeconds
+        if (y > 1.2f) {
+            y = -.2f
+            x = Random.nextFloat()
+        }
+        if (x < -.1f) x = 1.1f
+        if (x > 1.1f) x = -.1f
+    }
+}
+
+@Composable
+private fun Confetti(
+    modifier: Modifier = Modifier,
+    particleCount: Int = 250
+) {
+    val particles = remember { List(particleCount) { ConfettiParticle(Random) } }
+    var frame by remember { mutableStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        var lastFrameNanos = withFrameNanos { it }
+        while (true) {
+            withFrameNanos { nanos ->
+                val deltaSeconds = ((nanos - lastFrameNanos) / 1_000_000_000.0).toFloat()
+                lastFrameNanos = nanos
+                particles.forEach { it.advance(deltaSeconds.coerceAtMost(.1f)) }
+                frame++
+            }
+        }
+    }
+
+    Canvas(modifier = modifier) {
+        @Suppress("UNUSED_EXPRESSION")
+        frame // read the frame counter to invalidate the drawing on every animation frame
+
+        particles.forEach { particle ->
+            val width = particle.widthFraction * size.width
+            val height = width / particle.aspectRatio
+            val topLeft = Offset(
+                x = particle.x * size.width - width / 2,
+                y = particle.y * size.height - height / 2
+            )
+            rotate(
+                degrees = particle.rotation,
+                pivot = Offset(topLeft.x + width / 2, topLeft.y + height / 2)
+            ) {
+                drawRect(
+                    color = particle.color,
+                    topLeft = topLeft,
+                    size = Size(width, height)
+                )
+            }
         }
     }
 }

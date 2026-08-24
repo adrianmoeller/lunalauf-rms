@@ -76,12 +76,12 @@ fun RunControlScreen(
                     editTitle = "Update pool amount"
                 )
                 EditableValueTile(
-                    name = "Rounds to be reached",
+                    name = "Previous year rounds",
                     value = commons.sponsorPoolRounds,
                     onValueChange = screenModel::updateSponsoringPoolRounds,
                     parser = screenModel::validateSponsoringPoolRounds,
                     default = 0,
-                    editTitle = "Update pool rounds"
+                    editTitle = "Update previous year rounds"
                 )
             }
             RunControlCard(
